@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#11173d">
+  <meta name="description" content="垂直ジャンプで動くブロックに乗り、星くずの塔を積み上げるタイミングゲーム">
+  <title>星くずタワー モモ</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2311173d'/%3E%3Cpath d='m32 8 6 18 18 6-18 6-6 18-6-18-18-6 18-6z' fill='%23ffd75a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=1.0.0">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="game-card" id="gameCard" aria-label="星くずタワー モモ ゲーム画面">
+      <canvas id="gameCanvas" aria-label="垂直ジャンプで動くブロックに乗り塔を積み上げるゲーム"></canvas>
+
+      <header class="topbar">
+        <div class="brand"><span>✦</span> 星くずタワー</div>
+        <button class="icon-button" id="soundButton" type="button" aria-label="音をオフにする" aria-pressed="true">
+          <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5 3a4.5 4.5 0 0 0-2.2-3.87v7.74A4.5 4.5 0 0 0 16.5 12Zm-2.2-7.93v2.06a6.5 6.5 0 0 1 0 11.74v2.06a8.5 8.5 0 0 0 0-15.86Z"/></svg>
+          <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.27 3 16.46 16.46-1.27 1.27-3.05-3.05a8.28 8.28 0 0 1-2.11 1.25v-2.06c.24-.12.47-.26.69-.41L13 14.47V19l-5-4H4V9h2.18L3 5.82 4.27 3ZM13 5v5.47L9.74 7.21 13 5Zm5.77 2.23A8.45 8.45 0 0 1 21.5 12c0 1.2-.25 2.34-.69 3.37l-1.56-1.56A6.5 6.5 0 0 0 17.7 8.3l1.07-1.07Z"/></svg>
+        </button>
+      </header>
+
+      <div class="hud" id="hud">
+        <div class="hud-block">
+          <span>STACK</span>
+          <strong><b id="stack">0</b><small>段</small></strong>
+        </div>
+        <div class="hud-block hud-center">
+          <span>BEST</span>
+          <strong><b id="bestStack">0</b><small>段</small></strong>
+        </div>
+        <div class="hud-block hud-right">
+          <span>BALANCE</span>
+          <strong><b id="balance">100</b><small>%</small></strong>
+        </div>
+      </div>
+
+      <div class="landing-toast hidden" id="landingToast" aria-live="polite">
+        <strong id="toastTitle">NICE STACK!</strong>
+        <span id="toastDetail">バランス 100%</span>
+      </div>
+
+      <div class="start-screen panel" id="startScreen">
+        <div class="eyebrow">ONE TAP BLOCK TOWER</div>
+        <h1>星くず<br><span>タワー</span></h1>
+        <p class="lead">厚みも重さも違うブロックを見切ってタップ。<br>滑って傾く、崩れやすい塔を積み上げよう。</p>
+        <div class="howto" aria-label="遊びかた">
+          <span><i>↔</i><b>形ちがいで移動</b><small>位置・速さ・厚みも変化</small></span>
+          <em>→</em>
+          <span><i class="tap-icon">↑</i><b>タップで垂直跳び</b><small>真上のブロックへ</small></span>
+          <em>→</em>
+          <span><i>▤</i><b>乗ると物理落下</b><small>低摩擦で滑る・崩れる</small></span>
+        </div>
+        <button class="primary-button" id="startButton" type="button"><span>▲</span> 積み上げる</button>
+        <div class="best-chip"><span>BEST TOWER</span><strong><b id="startBest">0</b>段</strong></div>
+        <p class="hint">ブロックの端まで着地OK · 画面タップ / SPACE</p>
+      </div>
+
+      <div class="gameover-screen panel hidden" id="gameoverScreen">
+        <div class="result-card">
+          <div class="eyebrow">TOWER RESULT</div>
+          <p>積み上げた高さ</p>
+          <strong class="final-height"><b id="finalStack">0</b><small>段</small></strong>
+          <div class="result-stats">
+            <span>ジャンプ回数<b id="finalJumps">0</b></span>
+            <span>PERFECT<b id="finalPerfect">0</b></span>
+          </div>
+          <p class="new-best hidden" id="newBest">✦ NEW RECORD ✦</p>
+          <button class="primary-button" id="retryButton" type="button">もう一度積む</button>
+          <button class="text-button" id="homeButton" type="button">タイトルへ</button>
+        </div>
+      </div>
+
+      <div class="countdown hidden" id="countdown" aria-live="polite">READY</div>
+
+      <div class="tap-guide" id="tapGuide" aria-hidden="true">
+        <span class="direction-arrow" id="directionArrow">↑</span>
+        <div><b>TAP</b><small>垂直ジャンプ</small></div>
+        <i>SPACE</i>
+      </div>
+
+      <div class="first-tip hidden" id="firstTip">
+        <span>☝</span>
+        <b>着地時の位置を読んでタップ！</b>
+      </div>
+
+      <footer>TIME · LAND · PHYSICS</footer>
+    </section>
+  </main>
+  <script src="game.js?v=1.0.1"></script>
+</body>
+</html>

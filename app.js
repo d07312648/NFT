@@ -3,10 +3,14 @@ const WALLET_ADDRESS = "0x7A4F2C9B6E18D4A1F335B9C8705E1199AB8E93C2";
 const SEED_WORDS = ["orbit","harbor","velvet","maple","crystal","planet","silver","echo","canvas","river","gentle","sunset"];
 const NETWORK_FEE_ETH = 0.0032;
 const PURCHASE_GAS_ETH = 0.0028;
+const STORAGE_KEY = "nft-journey-lab-session-v1";
+const GAME_STORAGE_KEYS = ["hoshiwatari-momo-best","tokyo-digital-art-night-jump-best","skyline-music-fest-bounce-best-score","anime-creator-expo-tower-best-score","momo-spike-wall-best"];
+const TRANSFER_DELAY_MS = 2200;
+const PURCHASE_DELAY_MS = 2400;
 const NFT_BENEFIT_PROGRAMS = {
   "nova-live":{
     gameName:"星わたり モモ",challengeTitle:"NOVA LIVE 2026 特典チャレンジ",
-    gameSrc:"./experience-game/index.html?v=4.5.0",frameTitle:"星わたり モモ",messageType:"nova-live-game-score",
+    gameSrc:"./experience-game/index.html?v=4.5.1",frameTitle:"星わたり モモ",messageType:"nova-live-game-score",
     benefits:[
       {score:10,title:"グッズ 10%OFFクーポン",short:"10%OFF",code:"NOVA10"},
       {score:30,title:"グッズ 20%OFFクーポン",short:"20%OFF",code:"NOVA20"},
@@ -15,7 +19,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "digital-art":{
     gameName:"星わたりジャンプ モモ",challengeTitle:"TOKYO DIGITAL ART NIGHT 特典チャレンジ",
-    gameSrc:"./digital-art-game/index.html?v=1.0.0",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
+    gameSrc:"./digital-art-game/index.html?v=1.0.1",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
     benefits:[
       {score:3000,title:"10%OFFクーポン",short:"10%OFF",code:"TDAN10"},
       {score:5000,title:"20%OFFクーポン",short:"20%OFF",code:"TDAN20"},
@@ -24,10 +28,28 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "skyline-fest":{
     gameName:"星くずバウンド モモ",challengeTitle:"SKYLINE MUSIC FEST 特典チャレンジ",
-    gameSrc:"./skyline-game/index.html?v=1.0.1",frameTitle:"星くずバウンド モモ",messageType:"skyline-fest-game-score",
+    gameSrc:"./skyline-game/index.html?v=1.0.2",frameTitle:"星くずバウンド モモ",messageType:"skyline-fest-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"SKYLINE10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"SKYLINE20"},
+      {score:30,title:"限定グッズプレゼント",short:"限定グッズ",code:null}
+    ]
+  },
+  "creator-expo":{
+    gameName:"星くずタワー モモ",challengeTitle:"ANIME CREATOR EXPO 特典チャレンジ",
+    gameSrc:"./creator-expo-game/index.html?v=1.0.1",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
+    benefits:[
+      {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"ACE10"},
+      {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"ACE20"},
+      {score:30,title:"限定グッズプレゼント",short:"限定グッズ",code:null}
+    ]
+  },
+  "light-show":{
+    gameName:"モモのトゲかべタップ",challengeTitle:"BAY AREA LIGHT SHOW 特典チャレンジ",
+    gameSrc:"./light-show-game/index.html?v=1.0.0",frameTitle:"モモのトゲかべタップ",messageType:"light-show-game-score",
+    benefits:[
+      {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"BAYLIGHT10"},
+      {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"BAYLIGHT20"},
       {score:30,title:"限定グッズプレゼント",short:"限定グッズ",code:null}
     ]
   }
@@ -60,22 +82,82 @@ const missions = [
   ["purchase","NFTチケットを購入","取引内容を確認・署名"]
 ];
 
-const state = {
-  participantId:null, startedAt:null, completedAt:null,
-  currentApp:"exchange", currentExchangeTab:"exchange-home", currentWalletTab:"wallet-home",
-  appSwitchCount:0, helpOpenCount:0, copyCount:0, pasteCount:0, signatureCount:0, validationErrors:0,
-  appEnteredAt:null, appTimes:{exchange:0,wallet:0,market:0},
-  accountCreated:false, ethPurchased:false, walletCreated:false, seedConfirmed:false,
-  addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, transferPending:false, lastReceivedAmount:0,
-  marketConnected:false, connectionSigned:false, selectedTicketId:null,
-  purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null,
-  exchangeYen:100000, exchangeEth:0, walletEth:0, purchasedEth:0, purchaseYen:"",
-  buyAgreementChecked:false, ethPriceAtPurchase:null, purchaseHistory:[],
-  destinationAddress:"", transferAmount:0,
-  activeGameTicketId:null,
-  gameProgress:Object.fromEntries(Object.keys(NFT_BENEFIT_PROGRAMS).map(ticketId=>[ticketId,{bestScore:0,lastScore:0,playCount:0,benefitsUnlockedAt:{}}])),
-  eventLog:[]
-};
+function createDefaultState(){
+  return {
+    participantId:null, startedAt:null, completedAt:null,
+    currentApp:"exchange", currentExchangeTab:"exchange-home", currentWalletTab:"wallet-home",
+    appSwitchCount:0, helpOpenCount:0, copyCount:0, pasteCount:0, signatureCount:0, validationErrors:0,
+    appEnteredAt:null, appTimes:{exchange:0,wallet:0,market:0},
+    accountCreated:false, ethPurchased:false, walletCreated:false, seedConfirmed:false,
+    addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, transferPending:false, transferCompletesAt:null, lastReceivedAmount:0,
+    marketConnected:false, connectionSigned:false, selectedTicketId:null,
+    purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null, purchaseCompletesAt:null,
+    exchangeYen:100000, exchangeEth:0, walletEth:0, purchasedEth:0, purchaseYen:"",
+    buyAgreementChecked:false, ethPriceAtPurchase:null, purchaseHistory:[],
+    destinationAddress:"", transferAmount:0,
+    activeGameTicketId:null,
+    gameProgress:Object.fromEntries(Object.keys(NFT_BENEFIT_PROGRAMS).map(ticketId=>[ticketId,{bestScore:0,lastScore:0,playCount:0,benefitsUnlockedAt:{}}])),
+    eventLog:[]
+  };
+}
+
+function loadSavedState(){
+  const defaults=createDefaultState();
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    if(!saved?.state||saved.version!==1)return defaults;
+    const restored={...defaults,...saved.state};
+    restored.appTimes={...defaults.appTimes,...saved.state.appTimes};
+    restored.gameProgress=Object.fromEntries(Object.keys(defaults.gameProgress).map(ticketId=>[
+      ticketId,
+      {...defaults.gameProgress[ticketId],...saved.state.gameProgress?.[ticketId],benefitsUnlockedAt:{...defaults.gameProgress[ticketId].benefitsUnlockedAt,...saved.state.gameProgress?.[ticketId]?.benefitsUnlockedAt}}
+    ]));
+    restored.ownedNfts=Array.isArray(saved.state.ownedNfts)?saved.state.ownedNfts:[];
+    restored.purchaseHistory=Array.isArray(saved.state.purchaseHistory)?saved.state.purchaseHistory:[];
+    restored.eventLog=Array.isArray(saved.state.eventLog)?saved.state.eventLog:[];
+    if(!["exchange","wallet","market"].includes(restored.currentApp))restored.currentApp="exchange";
+    if(!["exchange-home","exchange-buy","exchange-send"].includes(restored.currentExchangeTab))restored.currentExchangeTab="exchange-home";
+    if(!["wallet-home","wallet-receive","wallet-nft","wallet-benefits"].includes(restored.currentWalletTab))restored.currentWalletTab="wallet-home";
+    restored.appEnteredAt=null;
+    restored.activeGameTicketId=null;
+    return restored;
+  }catch(error){
+    console.warn("保存されたセッションを読み込めませんでした。",error);
+    return defaults;
+  }
+}
+
+let persistTimer=null;
+let resetInProgress=false;
+function stateSnapshot(){
+  const snapshot=JSON.parse(JSON.stringify(state));
+  if(snapshot.participantId&&state.appEnteredAt!==null&&snapshot.appTimes[state.currentApp]!==undefined){
+    snapshot.appTimes[state.currentApp]+=Math.max(0,Math.round((performance.now()-state.appEnteredAt)/1000));
+  }
+  snapshot.appEnteredAt=null;
+  snapshot.activeGameTicketId=null;
+  return snapshot;
+}
+function persistState(){
+  clearTimeout(persistTimer);persistTimer=null;
+  if(resetInProgress||!state.participantId)return;
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,savedAt:now(),state:stateSnapshot()}))}
+  catch(error){console.warn("セッションを保存できませんでした。",error)}
+}
+function schedulePersist(){
+  clearTimeout(persistTimer);persistTimer=setTimeout(persistState,0);
+}
+function makePersistent(target,cache=new WeakMap()){
+  if(!target||typeof target!=="object")return target;
+  if(cache.has(target))return cache.get(target);
+  const proxy=new Proxy(target,{
+    get(object,key,receiver){return makePersistent(Reflect.get(object,key,receiver),cache)},
+    set(object,key,value,receiver){const changed=Reflect.get(object,key,receiver)!==value;const result=Reflect.set(object,key,value,receiver);if(changed)schedulePersist();return result},
+    deleteProperty(object,key){const existed=Reflect.has(object,key);const result=Reflect.deleteProperty(object,key);if(existed)schedulePersist();return result}
+  });
+  cache.set(target,proxy);return proxy;
+}
+const state = makePersistent(loadSavedState());
 
 let tickerTimer=null;
 let transferTimer=null;
@@ -107,7 +189,19 @@ function start(){
   state.participantId=participantId();state.startedAt=now();state.appEnteredAt=performance.now();
   landing.classList.add("hidden");workspace.classList.remove("hidden");appSwitcher.classList.remove("hidden");
   $("participantText").textContent=`参加者ID：${state.participantId}`;log("experiment_started");
-  renderAll();startTicker();
+  renderAll();startTicker();persistState();
+}
+
+function restoreSession(){
+  if(!state.participantId)return;
+  state.appEnteredAt=performance.now();
+  landing.classList.add("hidden");workspace.classList.remove("hidden");appSwitcher.classList.remove("hidden");
+  $("participantText").textContent=`参加者ID：${state.participantId}`;
+  exchangeApp.classList.toggle("hidden",state.currentApp!=="exchange");
+  walletApp.classList.toggle("hidden",state.currentApp!=="wallet");
+  marketApp.classList.toggle("hidden",state.currentApp!=="market");
+  document.querySelectorAll(".switcher-item").forEach(button=>button.classList.toggle("active",button.dataset.app===state.currentApp));
+  log("session_restored");renderAll();startTicker();resumePendingOperations();
 }
 
 function stopTicker(){if(tickerTimer){clearInterval(tickerTimer);tickerTimer=null}}
@@ -323,14 +417,21 @@ function openSendReview(sendAmount){
   $("cancelSend").onclick=closeModal;
   $("confirmSend").onclick=()=>{
     state.transferAmount=sendAmount;state.exchangeEth-=sendAmount+NETWORK_FEE_ETH;state.transferSent=true;state.transferPending=true;
+    state.transferCompletesAt=Date.now()+TRANSFER_DELAY_MS;
     log("eth_transfer_sent",{destination:WALLET_ADDRESS,amount:sendAmount,fee:NETWORK_FEE_ETH});
     closeModal();toast("送金処理を開始しました");renderAll();
-    clearTimeout(transferTimer);
-    transferTimer=setTimeout(()=>{
-      state.transferReceived=true;state.transferPending=false;state.lastReceivedAmount=sendAmount;state.walletEth+=sendAmount;state.transferAmount=0;
-      log("eth_transfer_confirmed",{amount:sendAmount});renderAll();toast("Orbit Walletへの入金が確認されました");
-    },2200);
+    scheduleTransferCompletion(TRANSFER_DELAY_MS);
   };
+}
+
+function completeTransfer(){
+  if(!state.transferPending)return;
+  const sendAmount=Number(state.transferAmount)||0;
+  state.transferReceived=true;state.transferPending=false;state.transferCompletesAt=null;state.lastReceivedAmount=sendAmount;state.walletEth+=sendAmount;state.transferAmount=0;
+  log("eth_transfer_confirmed",{amount:sendAmount});renderAll();toast("Orbit Walletへの入金が確認されました");
+}
+function scheduleTransferCompletion(delay){
+  clearTimeout(transferTimer);transferTimer=setTimeout(completeTransfer,Math.max(0,delay));
 }
 
 function renderWallet(){
@@ -438,7 +539,7 @@ function renderWalletBenefits(){
       </div>
       <div class="benefit-section-head"><div><span class="kicker">YOUR REWARDS</span><h2>${t.title} の特典</h2></div><span>最終プレイスコア ${fmtScore(progress.lastScore)}</span></div>
       <div class="benefit-grid">${benefitCards(ticketId)}</div></section>`;
-    }).join(""):`<div class="empty-benefit-state"><span>✦</span><h2>対象NFTを保有すると特典が表示されます</h2><p>NOVA LIVE 2026、TOKYO DIGITAL ART NIGHT、または SKYLINE MUSIC FEST の購入後、ゲームをプレイしてスコアに応じたホルダー特典を獲得できます。</p></div>`}`;
+    }).join(""):`<div class="empty-benefit-state"><span>✦</span><h2>対象NFTを保有すると特典が表示されます</h2><p>NOVA LIVE 2026、TOKYO DIGITAL ART NIGHT、SKYLINE MUSIC FEST、ANIME CREATOR EXPO、または BAY AREA LIGHT SHOW の購入後、ゲームをプレイしてスコアに応じたホルダー特典を獲得できます。</p></div>`}`;
   document.querySelectorAll("[data-benefit-game]").forEach(button=>button.onclick=()=>openGameExperience(button.dataset.benefitGame));
 }
 
@@ -555,15 +656,49 @@ function openTransactionSignature(){
 }
 function openTransactionPending(){
   state.pendingPurchaseTicketId=state.selectedTicketId;
+  state.purchaseCompletesAt=Date.now()+PURCHASE_DELAY_MS;
+  showTransactionPending();schedulePurchaseCompletion(PURCHASE_DELAY_MS);
+}
+function showTransactionPending(){
   openModal("TRANSACTION","購入処理を送信中",`<div class="transaction-status"><div class="spinner"></div><h3>ネットワーク承認を待っています</h3><p>署名済みトランザクションをEthereumネットワークへ送信しました。</p></div>`,false);
-  clearTimeout(purchaseTimer);
-  purchaseTimer=setTimeout(()=>{
-    const purchasedTicketId=state.pendingPurchaseTicketId;
-    state.ownedNfts.push({tokenId:`MG-${Date.now().toString().slice(-8)}`,ticketId:purchasedTicketId,purchasedAt:now()});
-    state.nftOwned=true;if(!state.completedAt)state.completedAt=now();
-    log("nft_purchase_confirmed",{ticket_id:purchasedTicketId,owned_count:state.ownedNfts.length});
-    state.pendingPurchaseTicketId=null;closeModal();toast("NFTチケットの購入が完了しました。続けて購入できます");renderAll();
-  },2400);
+}
+function completePurchase(){
+  const purchasedTicketId=state.pendingPurchaseTicketId;
+  if(!purchasedTicketId)return;
+  state.ownedNfts.push({tokenId:`MG-${Date.now().toString().slice(-8)}`,ticketId:purchasedTicketId,purchasedAt:now()});
+  state.nftOwned=true;if(!state.completedAt)state.completedAt=now();
+  log("nft_purchase_confirmed",{ticket_id:purchasedTicketId,owned_count:state.ownedNfts.length});
+  state.pendingPurchaseTicketId=null;state.purchaseCompletesAt=null;closeModal();toast("NFTチケットの購入が完了しました。続けて購入できます");renderAll();
+}
+function schedulePurchaseCompletion(delay){
+  clearTimeout(purchaseTimer);purchaseTimer=setTimeout(completePurchase,Math.max(0,delay));
+}
+function resumePendingOperations(){
+  if(state.transferPending){
+    const remaining=(Number(state.transferCompletesAt)||Date.now()+TRANSFER_DELAY_MS)-Date.now();
+    scheduleTransferCompletion(remaining);
+  }
+  if(state.pendingPurchaseTicketId){
+    const remaining=(Number(state.purchaseCompletesAt)||Date.now()+PURCHASE_DELAY_MS)-Date.now();
+    if(remaining>0)showTransactionPending();
+    schedulePurchaseCompletion(remaining);
+  }
+}
+function openResetConfirmation(){
+  openModal("RESET PROGRESS","進捗をリセットしますか？",`
+    <div class="notice danger">この参加者の進捗、残高、保有NFT、ゲームスコア、操作ログがすべて削除されます。この操作は取り消せません。</div>
+    <div class="button-row" style="margin-top:16px"><button id="confirmProgressReset" class="danger-btn" type="button">すべて削除してリセット</button><button id="cancelProgressReset" class="secondary" type="button">キャンセル</button></div>`);
+  $("cancelProgressReset").onclick=closeModal;
+  $("confirmProgressReset").onclick=resetProgress;
+}
+function resetProgress(){
+  resetInProgress=true;
+  clearTimeout(persistTimer);clearTimeout(transferTimer);clearTimeout(purchaseTimer);stopTicker();
+  try{
+    localStorage.removeItem(STORAGE_KEY);
+    GAME_STORAGE_KEYS.forEach(key=>localStorage.removeItem(key));
+  }catch(error){console.warn("保存された進捗を削除できませんでした。",error)}
+  location.reload();
 }
 function renderMarketComplete(){
   const t=ticket();
@@ -596,7 +731,7 @@ function resultData(){
     signature_count:state.signatureCount,validation_error_count:state.validationErrors,app_times_seconds:state.appTimes,
     exchange:{yen_balance:state.exchangeYen,eth_purchased_total:state.purchasedEth,last_rate_at_purchase:state.ethPriceAtPurchase,eth_remaining:state.exchangeEth,purchase_history:state.purchaseHistory},
     wallet:{address:WALLET_ADDRESS,eth_balance:state.walletEth,transfer_amount:state.transferAmount,transfer_received:state.transferReceived,owned_nfts:state.ownedNfts,
-      nova_live_benefits:benefitResult("nova-live"),digital_art_benefits:benefitResult("digital-art"),skyline_fest_benefits:benefitResult("skyline-fest")},
+      nova_live_benefits:benefitResult("nova-live"),digital_art_benefits:benefitResult("digital-art"),skyline_fest_benefits:benefitResult("skyline-fest"),anime_creator_expo_benefits:benefitResult("creator-expo"),bay_area_light_show_benefits:benefitResult("light-show")},
     marketplace:{connected:state.marketConnected,selected_ticket:state.selectedTicketId,purchase_signed:state.purchaseSigned,nft_owned:state.ownedNfts.length>0,nft_count:state.ownedNfts.length,purchases:state.ownedNfts},
     event_log:state.eventLog};
 }
@@ -619,6 +754,8 @@ $("helpButton").onclick=()=>{state.helpOpenCount++;log("help_opened");$("helpBac
 function closeHelp(){$("helpBackdrop").classList.add("hidden");$("helpDrawer").classList.remove("open");$("helpDrawer").setAttribute("aria-hidden","true")}
 $("helpClose").onclick=closeHelp;$("helpBackdrop").onclick=closeHelp;
 $("gameClose").onclick=closeGameExperience;
+$("resetProgressButton").onclick=openResetConfirmation;
+window.addEventListener("pagehide",persistState);
 window.addEventListener("message",event=>{
   const ticketId=state.activeGameTicketId,program=benefitProgram(ticketId);
   if(event.source!==$("gameFrame").contentWindow||!program||event.data?.type!==program.messageType)return;
@@ -635,3 +772,4 @@ window.addEventListener("message",event=>{
   updateGameOverlay();
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("gameExperience").classList.contains("hidden"))closeGameExperience();else{closeModal();closeHelp()}}});
+restoreSession();

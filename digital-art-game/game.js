@@ -24,7 +24,6 @@
   const roundPoints = document.getElementById('roundPoints');
   const resultNote = document.getElementById('resultNote');
   const lifeLost = document.getElementById('lifeLost');
-  const finalTitle = document.getElementById('finalTitle');
   const finalScore = document.getElementById('finalScore');
   const finalLandings = document.getElementById('finalLandings');
   const finalPerfects = document.getElementById('finalPerfects');
@@ -353,7 +352,6 @@
       best = score;
       localStorage.setItem(STORAGE_KEY, String(best));
     }
-    finalTitle.textContent = landings >= 20 ? '星わたり名人！' : landings >= 10 ? 'ナイスジャンプ！' : 'もう一度チャレンジ！';
     finalScore.textContent = score.toLocaleString('ja-JP');
     finalLandings.textContent = landings;
     finalPerfects.textContent = perfects;

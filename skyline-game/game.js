@@ -23,7 +23,6 @@
   const leftControl = document.getElementById('leftControl');
   const rightControl = document.getElementById('rightControl');
   const attitudeNeedle = document.querySelector('#attitude i');
-  const finalTitle = document.getElementById('finalTitle');
   const finalScore = document.getElementById('finalScore');
   const finalLandings = document.getElementById('finalLandings');
   const finalCombo = document.getElementById('finalCombo');
@@ -477,7 +476,6 @@
       best = score;
       localStorage.setItem(STORAGE_KEY, String(best));
     }
-    finalTitle.textContent = score >= 20 ? '星空の達人！' : 'NICE JUMP!';
     finalScore.textContent = score;
     finalLandings.textContent = score;
     finalCombo.textContent = maxCombo;
