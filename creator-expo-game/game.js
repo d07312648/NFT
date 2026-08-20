@@ -26,7 +26,8 @@
   const WORLD_W = 390;
   const WORLD_H = 720;
   const TAU = Math.PI * 2;
-  const START_Y = 648;
+  const START_Y = 560;
+  const CAMERA_FOLLOW_Y = 350;
   const FOOT = 27;
   const HIT_EDGE_EPSILON = .35;
   const PLAYER_SCALE = .8;
@@ -1175,8 +1176,8 @@
       towerBalance += (calculateBalance() - towerBalance) * Math.min(1, dt * 5);
       updateHud();
       const towerTopY = player.y - FOOT;
-      if (towerTopY - cameraY < 470) {
-        const targetCamera = towerTopY - 470;
+      if (towerTopY - cameraY < CAMERA_FOLLOW_Y) {
+        const targetCamera = towerTopY - CAMERA_FOLLOW_Y;
         cameraY += (targetCamera - cameraY) * Math.min(1, dt * 3.8);
       }
     }
@@ -1590,6 +1591,7 @@
     snapshot: () => ({
       state,
       stack: stackCount,
+      cameraY: Number(cameraY.toFixed(1)),
       balance: Math.round(towerBalance),
       jumps,
       perfect: perfectCount,
