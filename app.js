@@ -37,7 +37,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "creator-expo":{
     gameName:"星くずタワー モモ",challengeTitle:"ANIME CREATOR EXPO 特典チャレンジ",
-    gameSrc:"./creator-expo-game/index.html?v=1.0.6",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
+    gameSrc:"./creator-expo-game/index.html?v=1.0.7",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"ACE10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"ACE20"},

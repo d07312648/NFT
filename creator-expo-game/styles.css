@@ -209,7 +209,7 @@ button { color: inherit; font: inherit; }
   position: absolute;
   z-index: 6;
   right: 50%;
-  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+  bottom: max(64px, calc(env(safe-area-inset-bottom) + 52px));
   display: flex;
   min-width: 236px;
   height: 57px;
@@ -310,7 +310,7 @@ footer {
   .howto i { width: 37px; height: 37px; font-size: 17px; }
   .best-chip { margin-top: 12px; }
   .hint { margin-top: 7px; }
-  .tap-guide { bottom: 17px; height: 53px; }
+  .tap-guide { bottom: max(58px, calc(env(safe-area-inset-bottom) + 46px)); height: 53px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
