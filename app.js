@@ -19,7 +19,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "digital-art":{
     gameName:"星わたりジャンプ モモ",challengeTitle:"TOKYO DIGITAL ART NIGHT 特典チャレンジ",
-    gameSrc:"./digital-art-game/index.html?v=1.0.3",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
+    gameSrc:"./digital-art-game/index.html?v=1.0.4",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
     benefits:[
       {score:3000,title:"10%OFFクーポン",short:"10%OFF",code:"TDAN10"},
       {score:5000,title:"20%OFFクーポン",short:"20%OFF",code:"TDAN20"},
@@ -603,6 +603,7 @@ function openGameExperience(ticketId){
   if(!ownsTicket(ticketId)){error(`このゲームは${t.title}の保有者限定です`);return}
   closeModal();
   state.activeGameTicketId=ticketId;
+  $("gameExperience").dataset.ticketId=ticketId;
   const progress=gameProgress(ticketId);progress.playCount++;
   $("gameExperienceTitle").textContent=program.challengeTitle;
   const frame=$("gameFrame");frame.title=program.frameTitle;
@@ -623,6 +624,7 @@ function closeGameExperience(){
   $("gameExperience").classList.add("hidden");document.body.classList.remove("game-open");
   if(progress)log("benefit_game_closed",{ticket_id:ticketId,last_score:progress.lastScore,best_score:progress.bestScore});
   state.activeGameTicketId=null;
+  delete $("gameExperience").dataset.ticketId;
   const frame=$("gameFrame");
   frame.src="about:blank";
   delete frame.dataset.ticketId;

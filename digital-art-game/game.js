@@ -40,6 +40,7 @@
   const TAU = Math.PI * 2;
   const GRAVITY = 850;
   const FOOT = 28;
+  const INITIAL_LIVES = 3;
   const STORAGE_KEY = 'tokyo-digital-art-night-jump-best';
 
   let state = 'title';
@@ -48,7 +49,7 @@
   let stateTime = 0;
   let cameraX = 0;
   let cameraZoom = 1;
-  let lives = 5;
+  let lives = INITIAL_LIVES;
   let score = 0;
   let landings = 0;
   let perfects = 0;
@@ -187,7 +188,7 @@
   function showTitle() {
     state = 'title';
     stateTime = 0;
-    lives = 5;
+    lives = INITIAL_LIVES;
     score = 0;
     landings = 0;
     perfects = 0;
@@ -207,7 +208,7 @@
   function startGame() {
     window.GameFullscreen?.enter();
     initAudio();
-    lives = 5;
+    lives = INITIAL_LIVES;
     score = 0;
     landings = 0;
     perfects = 0;
