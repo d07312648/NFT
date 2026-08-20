@@ -238,6 +238,7 @@
   }
 
   function startGame() {
+    window.GameFullscreen?.enter();
     initAudio();
     state = 'countdown';
     stateTime = 0;

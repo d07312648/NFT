@@ -6,7 +6,7 @@
   --ink: #101535;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-user-drag: none; -webkit-user-select: none; user-select: none; }
 html, body { width: 100%; min-height: 100%; margin: 0; overscroll-behavior: none; }
 body {
   overflow: hidden;

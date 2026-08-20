@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#101535">
   <meta name="description" content="モモの空中姿勢を左右に操り、星くずの足場をバウンドして空高くのぼるゲーム">
   <title>星くずバウンド モモ</title>
-  <link rel="stylesheet" href="styles.css?v=1.0.1">
+  <link rel="stylesheet" href="styles.css?v=1.0.3">
 </head>
 <body>
   <main class="app-shell">
@@ -25,11 +28,6 @@
         <div class="hud-block"><span>SCORE</span><strong><b id="score">0</b><small>pt</small></strong></div>
         <div class="hud-block hud-center"><span>BEST</span><strong><b id="bestScore">0</b><small>pt</small></strong></div>
         <div class="hud-block hud-right"><span>COMBO</span><strong><b id="combo">0</b><small>x</small></strong></div>
-      </div>
-
-      <div class="landing-toast hidden" id="landingToast" aria-live="polite">
-        <strong id="toastTitle">PERFECT!</strong>
-        <span id="toastDetail">姿勢 0°</span>
       </div>
 
       <div class="start-screen panel" id="startScreen">
@@ -71,6 +69,7 @@
       <footer>LEAN · LAND · CLIMB</footer>
     </section>
   </main>
-  <script src="game.js?v=1.0.2"></script>
+  <script src="../game-fullscreen.js?v=1.0.1"></script>
+  <script src="game.js?v=1.0.4"></script>
 </body>
 </html>

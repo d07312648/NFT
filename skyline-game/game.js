@@ -15,9 +15,6 @@
   const bestScoreNode = document.getElementById('bestScore');
   const comboNode = document.getElementById('combo');
   const startBest = document.getElementById('startBest');
-  const landingToast = document.getElementById('landingToast');
-  const toastTitle = document.getElementById('toastTitle');
-  const toastDetail = document.getElementById('toastDetail');
   const countdown = document.getElementById('countdown');
   const controls = document.getElementById('controls');
   const leftControl = document.getElementById('leftControl');
@@ -83,7 +80,6 @@
   let trails = [];
   let shake = 0;
   let flash = 0;
-  let toastTimer = 0;
   let soundEnabled = true;
   let audioContext = null;
   let keyLeft = false;
@@ -282,13 +278,13 @@
     startBest.textContent = best;
     startScreen.classList.remove('hidden');
     gameoverScreen.classList.add('hidden');
-    landingToast.classList.add('hidden');
     countdown.classList.add('hidden');
     hud.classList.remove('visible');
     controls.classList.remove('visible');
   }
 
   function startGame() {
+    window.GameFullscreen?.enter();
     initAudio();
     score = 0;
     height = 0;
@@ -303,7 +299,6 @@
     updateHud();
     startScreen.classList.add('hidden');
     gameoverScreen.classList.add('hidden');
-    landingToast.classList.add('hidden');
     hud.classList.add('visible');
     controls.classList.add('visible');
     countdown.textContent = 'READY';
@@ -354,14 +349,6 @@
       x: Math.cos(platform.angle) * dx + Math.sin(platform.angle) * dy,
       y: -Math.sin(platform.angle) * dx + Math.cos(platform.angle) * dy,
     };
-  }
-
-  function showToast(title, detail, danger = false) {
-    toastTitle.textContent = title;
-    toastDetail.textContent = detail;
-    toastTitle.style.color = danger ? '#ff8b83' : '';
-    landingToast.classList.remove('hidden');
-    toastTimer = danger ? .85 : .65;
   }
 
   function registerPlatformTouch(platform) {
@@ -421,7 +408,6 @@
       combo = perfect ? combo + 1 : Math.max(1, combo);
       if (!good) combo = 0;
       maxCombo = Math.max(maxCombo, combo);
-      showToast(perfect ? 'PERFECT!' : good ? 'NICE!' : 'SAFE', `バーとの差 ${degrees}°`);
     } else {
       combo = 0;
     }
@@ -446,12 +432,11 @@
     player.squash = -.18;
     shake = Math.max(shake, .12);
     registerPlatformTouch(platform);
-    showToast('BONK!', 'バーの下側にヒット');
     playBump();
     dustBurst(hitPoint.x, hitPoint.y, 5);
   }
 
-  function beginCrash(reason = '姿勢をまっすぐに！') {
+  function beginCrash() {
     if (state !== 'playing') return;
     state = 'crashing';
     stateTime = 0;
@@ -459,7 +444,6 @@
     player.vy = Math.min(player.vy, -105);
     player.omega += player.angle >= 0 ? 2.2 : -2.2;
     shake = .35;
-    showToast('OUCH!', reason, true);
     playCrash();
     updateHud();
   }
@@ -469,7 +453,6 @@
     stateTime = 0;
     clearInput();
     controls.classList.remove('visible');
-    landingToast.classList.add('hidden');
     countdown.classList.add('hidden');
     const isNewBest = score > best;
     if (isNewBest) {
@@ -582,11 +565,6 @@
     player.squash += (0 - player.squash) * Math.min(1, dt * 10);
     player.wing += (0 - player.wing) * Math.min(1, dt * 3.4);
 
-    if (toastTimer > 0) {
-      toastTimer -= dt;
-      if (toastTimer <= 0 && state !== 'crashing') landingToast.classList.add('hidden');
-    }
-
     if (state === 'title') {
       player.y = currentPlatform.y - BAR_HALF - FOOT + Math.sin(elapsed * 2.2) * 3;
       player.angle = Math.sin(elapsed * 1.5) * .055;
@@ -634,9 +612,9 @@
       platforms = platforms.filter((platform) => platform === currentPlatform || platform.y < cameraY + WORLD_H + 170);
 
       if (player.x < -SIDE_FALL_MARGIN || player.x > WORLD_W + SIDE_FALL_MARGIN) {
-        beginCrash('横へ飛び出しちゃった');
+        beginCrash();
       } else if (player.y - cameraY > WORLD_H + 85) {
-        beginCrash('足場から落ちちゃった');
+        beginCrash();
       }
     }
 

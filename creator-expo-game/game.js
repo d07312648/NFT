@@ -15,9 +15,6 @@
   const bestStackNode = document.getElementById('bestStack');
   const balanceNode = document.getElementById('balance');
   const startBest = document.getElementById('startBest');
-  const landingToast = document.getElementById('landingToast');
-  const toastTitle = document.getElementById('toastTitle');
-  const toastDetail = document.getElementById('toastDetail');
   const countdown = document.getElementById('countdown');
   const tapGuide = document.getElementById('tapGuide');
   const firstTip = document.getElementById('firstTip');
@@ -70,7 +67,6 @@
   let tapRipples = [];
   let shake = 0;
   let flash = 0;
-  let toastTimer = 0;
   let soundEnabled = true;
   let audioContext = null;
   let firstJumpDone = false;
@@ -709,7 +705,6 @@
     startBest.textContent = best;
     startScreen.classList.remove('hidden');
     gameoverScreen.classList.add('hidden');
-    landingToast.classList.add('hidden');
     countdown.classList.add('hidden');
     firstTip.classList.add('hidden');
     hud.classList.remove('visible');
@@ -717,13 +712,13 @@
   }
 
   function startGame() {
+    window.GameFullscreen?.enter();
     initAudio();
     state = 'countdown';
     stateTime = 0;
     resetWorld();
     startScreen.classList.add('hidden');
     gameoverScreen.classList.add('hidden');
-    landingToast.classList.add('hidden');
     hud.classList.add('visible');
     tapGuide.classList.add('visible');
     countdown.textContent = 'READY';
@@ -789,14 +784,6 @@
     playJump();
   }
 
-  function showToast(title, detail, danger = false) {
-    toastTitle.textContent = title;
-    toastDetail.textContent = detail;
-    toastTitle.style.color = danger ? '#ff8b83' : '';
-    landingToast.classList.remove('hidden');
-    toastTimer = danger ? 1.05 : .72;
-  }
-
   function captureMovingBlock() {
     const caught = activeBlock;
     caught.mode = 'dropping';
@@ -812,7 +799,6 @@
     attachPlayer(caught, local.x, 'riding');
     player.squash = .18;
     player.wing = 1;
-    showToast('CATCH!', '着地位置のまま物理落下');
     starBurst(player.x, blockTop(caught), 10);
     playCatch();
   }
@@ -834,7 +820,6 @@
   function landPlayerOnTower(landing) {
     attachPlayer(landing.body, landing.surface.localX, 'standing');
     player.squash = .24;
-    showToast('ONE MORE!', 'ずれた足場でもう一度');
     dustBurst(player.x, landing.surface.y, 6);
     tone(300, .08, 'triangle', .025);
   }
@@ -856,7 +841,6 @@
     towerBalance = 0;
     updateHud();
     shake = .42;
-    showToast('TOWER CRASH!', reason, true);
     playCollapse();
   }
 
@@ -1059,11 +1043,6 @@
     dustBurst(landed.x, blockBottom(landed), 14);
     starBurst(player.x, blockTop(landed), perfect ? 23 : 12);
     playStack(perfect);
-    showToast(
-      perfect ? 'PERFECT STACK!' : towerBalance < 35 ? 'WOBBLY!' : 'PHYSICS STACK!',
-      towerBalance < 35 ? '摩擦で耐えている…' : 'ブロックはまだ動いている',
-      towerBalance < 18,
-    );
     spawnTimer = .7;
   }
 
@@ -1106,7 +1085,6 @@
     stateTime = 0;
     tapGuide.classList.remove('visible', 'ready');
     firstTip.classList.add('hidden');
-    landingToast.classList.add('hidden');
     const isNewBest = stackCount > best;
     if (isNewBest) {
       best = stackCount;
@@ -1162,11 +1140,6 @@
     flash = Math.max(0, flash - dt);
     player.squash += (0 - player.squash) * Math.min(1, dt * 11);
     player.wing += (0 - player.wing) * Math.min(1, dt * 3.6);
-
-    if (toastTimer > 0) {
-      toastTimer -= dt;
-      if (toastTimer <= 0 && state !== 'collapsing') landingToast.classList.add('hidden');
-    }
 
     if (state === 'title') {
       updateMovingBlock(dt * .72);

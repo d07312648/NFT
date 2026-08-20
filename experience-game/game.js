@@ -145,6 +145,7 @@
   }
 
   function startGame() {
+    window.GameFullscreen?.enter();
     initAudio();
     state = 'playing';
     score = 0;

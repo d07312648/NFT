@@ -205,6 +205,7 @@
   }
 
   function startGame() {
+    window.GameFullscreen?.enter();
     initAudio();
     lives = 5;
     score = 0;

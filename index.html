@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
   <title>NFT Journey Lab｜従来型NFT購入体験</title>
-  <link rel="stylesheet" href="./styles.css?v=4.6.1" />
+  <link rel="stylesheet" href="./styles.css?v=4.6.2" />
 </head>
 <body>
   <div id="toast" class="toast hidden" role="status"></div>
@@ -233,11 +236,11 @@
         <p id="gameNextReward" class="game-next-reward"></p>
       </aside>
       <div class="game-frame-wrap">
-        <iframe id="gameFrame" title="NFT特典ゲーム" src="about:blank" allow="autoplay"></iframe>
+        <iframe id="gameFrame" title="NFT特典ゲーム" src="about:blank" allow="autoplay; fullscreen" allowfullscreen></iframe>
       </div>
     </div>
   </section>
 
-  <script src="./app.js?v=4.8.1"></script>
+  <script src="./app.js?v=4.8.4"></script>
 </body>
 </html>

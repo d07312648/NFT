@@ -6,7 +6,7 @@
   --ink: #101535;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-user-drag: none; -webkit-user-select: none; user-select: none; }
 html, body { width: 100%; height: 100%; min-height: 0; margin: 0; overscroll-behavior: none; }
 body {
   overflow: hidden;
@@ -90,10 +90,6 @@ button { color: inherit; font: inherit; }
 .controls button.active { border-color: #ffe58a99; background: rgba(255,215,90,.22); transform: translateY(2px); }
 .attitude { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #fff7dc70; font-size: 8px; letter-spacing: .08em; }
 .attitude i { display: block; width: 30px; height: 30px; border: 2px solid #fff3; border-radius: 50%; background: linear-gradient(90deg,transparent 47%,var(--yellow) 48% 52%,transparent 53%); box-shadow: inset 0 -12px 0 #ffffff0a; transform-origin: center; }
-.landing-toast { position: absolute; z-index: 7; top: 27%; left: 50%; display: flex; min-width: 160px; flex-direction: column; align-items: center; padding: 10px 19px; border: 1px solid #fff3; border-radius: 18px; background: #101535c7; box-shadow: 0 12px 35px #0006; backdrop-filter: blur(10px); transform: translate(-50%,-50%); transition: .18s ease; pointer-events: none; }
-.landing-toast.hidden { visibility: hidden; opacity: 0; transform: translate(-50%,-42%) scale(.9); }
-.landing-toast strong { color: var(--yellow); font-size: 13px; font-weight: 900; letter-spacing: .15em; }
-.landing-toast span { margin-top: 2px; color: #fff9; font-size: 9px; }
 .countdown { position: absolute; z-index: 7; top: 43%; left: 50%; color: var(--yellow); font-size: 27px; font-weight: 900; letter-spacing: .2em; text-shadow: 0 5px 22px #000; transform: translate(-50%,-50%); transition: .2s; pointer-events: none; }
 .countdown.hidden { visibility: hidden; opacity: 0; transform: translate(-50%,-40%) scale(.9); }
 .gameover-screen { background: rgba(7,11,32,.34); backdrop-filter: blur(5px); }

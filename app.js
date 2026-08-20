@@ -10,7 +10,7 @@ const PURCHASE_DELAY_MS = 2400;
 const NFT_BENEFIT_PROGRAMS = {
   "nova-live":{
     gameName:"星わたり モモ",challengeTitle:"NOVA LIVE 2026 特典チャレンジ",
-    gameSrc:"./experience-game/index.html?v=4.5.1",frameTitle:"星わたり モモ",messageType:"nova-live-game-score",
+    gameSrc:"./experience-game/index.html?v=4.5.3",frameTitle:"星わたり モモ",messageType:"nova-live-game-score",
     benefits:[
       {score:10,title:"グッズ 10%OFFクーポン",short:"10%OFF",code:"NOVA10"},
       {score:30,title:"グッズ 20%OFFクーポン",short:"20%OFF",code:"NOVA20"},
@@ -19,7 +19,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "digital-art":{
     gameName:"星わたりジャンプ モモ",challengeTitle:"TOKYO DIGITAL ART NIGHT 特典チャレンジ",
-    gameSrc:"./digital-art-game/index.html?v=1.0.1",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
+    gameSrc:"./digital-art-game/index.html?v=1.0.3",frameTitle:"星わたりジャンプ モモ",messageType:"digital-art-game-score",
     benefits:[
       {score:3000,title:"10%OFFクーポン",short:"10%OFF",code:"TDAN10"},
       {score:5000,title:"20%OFFクーポン",short:"20%OFF",code:"TDAN20"},
@@ -28,7 +28,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "skyline-fest":{
     gameName:"星くずバウンド モモ",challengeTitle:"SKYLINE MUSIC FEST 特典チャレンジ",
-    gameSrc:"./skyline-game/index.html?v=1.0.2",frameTitle:"星くずバウンド モモ",messageType:"skyline-fest-game-score",
+    gameSrc:"./skyline-game/index.html?v=1.0.5",frameTitle:"星くずバウンド モモ",messageType:"skyline-fest-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"SKYLINE10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"SKYLINE20"},
@@ -37,7 +37,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "creator-expo":{
     gameName:"星くずタワー モモ",challengeTitle:"ANIME CREATOR EXPO 特典チャレンジ",
-    gameSrc:"./creator-expo-game/index.html?v=1.0.1",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
+    gameSrc:"./creator-expo-game/index.html?v=1.0.4",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"ACE10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"ACE20"},
@@ -46,7 +46,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "light-show":{
     gameName:"モモのトゲかべタップ",challengeTitle:"BAY AREA LIGHT SHOW 特典チャレンジ",
-    gameSrc:"./light-show-game/index.html?v=1.0.0",frameTitle:"モモのトゲかべタップ",messageType:"light-show-game-score",
+    gameSrc:"./light-show-game/index.html?v=1.0.2",frameTitle:"モモのトゲかべタップ",messageType:"light-show-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"BAYLIGHT10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"BAYLIGHT20"},
@@ -569,6 +569,34 @@ function updateGameOverlay(){
   $("gameNextReward").textContent=next?`次の特典まであと ${fmtScore(Math.max(0,next.score-progress.bestScore))} 点`:`全ての特典を獲得しました！`;
 }
 
+function gameFullscreenElement(){
+  return document.fullscreenElement||document.webkitFullscreenElement||null;
+}
+function collapseGameBrowserUi(){
+  const nudge=()=>window.scrollTo(0,Math.max(1,window.scrollY+1));
+  nudge();
+  window.setTimeout(nudge,250);
+}
+function enterGameFullscreen(){
+  const mobileViewport=window.matchMedia("(pointer: coarse)").matches||window.innerWidth<=760;
+  if(!mobileViewport||navigator.standalone===true||gameFullscreenElement())return;
+  const overlay=$("gameExperience");
+  const standardRequest=overlay.requestFullscreen;
+  const prefixedRequest=overlay.webkitRequestFullscreen||overlay.webkitRequestFullScreen;
+  if(!standardRequest&&!prefixedRequest){collapseGameBrowserUi();return}
+  try{
+    const request=standardRequest?standardRequest.call(overlay,{navigationUI:"hide"}):prefixedRequest.call(overlay);
+    Promise.resolve(request).catch(collapseGameBrowserUi);
+  }catch(_error){collapseGameBrowserUi()}
+}
+function exitGameFullscreen(){
+  const overlay=$("gameExperience"),fullscreen=gameFullscreenElement();
+  if(!fullscreen||!(fullscreen===overlay||overlay.contains(fullscreen)))return;
+  const exit=document.exitFullscreen||document.webkitExitFullscreen||document.webkitCancelFullScreen;
+  if(!exit)return;
+  try{Promise.resolve(exit.call(document)).catch(()=>{})}catch(_error){}
+}
+
 function openGameExperience(ticketId){
   const program=benefitProgram(ticketId),t=tickets.find(item=>item.id===ticketId);
   if(!program||!t)return;
@@ -581,10 +609,13 @@ function openGameExperience(ticketId){
   if(frame.dataset.ticketId!==ticketId){frame.src=program.gameSrc;frame.dataset.ticketId=ticketId}
   log("benefit_game_opened",{ticket_id:ticketId,play_count:progress.playCount});
   updateGameOverlay();
-  $("gameExperience").classList.remove("hidden");document.body.classList.add("game-open");
+  $("gameExperience").classList.remove("hidden");
+  enterGameFullscreen();
+  document.body.classList.add("game-open");
 }
 function closeGameExperience(){
   const ticketId=state.activeGameTicketId,progress=ticketId?gameProgress(ticketId):null;
+  exitGameFullscreen();
   $("gameExperience").classList.add("hidden");document.body.classList.remove("game-open");
   if(progress)log("benefit_game_closed",{ticket_id:ticketId,last_score:progress.lastScore,best_score:progress.bestScore});
   renderWallet();
