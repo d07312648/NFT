@@ -37,7 +37,7 @@ const NFT_BENEFIT_PROGRAMS = {
   },
   "creator-expo":{
     gameName:"星くずタワー モモ",challengeTitle:"ANIME CREATOR EXPO 特典チャレンジ",
-    gameSrc:"./creator-expo-game/index.html?v=1.0.4",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
+    gameSrc:"./creator-expo-game/index.html?v=1.0.5",frameTitle:"星くずタワー モモ",messageType:"creator-expo-game-score",
     benefits:[
       {score:10,title:"10%OFFクーポン",short:"10%OFF",code:"ACE10"},
       {score:20,title:"20%OFFクーポン",short:"20%OFF",code:"ACE20"},
@@ -606,7 +606,11 @@ function openGameExperience(ticketId){
   const progress=gameProgress(ticketId);progress.playCount++;
   $("gameExperienceTitle").textContent=program.challengeTitle;
   const frame=$("gameFrame");frame.title=program.frameTitle;
-  if(frame.dataset.ticketId!==ticketId){frame.src=program.gameSrc;frame.dataset.ticketId=ticketId}
+  if(frame.dataset.ticketId!==ticketId){
+    const separator=program.gameSrc.includes("?")?"&":"?";
+    frame.src=`${program.gameSrc}${separator}run=${Date.now()}-${progress.playCount}`;
+    frame.dataset.ticketId=ticketId;
+  }
   log("benefit_game_opened",{ticket_id:ticketId,play_count:progress.playCount});
   updateGameOverlay();
   $("gameExperience").classList.remove("hidden");
@@ -618,6 +622,10 @@ function closeGameExperience(){
   exitGameFullscreen();
   $("gameExperience").classList.add("hidden");document.body.classList.remove("game-open");
   if(progress)log("benefit_game_closed",{ticket_id:ticketId,last_score:progress.lastScore,best_score:progress.bestScore});
+  state.activeGameTicketId=null;
+  const frame=$("gameFrame");
+  frame.src="about:blank";
+  delete frame.dataset.ticketId;
   renderWallet();
 }
 

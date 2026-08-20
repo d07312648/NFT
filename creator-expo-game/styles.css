@@ -127,7 +127,7 @@ button { color: inherit; font: inherit; }
 .howto {
   display: grid;
   width: min(100%, 340px);
-  grid-template-columns: 1fr 16px 1fr 16px 1fr;
+  grid-template-columns: 1fr 16px 1fr;
   align-items: start;
   margin-bottom: 20px;
 }
