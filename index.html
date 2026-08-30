@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
   <title>NFT Journey Lab｜従来型NFT購入体験</title>
-  <link rel="stylesheet" href="./styles.css?v=4.6.5" />
+  <link rel="stylesheet" href="./styles.css?v=4.9.1" />
 </head>
 <body>
   <div id="toast" class="toast hidden" role="status"></div>
@@ -26,17 +26,14 @@
       <button class="switcher-item exchange" data-app="exchange" type="button">
         <span class="switcher-logo">E</span>
         <span><strong>取引所</strong><small>NOVA Exchange</small></span>
-        <span class="switcher-state" id="exchangeState">進行中</span>
       </button>
       <button class="switcher-item wallet" data-app="wallet" type="button">
         <span class="switcher-logo">W</span>
         <span><strong>ウォレット</strong><small>Orbit Wallet</small></span>
-        <span class="switcher-state" id="walletState">未開始</span>
       </button>
       <button class="switcher-item market" data-app="market" type="button">
         <span class="switcher-logo">M</span>
         <span><strong>チケットサイト</strong><small>MintGate</small></span>
-        <span class="switcher-state" id="marketState">ロック中</span>
       </button>
     </nav>
 
@@ -118,6 +115,14 @@
         <p id="participantText">参加者ID：—</p>
       </div>
 
+      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle">
+        <span class="progress-guide-label">GUIDE</span>
+        <h2 id="progressGuideTitle">進捗フローを確認</h2>
+        <p>進捗フローを参考にNFTチケットを獲得してください。</p>
+        <p class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
+        <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
+      </section>
+
       <div class="overall-progress">
         <div><span>全体の進捗</span><strong id="progressPercent">0%</strong></div>
         <div class="track"><i id="progressFill"></i></div>
@@ -186,6 +191,8 @@
     </section>
   </main>
 
+  <div id="progressGuideBackdrop" class="progress-guide-backdrop hidden" aria-hidden="true"></div>
+
   <div id="modalBackdrop" class="modal-backdrop hidden"></div>
   <section id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-header">
@@ -218,6 +225,86 @@
     </section>
   </aside>
 
+  <section id="admissionPass" class="admission-pass hidden" role="dialog" aria-modal="true" aria-labelledby="admissionPassTitle">
+    <header class="admission-pass-header">
+      <div class="admission-pass-brand">
+        <span class="admission-pass-logo">M</span>
+        <div><strong>MintGate ENTRY PASS</strong><small>NFT Ticket Verification</small></div>
+      </div>
+      <button id="admissionPassClose" class="admission-pass-close" type="button" aria-label="入館証を閉じる">×</button>
+    </header>
+
+    <div class="admission-pass-body">
+      <article class="admission-ticket">
+        <div class="admission-ticket-visual">
+          <img id="admissionEventImage" src="" alt="">
+          <div class="admission-ticket-shade"></div>
+          <div class="admission-ticket-copy">
+            <span id="admissionEventCategory"></span>
+            <h1 id="admissionPassTitle">NFT入館証</h1>
+            <strong id="admissionEventDate"></strong>
+          </div>
+        </div>
+
+        <div class="admission-ticket-content">
+          <div id="admissionValidStatus" class="admission-valid-status pending"><i></i><span id="admissionStatusLabel">WALLET AUTH REQUIRED</span><strong id="admissionStatusText">未認証</strong></div>
+          <p id="admissionInstruction" class="admission-instruction">ウォレット署名を行い、NFTチケットの現在の保有者であることを証明してください</p>
+
+          <div class="admission-verification">
+            <div id="admissionLiveProof" class="admission-live-proof pending" role="status" aria-live="polite">
+              <div class="admission-live-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span id="admissionLiveLabel">LIVE WALLET PROOF</span>
+              <strong id="admissionLiveCode">—— ——</strong>
+              <small id="admissionLiveCountdown">ウォレット署名が必要です</small>
+            </div>
+            <div class="admission-event-summary">
+              <span>EVENT</span>
+              <h2 id="admissionEventTitle"></h2>
+              <p id="admissionEventVenue"></p>
+            </div>
+          </div>
+
+          <ul class="admission-proof-checks" aria-label="入館認証の確認項目">
+            <li id="admissionOwnershipCheck"><i>✓</i><div><strong>NFTチケット保有</strong><small>譲渡不可</small></div></li>
+            <li id="admissionSignatureCheck"><i>✓</i><div><strong>ウォレット署名</strong><small>秘密鍵の所持を確認</small></div></li>
+            <li id="admissionExpiryCheck"><i>✓</i><div><strong>短時間認証</strong><small>30秒で自動失効</small></div></li>
+          </ul>
+
+          <div class="admission-auth-actions">
+            <button id="admissionVerifyButton" class="admission-verify-button" type="button">ウォレットで入館認証 <span>→</span></button>
+            <button id="admissionCheckInButton" class="admission-checkin-button hidden" type="button">受付で入館処理を完了する <span>✓</span></button>
+          </div>
+
+          <dl class="admission-details">
+            <div><dt>TOKEN ID</dt><dd id="admissionTokenId"></dd></div>
+            <div><dt>TOKEN TYPE</dt><dd>NFTチケット</dd></div>
+            <div><dt>OWNER</dt><dd id="admissionOwner"></dd></div>
+            <div><dt>ISSUED AT</dt><dd id="admissionIssuedAt"></dd></div>
+          </dl>
+
+          <div class="admission-demo-notice">これは研究用の疑似署名デモです。実際のブロックチェーン通信や施設への入場には使用できません。</div>
+        </div>
+      </article>
+    </div>
+
+    <div id="admissionSignatureBackdrop" class="admission-signature-backdrop hidden" aria-hidden="true"></div>
+    <section id="admissionSignatureSheet" class="admission-signature-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="admissionSignatureTitle" aria-hidden="true">
+      <div class="admission-signature-head">
+        <span>O</span>
+        <div><small>ORBIT WALLET</small><h2 id="admissionSignatureTitle">入館認証メッセージへ署名</h2></div>
+      </div>
+      <p>この署名は送金ではありません。現在のウォレット所有者であることだけを証明します。</p>
+      <dl class="admission-signature-details">
+        <div><dt>要求元</dt><dd>MintGate Entry</dd></div>
+        <div><dt>対象NFTチケット</dt><dd id="admissionSignatureToken"></dd></div>
+        <div><dt>ワンタイムNonce</dt><dd id="admissionSignatureNonce"></dd></div>
+        <div><dt>有効期間</dt><dd>署名後30秒</dd></div>
+      </dl>
+      <label class="check admission-signature-agree"><input id="admissionSignatureAgree" type="checkbox"><span>認証先、対象NFTチケット、有効期間を確認しました。</span></label>
+      <div class="button-row admission-signature-actions"><button id="admissionSignatureConfirm" class="primary" type="button">メッセージに署名</button><button id="admissionSignatureCancel" class="secondary" type="button">キャンセル</button></div>
+    </section>
+  </section>
+
   <section id="gameExperience" class="game-experience hidden" role="dialog" aria-modal="true" aria-labelledby="gameExperienceTitle">
     <header class="game-experience-header">
       <div>
@@ -241,6 +328,6 @@
     </div>
   </section>
 
-  <script src="./app.js?v=4.8.11"></script>
+  <script src="./app.js?v=4.11.1"></script>
 </body>
 </html>
