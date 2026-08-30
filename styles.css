@@ -1327,6 +1327,35 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   line-height: 1.65;
 }
 
+.progress-guide-bubble .progress-guide-hint-note {
+  margin-top: 9px;
+  padding: 10px 11px;
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr);
+  gap: 9px;
+  align-items: center;
+  border: 1px solid #dfe5f5;
+  border-radius: 11px;
+  color: #3f4d6e;
+  background: #f8faff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.progress-guide-hint-note > span {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbdcff;
+  border-radius: 50%;
+  color: #1769ff;
+  background: #eef4ff;
+  font-size: 10px;
+  font-weight: 950;
+}
+
 .progress-guide-bubble button {
   width: 100%;
   min-height: 46px;
@@ -1412,6 +1441,11 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   .progress-guide-bubble .progress-guide-note {
     padding: 9px 10px;
     font-size: 8px;
+  }
+
+  .progress-guide-bubble .progress-guide-hint-note {
+    padding: 9px 10px;
+    font-size: 9px;
   }
 
   .progress-guide-bubble button {
@@ -2229,6 +2263,143 @@ body.admission-pass-open {
 @media (prefers-reduced-motion: reduce) {
   .airdrop-market-banner::after { animation: none; }
 }
+/* 進捗項目から開く操作ヒント */
+.mission-item { padding: 0 50px 0 36px; }
+.mission-copy { display: block; }
+.mission-hint-button {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ccd9f5;
+  border-radius: 50%;
+  color: #1769ff;
+  background: #eef4ff;
+  box-shadow: 0 6px 15px rgba(23,105,255,.12);
+  font-size: 16px;
+  font-weight: 950;
+  transition: transform .18s, box-shadow .18s, background .18s;
+}
+.mission-hint-button:hover { background: #dfebff; box-shadow: 0 8px 19px rgba(23,105,255,.18); transform: translateY(-1px); }
+.mission-hint-button:active { transform: scale(.94); }
+.mission-hint-button:focus-visible { outline: 3px solid rgba(23,105,255,.22); outline-offset: 2px; }
+.mission-item.done .mission-hint-button { border-color: #bfe3d6; color: #078158; background: #eaf8f2; box-shadow: 0 6px 15px rgba(7,129,88,.10); }
+
+.mission-hint-summary {
+  padding: 16px;
+  border: 1px solid #e2e6ef;
+  border-radius: 15px;
+  background: linear-gradient(145deg,#fafbfe,#f4f7fb);
+}
+.mission-hint-service,
+.mission-hint-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+.mission-hint-service { color: #244f9c; background: #e8f0ff; }
+.mission-hint-state { margin-left: 5px; color: #8a620d; background: #fff1d4; }
+.mission-hint-state.done { color: #087653; background: #e6f7f0; }
+.mission-hint-summary p { margin: 11px 0 0; color: #5f6676; font-size: 10px; line-height: 1.75; }
+
+.mission-hint-steps {
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+.mission-hint-steps li {
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: 27px minmax(0,1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #e5e8ef;
+  border-radius: 12px;
+  background: white;
+}
+.mission-hint-steps li > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: white;
+  background: linear-gradient(135deg,#1769ff,#6c4df6);
+  font-size: 9px;
+  font-weight: 950;
+}
+.mission-hint-steps p { margin: 0; color: #3e4554; font-size: 9px; font-weight: 750; line-height: 1.65; }
+.mission-hint-tip {
+  margin-top: 12px;
+  padding: 12px 13px;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  gap: 10px;
+  align-items: start;
+  border-radius: 12px;
+  color: #76570d;
+  background: #fff7e5;
+}
+.mission-hint-tip > span { padding-top: 2px; font-size: 7px; font-weight: 950; letter-spacing: .12em; }
+.mission-hint-tip p { margin: 0; font-size: 8px; line-height: 1.65; }
+.mission-hint-go {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 15px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg,#1769ff,#3c83ff);
+  box-shadow: 0 10px 24px rgba(23,105,255,.20);
+  font-size: 10px;
+  font-weight: 950;
+}
+.mission-hint-go.wallet { background: linear-gradient(135deg,#5b3de0,#8065fa); box-shadow: 0 10px 24px rgba(91,61,224,.20); }
+.mission-hint-go.market { background: linear-gradient(135deg,#171a22,#3e4554); box-shadow: 0 10px 24px rgba(23,26,34,.20); }
+.mission-hint-go > span { font-size: 17px; }
+.mission-hint-go:focus-visible { outline: 3px solid rgba(23,105,255,.22); outline-offset: 3px; }
+
+@media (max-width: 1150px) {
+  .mission-item {
+    min-height: 88px;
+    padding: 6px 5px 8px;
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 46px;
+    grid-template-rows: 46px auto;
+    align-items: center;
+    text-align: center;
+  }
+  .mission-item .mission-dot { grid-column: 1; grid-row: 1; justify-self: end; margin: 0 8px 0 0; }
+  .mission-copy { grid-column: 1 / -1; grid-row: 2; }
+  .mission-hint-button { position: static; grid-column: 2; grid-row: 1; width: 44px; height: 44px; justify-self: start; font-size: 16px; }
+}
+
+@media (max-width: 760px) {
+  .mission-item { flex: 0 0 108px; min-height: 91px; padding: 6px 5px 8px; }
+  .mission-hint-button { width: 46px; height: 46px; font-size: 17px; }
+  .mission-copy strong { padding-top: 3px; font-size: 9px; }
+  .mission-hint-summary p { font-size: 11px; }
+  .mission-hint-steps li { padding: 12px; }
+  .mission-hint-steps p { font-size: 11px; }
+  .mission-hint-tip p { font-size: 10px; }
+  .mission-hint-go { min-height: 51px; font-size: 11px; }
+}
+
 /* ETH購入完了の強調通知 */
 .toast.eth-success-toast{
   z-index:240;
@@ -2303,4 +2474,42 @@ body.admission-pass-open {
 @media(prefers-reduced-motion:reduce){
   .toast.eth-success-toast,
   .toast.eth-success-toast::after{animation:none}
+}
+
+/* 複数ウォレットの切替・マーケット接続選択 */
+.wallet-manager-panel{margin-bottom:24px;padding:18px;border:1px solid #e3defd;border-radius:19px;background:linear-gradient(145deg,#fbfaff,#f5f2ff)}
+.wallet-manager-heading{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.wallet-manager-heading h2{margin:5px 0 4px;font-size:17px}
+.wallet-manager-heading p{margin:0;color:var(--muted);font-size:10px}
+.wallet-add-button{min-height:40px;padding:0 14px;border:1px solid #d8d0fd;border-radius:11px;color:#5237cf;background:#fff;font-size:10px;font-weight:850;white-space:nowrap}
+.wallet-add-button span{margin-right:4px;font-size:15px;line-height:0}
+.wallet-account-list{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.wallet-account-card{min-width:0;padding:12px;display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid #e1e3ea;border-radius:13px;color:var(--ink);background:#fff;text-align:left}
+.wallet-account-card.active{border-color:#765cf5;box-shadow:0 0 0 3px rgba(108,77,246,.11)}
+.wallet-account-icon,.market-wallet-option-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;color:#fff;background:linear-gradient(145deg,#7d62fb,#5233d5);font-weight:900}
+.wallet-account-copy{min-width:0}
+.wallet-account-copy strong,.wallet-account-copy code{display:block}
+.wallet-account-copy strong{font-size:11px}
+.wallet-account-copy code{margin-top:3px;overflow:hidden;color:#777d8c;font-size:9px;text-overflow:ellipsis}
+.wallet-account-balance{color:#4d35bf;font-size:10px;font-weight:900;white-space:nowrap}
+.wallet-selection-intro{margin:0 0 14px;color:var(--muted);font-size:11px;line-height:1.7}
+.market-wallet-selection{display:grid;gap:10px}
+.market-wallet-option{width:100%;padding:15px;border:1px solid #dfe2e9;border-radius:15px;color:var(--ink);background:#fff;text-align:left;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.market-wallet-option:hover,.market-wallet-option:focus-visible{border-color:#262a34;box-shadow:0 8px 24px rgba(24,27,34,.09);transform:translateY(-1px)}
+.market-wallet-option.connected{border-color:#40aa82;background:#f4fcf9}
+.market-wallet-option-head{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:10px}
+.market-wallet-option-head strong,.market-wallet-option-head small{display:block}
+.market-wallet-option-head strong{font-size:12px}
+.market-wallet-option-head small{margin-top:3px;color:var(--muted);font-size:9px}
+.market-wallet-option-head b{color:#12151c;font-size:12px;white-space:nowrap}
+.market-wallet-public-label{margin-top:13px;display:block;color:#8b909c;font-size:8px;font-weight:850;letter-spacing:.09em}
+.market-wallet-option code{margin-top:5px;display:block;overflow-wrap:anywhere;color:#4c5260;font-size:10px;line-height:1.5}
+@media(max-width:640px){
+  .wallet-manager-panel{padding:14px}
+  .wallet-manager-heading{align-items:flex-start}
+  .wallet-manager-heading p{display:none}
+  .wallet-add-button{min-height:38px;padding:0 11px}
+  .wallet-account-list{grid-template-columns:1fr}
+  .market-wallet-option-head{grid-template-columns:36px minmax(0,1fr)}
+  .market-wallet-option-head b{grid-column:2}
 }

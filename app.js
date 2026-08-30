@@ -87,6 +87,18 @@ const missions = [
   ["admission","入館証を表示する","所有NFTを受付用画面で開く"]
 ];
 
+const missionHints = {
+  account:{service:"NOVA Exchange",summary:"最初に暗号資産取引所の疑似口座を開設します。実在する個人情報は必要ありません。",steps:["画面上部の「取引所」を開きます。","ホーム画面の「口座開設を開始」を押します。","架空の登録情報を確認し、利用規約のチェックを入れて「本人確認を完了する」を押します。"],tip:"入力済みのデモ情報をそのまま使用できます。",app:"exchange",tab:"exchange-home",action:"取引所を開く"},
+  buy:{service:"NOVA Exchange",summary:"日本円残高を使い、ウォレットへの送金に必要なETHを購入します。",steps:["取引所上部の「購入」タブを開きます。","購入する日本円の金額を1,000円以上で入力します。","価格変動と手数料の確認にチェックを入れ、「ETHを購入する」を押します。"],tip:"NFTチケット代と送金・購入手数料の分も含め、少し多めに購入すると進めやすくなります。",app:"exchange",tab:"exchange-buy",action:"ETH購入画面を開く"},
+  wallet:{service:"Orbit Wallet",summary:"暗号資産とNFTを受け取るためのウォレットを作成します。",steps:["画面上部の「ウォレット」を開きます。","「ウォレットを作成」を押して復旧用フレーズを確認します。","指定された単語を選び、注意事項にチェックを入れて作成を完了します。"],tip:"秘密鍵と復旧用フレーズは研究用の架空データです。",app:"wallet",tab:"wallet-home",action:"ウォレットを開く"},
+  copy:{service:"Orbit Wallet",summary:"取引所の送金先として使用するウォレットの公開鍵をコピーします。",steps:["ウォレット上部の「受け取る」タブを開きます。","表示された公開鍵の下にある「公開鍵をコピー」を押します。","コピー済みと表示されたら、取引所の送金画面へ進みます。"],tip:"公開鍵は共有可能ですが、秘密鍵は第三者へ共有しないでください。",app:"wallet",tab:"wallet-receive",action:"受取画面を開く"},
+  send:{service:"NOVA Exchange",summary:"コピーした公開鍵を貼り付け、取引所からOrbit WalletへETHを送ります。",steps:["取引所上部の「送金」タブを開きます。","送金先欄へ、ウォレットでコピーした公開鍵を貼り付けます。","送金額と手数料を確認し、注意事項にチェックを入れて送金を確定します。"],tip:"公開鍵は手入力せず、コピー・貼り付けを使うと間違いを防げます。",app:"exchange",tab:"exchange-send",action:"ETH送金画面を開く"},
+  receive:{service:"Orbit Wallet",summary:"取引所から送ったETHがウォレット残高へ反映されたことを確認します。",steps:["送金後、数秒間ネットワーク確認が完了するのを待ちます。","画面上部の「ウォレット」を開きます。","ウォレットの「資産」画面を開くと、受取確認が進捗へ反映されます。"],tip:"まだ反映されない場合は「受け取る」画面の「残高を再確認」も利用できます。",app:"wallet",tab:"wallet-home",action:"ウォレットの資産を開く"},
+  connect:{service:"MintGate",summary:"NFTチケットサイトへOrbit Walletを接続し、ウォレット所有者であることを証明します。",steps:["画面上部の「チケットサイト」を開きます。","右上の「ウォレットを接続」を押します。","要求元と署名内容を確認してチェックを入れ、「メッセージに署名」を押します。"],tip:"この接続署名ではETHの送金や手数料は発生しません。",app:"market",tab:null,action:"チケットサイトを開く"},
+  purchase:{service:"MintGate",summary:"購入したいNFTチケットを選び、ウォレットで取引内容へ署名します。",steps:["チケットサイトで希望するNFTの「購入する」を押します。","NFT価格、ガス代、ウォレット残高を確認して「ウォレットで確認」を押します。","トランザクション内容を確認してチェックを入れ、「確認して署名」を押します。"],tip:"残高不足の場合は、価格の低いチケットを選ぶかETHを追加送金してください。",app:"market",tab:null,action:"NFTチケットを選ぶ"},
+  admission:{service:"Orbit Wallet",summary:"購入したNFTチケットを開き、受付で提示するLIVE入館証を表示します。",steps:["ウォレット上部の「NFT」タブを開きます。","保有NFTの中から入館するチケットをタップします。","「入館証を表示する」を押し、必要に応じてウォレット署名でLIVE認証します。"],tip:"NFTをまだ保有していない場合は、先にチケットサイトで購入してください。",app:"wallet",tab:"wallet-nft",action:"保有NFTを開く"}
+};
+
 function createDefaultState(){
   return {
     participantId:null, startedAt:null, completedAt:null,
@@ -94,9 +106,10 @@ function createDefaultState(){
     appSwitchCount:0, helpOpenCount:0, copyCount:0, pasteCount:0, signatureCount:0, validationErrors:0,
     appEnteredAt:null, appTimes:{exchange:0,wallet:0,market:0},
     accountCreated:false, ethPurchased:false, walletCreated:false, seedConfirmed:false, privateKey:null,
-    addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, receiptChecked:false, transferPending:false, transferCompletesAt:null, lastReceivedAmount:0,
+    wallets:[], activeWalletId:null, connectedWalletId:null, copiedWalletId:null,
+    addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, receiptChecked:false, transferPending:false, transferCompletesAt:null, transferDestinationWalletId:null, lastReceivedAmount:0, lastReceivedWalletId:null,
     marketConnected:false, connectionSigned:false, selectedTicketId:null,
-    purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null, purchaseCompletesAt:null, admissionPassViewed:false,
+    purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null, pendingPurchaseWalletId:null, purchaseCompletesAt:null, admissionPassViewed:false,
     exchangeYen:100000, exchangeEth:0, walletEth:0, purchasedEth:0, purchaseYen:"",
     buyAgreementChecked:false, ethPriceAtPurchase:null, purchaseHistory:[],
     destinationAddress:"", transferAmount:0,
@@ -123,9 +136,37 @@ function loadSavedState(){
     if(!["exchange","wallet","market"].includes(restored.currentApp))restored.currentApp="exchange";
     if(!["exchange-home","exchange-buy","exchange-send"].includes(restored.currentExchangeTab))restored.currentExchangeTab="exchange-home";
     if(!["wallet-home","wallet-receive","wallet-nft","wallet-benefits"].includes(restored.currentWalletTab))restored.currentWalletTab="wallet-home";
-    if(restored.walletCreated&&!/^0x[0-9a-f]{64}$/i.test(restored.privateKey||""))restored.privateKey=generateDemoPrivateKey();
-    if(!restored.walletCreated)restored.privateKey=null;
-    if(!restored.walletCreated||!restored.seedConfirmed){restored.marketConnected=false;restored.connectionSigned=false}
+    const savedWallets=Array.isArray(saved.state.wallets)?saved.state.wallets:[];
+    restored.wallets=savedWallets.map((wallet,index)=>({
+      id:String(wallet.id||`wallet-${index+1}`),
+      name:String(wallet.name||`ウォレット ${index+1}`),
+      address:/^0x[0-9a-f]{40}$/i.test(wallet.address||"")?wallet.address:generateDemoWalletAddress(),
+      privateKey:/^0x[0-9a-f]{64}$/i.test(wallet.privateKey||"")?wallet.privateKey:generateDemoPrivateKey(),
+      ethBalance:Math.max(0,Number(wallet.ethBalance)||0),
+      createdAt:wallet.createdAt||restored.startedAt||now()
+    }));
+    if(!restored.wallets.length&&restored.walletCreated){
+      restored.wallets.push({id:"wallet-1",name:"ウォレット 1",address:WALLET_ADDRESS,privateKey:/^0x[0-9a-f]{64}$/i.test(restored.privateKey||"")?restored.privateKey:generateDemoPrivateKey(),ethBalance:Math.max(0,Number(restored.walletEth)||0),createdAt:restored.startedAt||now()});
+    }
+    restored.walletCreated=restored.wallets.length>0;
+    restored.seedConfirmed=restored.wallets.length>0;
+    if(!restored.wallets.some(wallet=>wallet.id===restored.activeWalletId))restored.activeWalletId=restored.wallets[0]?.id||null;
+    const activeRestoredWallet=restored.wallets.find(wallet=>wallet.id===restored.activeWalletId)||null;
+    restored.privateKey=activeRestoredWallet?.privateKey||null;
+    restored.walletEth=activeRestoredWallet?.ethBalance||0;
+    if(restored.addressCopied&&!restored.wallets.some(wallet=>wallet.id===restored.copiedWalletId))restored.copiedWalletId=activeRestoredWallet?.id||null;
+    if(restored.transferPending&&!restored.wallets.some(wallet=>wallet.id===restored.transferDestinationWalletId)){
+      restored.transferDestinationWalletId=restored.wallets.find(wallet=>wallet.address.toLowerCase()===String(restored.destinationAddress||"").toLowerCase())?.id||activeRestoredWallet?.id||null;
+    }
+    if(restored.transferReceived&&!restored.wallets.some(wallet=>wallet.id===restored.lastReceivedWalletId))restored.lastReceivedWalletId=activeRestoredWallet?.id||null;
+    if(restored.marketConnected&&!restored.wallets.some(wallet=>wallet.id===restored.connectedWalletId))restored.connectedWalletId=restored.wallets[0]?.id||null;
+    if(!restored.walletCreated||!restored.seedConfirmed||!restored.connectedWalletId){restored.marketConnected=false;restored.connectionSigned=false;restored.connectedWalletId=null}
+    const fallbackOwner=restored.wallets[0]||null;
+    restored.ownedNfts=restored.ownedNfts.map(item=>{
+      const owner=restored.wallets.find(wallet=>wallet.id===item.ownerWalletId)||fallbackOwner;
+      return {...item,ownerWalletId:owner?.id||null,ownerAddress:item.ownerAddress||owner?.address||null};
+    });
+    if(restored.pendingPurchaseTicketId&&!restored.wallets.some(wallet=>wallet.id===restored.pendingPurchaseWalletId))restored.pendingPurchaseWalletId=restored.connectedWalletId||activeRestoredWallet?.id||null;
     if(!restored.transferReceived)restored.receiptChecked=false;
     restored.appEnteredAt=null;
     restored.activeGameTicketId=null;
@@ -192,20 +233,42 @@ function generateDemoPrivateKey(){
   else for(let index=0;index<bytes.length;index++)bytes[index]=Math.floor(Math.random()*256);
   return `0x${Array.from(bytes,byte=>byte.toString(16).padStart(2,"0")).join("")}`;
 }
+function generateDemoWalletAddress(){
+  const bytes=new Uint8Array(20);
+  if(globalThis.crypto?.getRandomValues)globalThis.crypto.getRandomValues(bytes);
+  else for(let index=0;index<bytes.length;index++)bytes[index]=Math.floor(Math.random()*256);
+  return `0x${Array.from(bytes,byte=>byte.toString(16).padStart(2,"0")).join("").toUpperCase()}`;
+}
 function log(type,detail={}){state.eventLog.push({timestamp:now(),app:state.currentApp,type,...detail})}
 function fmtEth(v){return `${Number(v||0).toFixed(4)} ETH`}
 function fmtYen(v){return `¥${Math.round(Number(v||0)).toLocaleString("ja-JP")}`}
 function ticket(){return tickets.find(t=>t.id===state.selectedTicketId)||null}
 function escapeHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function ownsTicket(ticketId){return state.ownedNfts.some(item=>item.ticketId===ticketId)}
+function walletById(walletId){return state.wallets.find(wallet=>wallet.id===walletId)||null}
+function walletByAddress(address){
+  const normalized=String(address||"").trim().toLowerCase();
+  return state.wallets.find(wallet=>wallet.address.toLowerCase()===normalized)||null;
+}
+function activeWallet(){return walletById(state.activeWalletId)||state.wallets[0]||null}
+function connectedWallet(){return state.marketConnected?walletById(state.connectedWalletId):null}
+function shortWalletAddress(address){return address?`${address.slice(0,10)}...${address.slice(-6)}`:"—"}
+function syncLegacyWalletState(){
+  const wallet=activeWallet();
+  state.walletCreated=state.wallets.length>0;state.seedConfirmed=state.wallets.length>0;
+  state.privateKey=wallet?.privateKey||null;state.walletEth=wallet?.ethBalance||0;
+}
+function nftOwnerWalletId(item){return item?.ownerWalletId||state.wallets[0]?.id||null}
+function ownedNftsForWallet(walletId){return state.ownedNfts.filter(item=>nftOwnerWalletId(item)===walletId)}
+function ownsTicket(ticketId,walletId=null){return state.ownedNfts.some(item=>item.ticketId===ticketId&&(!walletId||nftOwnerWalletId(item)===walletId))}
 function purchasedNftCount(){return state.ownedNfts.filter(item=>item.acquisitionType!=="airdrop").length}
 function airdropTicket(){return tickets.find(item=>item.id===AIRDROP_TICKET_ID)}
-function maybeGrantAirdrop(trigger="purchase_threshold"){
+function maybeGrantAirdrop(trigger="purchase_threshold",ownerWalletId=null){
   if(purchasedNftCount()<AIRDROP_PURCHASE_THRESHOLD||ownsTicket(AIRDROP_TICKET_ID))return null;
+  const owner=walletById(ownerWalletId)||connectedWallet()||activeWallet();
   const grantedAt=now();
-  const reward={tokenId:`MG-AIR-${Date.now().toString().slice(-8)}`,ticketId:AIRDROP_TICKET_ID,purchasedAt:grantedAt,acquisitionType:"airdrop",airdropTriggerCount:purchasedNftCount()};
+  const reward={tokenId:`MG-AIR-${Date.now().toString().slice(-8)}`,ticketId:AIRDROP_TICKET_ID,purchasedAt:grantedAt,acquisitionType:"airdrop",airdropTriggerCount:purchasedNftCount(),ownerWalletId:owner?.id||null,ownerAddress:owner?.address||null};
   state.ownedNfts.push(reward);
-  log("nft_airdrop_received",{ticket_id:AIRDROP_TICKET_ID,token_id:reward.tokenId,purchased_nft_count:reward.airdropTriggerCount,trigger});
+  log("nft_airdrop_received",{ticket_id:AIRDROP_TICKET_ID,token_id:reward.tokenId,purchased_nft_count:reward.airdropTriggerCount,wallet_id:owner?.id||null,trigger});
   return reward;
 }
 function benefitProgram(ticketId){return NFT_BENEFIT_PROGRAMS[ticketId]||null}
@@ -300,12 +363,44 @@ function renderMission(){
   $("missionList").innerHTML=missions.map(([key,title,desc],i)=>{
     const done=missionStatus(key),active=key===next;
     return `<li class="mission-item ${done?"done":active?"active":""}">
-      <span class="mission-dot">${done?"✓":i+1}</span><strong>${title}</strong><small>${desc}</small></li>`;
+      <span class="mission-dot">${done?"✓":i+1}</span><span class="mission-copy"><strong>${title}</strong><small>${desc}</small></span>
+      <button class="mission-hint-button" data-mission-hint="${key}" type="button" aria-label="${title}の操作ヒントを表示">?</button></li>`;
   }).join("");
+  document.querySelectorAll("[data-mission-hint]").forEach(button=>button.onclick=()=>openMissionHint(button.dataset.missionHint));
   const p=progress();$("progressPercent").textContent=`${p}%`;$("progressFill").style.width=`${p}%`;
-  $("sideWalletBalance").textContent=fmtEth(state.walletEth);
-  $("sideNetworkStatus").innerHTML=state.marketConnected?"<i></i>接続済み":"<i></i>未接続";
+  $("sideWalletBalance").textContent=fmtEth(activeWallet()?.ethBalance||0);
+  const marketWallet=connectedWallet();
+  $("sideNetworkStatus").innerHTML=marketWallet?`<i></i>${escapeHtml(marketWallet.name)} 接続済み`:"<i></i>未接続";
   $("sideNetworkStatus").classList.toggle("connected",state.marketConnected);
+}
+
+function resolveMissionHintTarget(key){
+  const hint=missionHints[key];if(!hint)return null;
+  if(key==="buy"&&!state.accountCreated)return {app:"exchange",tab:"exchange-home",action:"先に口座開設画面を開く"};
+  if(key==="send"&&!state.walletCreated)return {app:"wallet",tab:"wallet-home",action:"先にウォレットを作成する"};
+  if(key==="admission"&&!state.ownedNfts.length)return {app:"market",tab:null,action:"先にNFTチケットを購入する"};
+  return {app:hint.app,tab:hint.tab,action:hint.action};
+}
+
+function openMissionHint(key){
+  const hint=missionHints[key],mission=missions.find(([missionKey])=>missionKey===key);if(!hint||!mission)return;
+  const done=missionStatus(key),target=resolveMissionHintTarget(key);
+  log("mission_hint_opened",{mission:key,completed:done});
+  openModal("操作ヒント",mission[1],`
+    <div class="mission-hint-summary"><span class="mission-hint-service">${escapeHtml(hint.service)}</span><span class="mission-hint-state ${done?"done":""}">${done?"✓ 完了済み":"操作を確認"}</span><p>${escapeHtml(hint.summary)}</p></div>
+    <ol class="mission-hint-steps">${hint.steps.map((step,index)=>`<li><span>${index+1}</span><p>${escapeHtml(step)}</p></li>`).join("")}</ol>
+    <div class="mission-hint-tip"><span>TIP</span><p>${escapeHtml(hint.tip)}</p></div>
+    <button id="missionHintGo" class="mission-hint-go ${target.app}" type="button">${escapeHtml(target.action)} <span>→</span></button>`);
+  $("missionHintGo").onclick=()=>goToMissionHintTarget(key);
+}
+
+function goToMissionHintTarget(key){
+  const target=resolveMissionHintTarget(key);if(!target)return;
+  closeModal();
+  if(target.app==="exchange"&&target.tab)state.currentExchangeTab=target.tab;
+  if(target.app==="wallet"&&target.tab)state.currentWalletTab=target.tab;
+  log("mission_hint_navigation",{mission:key,to_app:target.app,to_tab:target.tab});
+  switchApp(target.app);
 }
 
 function switchApp(app){
@@ -444,13 +539,15 @@ function renderExchangeBuy(){
 function renderExchangeSend(){
   const max=Math.max(0,state.exchangeEth-NETWORK_FEE_ETH);
   const amount=state.transferAmount||max;
+  const destinationWallet=walletByAddress(state.destinationAddress);
+  const pastedCopiedWallet=destinationWallet&&destinationWallet.id===state.copiedWalletId;
   exchangeContent.innerHTML=`
     <div class="dashboard-title"><div><span class="kicker">SEND ETH</span><h1>外部ウォレットへ送金</h1><p>Orbit Walletでコピーした公開鍵を貼り付けます。</p></div><span class="task-callout">送金可能 ${fmtEth(max)}</span></div>
     <div class="panel">
       ${!state.addressCopied?`<div class="notice warning">先にOrbit Walletの「受け取る」で公開鍵をコピーしてください。</div>`:""}
       <div class="form-grid" style="margin-top:${state.addressCopied?0:16}px">
         <div class="field full"><label>送金先の公開鍵（ウォレットアドレス）</label><input id="destinationAddress" class="input" placeholder="Orbit Walletからコピーして貼り付け" value="${escapeHtml(state.destinationAddress)}">
-          <span id="pasteIndicator" class="paste-status ${state.addressPasted&&state.destinationAddress===WALLET_ADDRESS?"ok":""}"><i></i>${state.addressPasted?"貼り付け操作を検出しました":"Ctrl/Cmd + V で貼り付けてください"}</span></div>
+          <span id="pasteIndicator" class="paste-status ${state.addressPasted&&pastedCopiedWallet?"ok":""}"><i></i>${state.addressPasted?(pastedCopiedWallet?`${escapeHtml(destinationWallet.name)}のコピー済み公開鍵を検出しました`:"コピーした公開鍵と一致しません"):"Ctrl/Cmd + V で貼り付けてください"}</span></div>
         <div class="field"><label>送金額</label><input id="transferAmount" class="input" type="number" step="0.0001" value="${Number(amount).toFixed(6)}"></div>
         <div class="field"><label>ネットワーク</label><select class="select" disabled><option>Ethereum Mainnet（疑似）</option></select></div>
       </div>
@@ -468,23 +565,25 @@ function renderExchangeSend(){
     const rawAmount=$("transferAmount").value.trim(),sendAmount=Number(rawAmount);
     if(!state.addressCopied){error("ウォレットで公開鍵をコピーしてください");return}
     if(!state.addressPasted){error("コピーした公開鍵を貼り付けてください");return}
-    if(state.destinationAddress.trim()!==WALLET_ADDRESS){error("送金先アドレスがOrbit Walletの公開鍵と一致しません");return}
+    const targetWallet=walletByAddress(state.destinationAddress);
+    if(!targetWallet){error("送金先アドレスが作成済みのOrbit Walletの公開鍵と一致しません");return}
+    if(targetWallet.id!==state.copiedWalletId){error("最後にコピーしたウォレットの公開鍵を貼り付けてください");return}
     if(!$("sendAgree").checked){error("送金リスクの確認が必要です");return}
     if(rawAmount===""||!Number.isFinite(sendAmount)||sendAmount<=0){error("0より大きい送金額を入力してください");return}
     if(sendAmount+NETWORK_FEE_ETH>state.exchangeEth){error("送金額と手数料の合計が取引所残高を超えています");return}
-    openSendReview(sendAmount);
+    openSendReview(sendAmount,targetWallet);
   };
 }
-function openSendReview(sendAmount){
+function openSendReview(sendAmount,targetWallet){
   openModal("WITHDRAWAL REVIEW","ETH送金を確定",`
-    <div class="summary"><div class="summary-row"><span>送金先</span><strong style="max-width:280px;overflow-wrap:anywhere">${WALLET_ADDRESS}</strong></div><div class="summary-row"><span>送金額</span><strong>${fmtEth(sendAmount)}</strong></div><div class="summary-row"><span>手数料</span><strong>${fmtEth(NETWORK_FEE_ETH)}</strong></div><div class="summary-row"><span>受取予定</span><strong>${fmtEth(sendAmount)}</strong></div></div>
+    <div class="summary"><div class="summary-row"><span>送金先</span><strong>${escapeHtml(targetWallet.name)}</strong></div><div class="summary-row"><span>公開鍵</span><strong style="max-width:280px;overflow-wrap:anywhere">${escapeHtml(targetWallet.address)}</strong></div><div class="summary-row"><span>送金額</span><strong>${fmtEth(sendAmount)}</strong></div><div class="summary-row"><span>手数料</span><strong>${fmtEth(NETWORK_FEE_ETH)}</strong></div><div class="summary-row"><span>受取予定</span><strong>${fmtEth(sendAmount)}</strong></div></div>
     <div class="notice danger" style="margin-top:14px">ブロックチェーン上の送金は原則として取り消せません。</div>
     <div class="button-row" style="margin-top:16px"><button id="confirmSend" class="danger-btn" type="button">このアドレスへ送金する</button><button id="cancelSend" class="secondary" type="button">戻る</button></div>`);
   $("cancelSend").onclick=closeModal;
   $("confirmSend").onclick=()=>{
-    state.transferAmount=sendAmount;state.exchangeEth-=sendAmount+NETWORK_FEE_ETH;state.transferSent=true;state.transferPending=true;
+    state.transferAmount=sendAmount;state.exchangeEth-=sendAmount+NETWORK_FEE_ETH;state.transferSent=true;state.transferPending=true;state.transferDestinationWalletId=targetWallet.id;state.receiptChecked=false;
     state.transferCompletesAt=Date.now()+TRANSFER_DELAY_MS;
-    log("eth_transfer_sent",{destination:WALLET_ADDRESS,amount:sendAmount,fee:NETWORK_FEE_ETH});
+    log("eth_transfer_sent",{destination:targetWallet.address,wallet_id:targetWallet.id,amount:sendAmount,fee:NETWORK_FEE_ETH});
     closeModal();showEthTransferStarted(sendAmount);renderAll();
     scheduleTransferCompletion(TRANSFER_DELAY_MS);
   };
@@ -493,17 +592,39 @@ function openSendReview(sendAmount){
 function completeTransfer(){
   if(!state.transferPending)return;
   const sendAmount=Number(state.transferAmount)||0;
-  state.transferReceived=true;state.transferPending=false;state.transferCompletesAt=null;state.lastReceivedAmount=sendAmount;state.walletEth+=sendAmount;state.transferAmount=0;
-  log("eth_transfer_confirmed",{amount:sendAmount});renderAll();showEthTransferCompleted(sendAmount);
+  const targetWallet=walletById(state.transferDestinationWalletId)||walletByAddress(state.destinationAddress)||activeWallet();
+  if(!targetWallet){state.transferPending=false;state.transferCompletesAt=null;error("送金先ウォレットを確認できませんでした");return}
+  targetWallet.ethBalance+=sendAmount;
+  state.transferReceived=true;state.transferPending=false;state.transferCompletesAt=null;state.lastReceivedAmount=sendAmount;state.lastReceivedWalletId=targetWallet.id;state.transferAmount=0;state.transferDestinationWalletId=null;
+  syncLegacyWalletState();
+  log("eth_transfer_confirmed",{amount:sendAmount,wallet_id:targetWallet.id,destination:targetWallet.address});renderAll();showEthTransferCompleted(sendAmount);
 }
 function scheduleTransferCompletion(delay){
   clearTimeout(transferTimer);transferTimer=setTimeout(completeTransfer,Math.max(0,delay));
 }
 
+function walletManagerPanel(){
+  const current=activeWallet();
+  return `<section class="wallet-manager-panel" aria-label="ウォレット一覧">
+    <div class="wallet-manager-heading"><div><span class="kicker">YOUR WALLETS</span><h2>ウォレットを選択</h2><p>資産・公開鍵・保有NFTはウォレットごとに管理されます。</p></div><button id="addWalletButton" class="wallet-add-button" type="button"><span>＋</span> 新規作成</button></div>
+    <div class="wallet-account-list">${state.wallets.map(wallet=>`<button class="wallet-account-card ${wallet.id===current?.id?"active":""}" data-wallet-switch="${escapeHtml(wallet.id)}" type="button" aria-pressed="${wallet.id===current?.id}">
+      <span class="wallet-account-icon">O</span><span class="wallet-account-copy"><strong>${escapeHtml(wallet.name)}</strong><code>${escapeHtml(shortWalletAddress(wallet.address))}</code></span><span class="wallet-account-balance">${fmtEth(wallet.ethBalance)}</span>
+    </button>`).join("")}</div>
+  </section>`;
+}
+function bindWalletManager(){
+  document.querySelectorAll("[data-wallet-switch]").forEach(button=>button.onclick=()=>{
+    const wallet=walletById(button.dataset.walletSwitch);if(!wallet||wallet.id===state.activeWalletId)return;
+    state.activeWalletId=wallet.id;privateKeyVisible=false;syncLegacyWalletState();
+    log("active_wallet_changed",{wallet_id:wallet.id,address:wallet.address});renderAll();
+  });
+  if($("addWalletButton"))$("addWalletButton").onclick=openSeedModal;
+}
 function renderWallet(){
   privateKeyVisible=false;
   document.querySelectorAll("#walletTabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===state.currentWalletTab));
-  if(!state.walletCreated){renderWalletCreate();return}
+  if(!state.wallets.length){renderWalletCreate();return}
+  if(!activeWallet()){state.activeWalletId=state.wallets[0].id;syncLegacyWalletState()}
   if(state.currentWalletTab==="wallet-home")renderWalletHome();
   if(state.currentWalletTab==="wallet-receive")renderWalletReceive();
   if(state.currentWalletTab==="wallet-nft")renderWalletNft();
@@ -519,7 +640,8 @@ function renderWalletCreate(){
   $("createWallet").onclick=()=>openSeedModal();
 }
 function openSeedModal(){
-  openModal("SECRET RECOVERY PHRASE","復旧用フレーズを保存",`
+  const walletNumber=state.wallets.length+1;
+  openModal("SECRET RECOVERY PHRASE",`${walletNumber}個目のウォレットを作成`,`
     <div class="notice warning">実際のウォレットでは、この単語列を失うと資産を復旧できません。第三者に共有してはいけません。</div>
     <div class="seed-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
       ${SEED_WORDS.map((w,i)=>`<div style="padding:10px;border:1px solid #e3e6ed;border-radius:10px;font:10px monospace"><span style="color:#a0a5b0;margin-right:6px">${i+1}</span>${w}</div>`).join("")}
@@ -530,52 +652,66 @@ function openSeedModal(){
   $("finishWallet").onclick=()=>{
     if($("seed3").value!=="velvet"||$("seed9").value!=="canvas"){error("指定された単語を確認してください");return}
     if(!$("seedAgree").checked){error("復旧用フレーズの確認が必要です");return}
-    state.privateKey=generateDemoPrivateKey();state.walletCreated=true;state.seedConfirmed=true;log("wallet_created",{address:WALLET_ADDRESS});closeModal();toast("Orbit Walletと秘密鍵を作成しました");renderAll();
+    let address=state.wallets.length?generateDemoWalletAddress():WALLET_ADDRESS;
+    while(walletByAddress(address))address=generateDemoWalletAddress();
+    const wallet={id:`wallet-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name:`ウォレット ${walletNumber}`,address,privateKey:generateDemoPrivateKey(),ethBalance:0,createdAt:now()};
+    state.wallets.push(wallet);state.activeWalletId=wallet.id;syncLegacyWalletState();
+    log("wallet_created",{wallet_id:wallet.id,wallet_number:walletNumber,address:wallet.address});closeModal();toast(`${wallet.name}と秘密鍵を作成しました`);renderAll();
     state.currentWalletTab="wallet-receive";renderWallet();
   };
 }
 function renderWalletHome(){
-  if(state.currentApp==="wallet"&&state.transferReceived&&!state.transferPending&&!state.receiptChecked){
-    state.receiptChecked=true;log("wallet_receipt_checked",{amount:state.lastReceivedAmount,source:"assets_opened"});renderMission();
+  const wallet=activeWallet();if(!wallet){renderWalletCreate();return}
+  const receivingHere=state.lastReceivedWalletId===wallet.id;
+  const pendingHere=state.transferPending&&state.transferDestinationWalletId===wallet.id;
+  if(state.currentApp==="wallet"&&receivingHere&&state.transferReceived&&!state.transferPending&&!state.receiptChecked){
+    state.receiptChecked=true;log("wallet_receipt_checked",{amount:state.lastReceivedAmount,wallet_id:wallet.id,source:"assets_opened"});renderMission();
   }
   walletContent.innerHTML=`
-    <div class="dashboard-title"><div><span class="kicker">PORTFOLIO</span><h1>ウォレット</h1><p>${WALLET_ADDRESS.slice(0,10)}...${WALLET_ADDRESS.slice(-6)}</p></div><span class="task-callout">${state.transferPending?"入金確認中":"Ethereum Mainnet"}</span></div>
-    <div class="balance-grid"><div class="balance-card wallet-balance"><small>TOTAL BALANCE</small><strong>${fmtEth(state.walletEth)}</strong><span>${fmtYen(state.walletEth*markets.ETH.price)}</span></div>
-      <div class="action-card"><h3>${state.transferReceived?"チケット購入の準備完了":"ETHを受け取る"}</h3><p>${state.transferReceived?"MintGateでウォレットを接続してください。":"公開鍵をコピーし、取引所の送金先へ貼り付けます。"}</p><button id="walletPrimary" class="primary" type="button">${state.transferReceived?"MintGateを開く":"受取用アドレスを表示"}</button></div></div>
-    ${state.transferPending?`<div class="notice info" style="margin-top:16px">ネットワーク確認中です。通常は複数の承認を待って残高へ反映されます。</div>`:""}
-    <div class="wallet-assets"><div class="asset-row"><div class="asset-row-left"><span class="asset-icon">Ξ</span><div><strong>Ethereum</strong><small>ETH</small></div></div><div class="asset-value"><strong>${fmtEth(state.walletEth)}</strong><small>${fmtYen(state.walletEth*markets.ETH.price)}</small></div></div></div>
+    ${walletManagerPanel()}
+    <div class="dashboard-title"><div><span class="kicker">PORTFOLIO</span><h1>${escapeHtml(wallet.name)}</h1><p>${escapeHtml(shortWalletAddress(wallet.address))}</p></div><span class="task-callout">${pendingHere?"入金確認中":"Ethereum Mainnet"}</span></div>
+    <div class="balance-grid"><div class="balance-card wallet-balance"><small>TOTAL BALANCE</small><strong>${fmtEth(wallet.ethBalance)}</strong><span>${fmtYen(wallet.ethBalance*markets.ETH.price)}</span></div>
+      <div class="action-card"><h3>${wallet.ethBalance>0?"チケット購入の準備完了":"ETHを受け取る"}</h3><p>${wallet.ethBalance>0?"MintGateでこのウォレットを接続できます。":"公開鍵をコピーし、取引所の送金先へ貼り付けます。"}</p><button id="walletPrimary" class="primary" type="button">${wallet.ethBalance>0?"MintGateを開く":"受取用アドレスを表示"}</button></div></div>
+    ${pendingHere?`<div class="notice info" style="margin-top:16px">ネットワーク確認中です。通常は複数の承認を待って残高へ反映されます。</div>`:""}
+    <div class="wallet-assets"><div class="asset-row"><div class="asset-row-left"><span class="asset-icon">Ξ</span><div><strong>Ethereum</strong><small>ETH</small></div></div><div class="asset-value"><strong>${fmtEth(wallet.ethBalance)}</strong><small>${fmtYen(wallet.ethBalance*markets.ETH.price)}</small></div></div></div>
     ${privateKeyPanel()}`;
-  $("walletPrimary").onclick=()=>state.transferReceived?switchApp("market"):(state.currentWalletTab="wallet-receive",renderWallet());
-  bindPrivateKeyPanel();
+  $("walletPrimary").onclick=()=>wallet.ethBalance>0?switchApp("market"):(state.currentWalletTab="wallet-receive",renderWallet());
+  bindWalletManager();bindPrivateKeyPanel();
 }
 function renderWalletReceive(){
+  const wallet=activeWallet();if(!wallet){renderWalletCreate();return}
+  const copiedHere=state.addressCopied&&state.copiedWalletId===wallet.id;
+  const receivingHere=state.transferReceived&&state.lastReceivedWalletId===wallet.id;
+  const pendingHere=state.transferPending&&state.transferDestinationWalletId===wallet.id;
   walletContent.innerHTML=`
-    <div class="dashboard-title"><div><span class="kicker">RECEIVE</span><h1>ETHを受け取る</h1><p>以下の公開鍵を取引所の送金先に貼り付けてください。</p></div><span class="task-callout">ネットワーク：Ethereum</span></div>
+    ${walletManagerPanel()}
+    <div class="dashboard-title"><div><span class="kicker">RECEIVE</span><h1>${escapeHtml(wallet.name)}でETHを受け取る</h1><p>以下の公開鍵を取引所の送金先に貼り付けてください。</p></div><span class="task-callout">ネットワーク：Ethereum</span></div>
     <div class="panel">
-      <div class="address-box"><span class="field-title">あなたの公開鍵（ウォレットアドレス）</span><code id="publicAddress">${WALLET_ADDRESS}</code><button id="copyAddress" class="copy-button" type="button">${state.addressCopied?"コピー済み":"公開鍵をコピー"}</button></div>
+      <div class="address-box"><span class="field-title">あなたの公開鍵（ウォレットアドレス）</span><code id="publicAddress">${escapeHtml(wallet.address)}</code><button id="copyAddress" class="copy-button" type="button">${copiedHere?"コピー済み":"公開鍵をコピー"}</button></div>
       <div class="notice warning" style="margin-top:13px">送金元と送金先で、必ず同じネットワークを選択してください。</div>
-      <div class="button-row" style="margin-top:15px"><button id="goExchangeSend" class="primary" type="button" ${!state.addressCopied?"disabled":""}>取引所の送金画面へ</button><button id="checkWallet" class="secondary" type="button">${state.receiptChecked?"入金確認済み":"残高を再確認"}</button></div>
-      ${state.transferPending?`<div class="notice info" style="margin-top:13px">取引所からの送金を確認中です…</div>`:""}
-      ${state.transferReceived&&!state.transferPending?`<div class="notice success" style="margin-top:13px">${fmtEth(state.lastReceivedAmount)} の入金が確認されました。</div>`:""}
+      <div class="button-row" style="margin-top:15px"><button id="goExchangeSend" class="primary" type="button" ${!copiedHere?"disabled":""}>取引所の送金画面へ</button><button id="checkWallet" class="secondary" type="button">${receivingHere&&state.receiptChecked?"入金確認済み":"残高を再確認"}</button></div>
+      ${pendingHere?`<div class="notice info" style="margin-top:13px">取引所からの送金を確認中です…</div>`:""}
+      ${receivingHere&&!state.transferPending?`<div class="notice success" style="margin-top:13px">${fmtEth(state.lastReceivedAmount)} の入金が確認されました。</div>`:""}
     </div>
     ${privateKeyPanel()}`;
   $("copyAddress").onclick=copyWalletAddress;
   $("goExchangeSend").onclick=()=>{switchApp("exchange");state.currentExchangeTab="exchange-send";renderExchange()};
   $("checkWallet").onclick=()=>{
-    if(state.transferPending){toast("まだネットワーク確認中です");return}
-    if(!state.transferReceived){toast("まだ入金はありません");return}
-    if(!state.receiptChecked){state.receiptChecked=true;log("wallet_receipt_checked",{amount:state.lastReceivedAmount})}
+    if(pendingHere){toast("まだネットワーク確認中です");return}
+    if(!receivingHere){toast("このウォレットへの入金はまだありません");return}
+    if(!state.receiptChecked){state.receiptChecked=true;log("wallet_receipt_checked",{amount:state.lastReceivedAmount,wallet_id:wallet.id})}
     renderAll();toast("入金を確認しました");
   };
-  bindPrivateKeyPanel();
+  bindWalletManager();bindPrivateKeyPanel();
 }
 
 function maskedPrivateKey(){return `0x${"•".repeat(64)}`}
 function privateKeyPanel(){
+  const wallet=activeWallet();
   const visible=privateKeyVisible;
   return `<section class="private-key-vault">
     <div class="private-key-heading"><div><span class="kicker">SECURITY</span><h2>秘密鍵</h2></div><span>研究用疑似データ</span></div>
-    <div id="privateKeyDisplay" class="private-key-display ${visible?"visible":"masked"}"><code id="privateKeyValue" aria-label="${visible?"秘密鍵を表示中":"秘密鍵は非表示"}">${visible?escapeHtml(state.privateKey):maskedPrivateKey()}</code></div>
+    <div id="privateKeyDisplay" class="private-key-display ${visible?"visible":"masked"}"><code id="privateKeyValue" aria-label="${visible?"秘密鍵を表示中":"秘密鍵は非表示"}">${visible?escapeHtml(wallet?.privateKey):maskedPrivateKey()}</code></div>
     <button id="togglePrivateKey" class="private-key-toggle" type="button" aria-pressed="${visible}">${visible?"秘密鍵を隠す":"秘密鍵を表示する"}</button>
     <p>実際の秘密鍵は第三者に共有せず、画面の録画やスクリーンショットにも残さないでください。</p>
   </section>`;
@@ -583,38 +719,44 @@ function privateKeyPanel(){
 function bindPrivateKeyPanel(){
   const button=$("togglePrivateKey");if(!button)return;
   button.onclick=()=>{
+    const wallet=activeWallet();if(!wallet)return;
     privateKeyVisible=!privateKeyVisible;
     const display=$("privateKeyDisplay"),value=$("privateKeyValue");
     display.classList.toggle("visible",privateKeyVisible);display.classList.toggle("masked",!privateKeyVisible);
-    value.textContent=privateKeyVisible?state.privateKey:maskedPrivateKey();
+    value.textContent=privateKeyVisible?wallet.privateKey:maskedPrivateKey();
     value.setAttribute("aria-label",privateKeyVisible?"秘密鍵を表示中":"秘密鍵は非表示");
     button.textContent=privateKeyVisible?"秘密鍵を隠す":"秘密鍵を表示する";button.setAttribute("aria-pressed",String(privateKeyVisible));
     log(privateKeyVisible?"private_key_revealed":"private_key_hidden");
   };
 }
 async function copyWalletAddress(){
+  const wallet=activeWallet();if(!wallet){error("先にウォレットを作成してください");return}
   let copied=false;
-  try{await navigator.clipboard.writeText(WALLET_ADDRESS);copied=true}catch(e){
-    const ta=document.createElement("textarea");ta.value=WALLET_ADDRESS;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();
+  try{await navigator.clipboard.writeText(wallet.address);copied=true}catch(e){
+    const ta=document.createElement("textarea");ta.value=wallet.address;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();
     try{copied=document.execCommand("copy")}catch(_){copied=false}ta.remove();
   }
-  state.copyCount++;log("wallet_address_copy_attempted",{clipboard_success:copied});
+  state.copyCount++;log("wallet_address_copy_attempted",{clipboard_success:copied,wallet_id:wallet.id,address:wallet.address});
   if(!copied){error("公開鍵をコピーできませんでした。ブラウザのクリップボード許可を確認してください");renderWallet();return}
-  state.addressCopied=true;log("wallet_address_copied");toast("公開鍵をコピーしました。取引所で貼り付けてください");renderAll();
+  state.addressCopied=true;state.copiedWalletId=wallet.id;log("wallet_address_copied",{wallet_id:wallet.id,address:wallet.address});toast(`${wallet.name}の公開鍵をコピーしました`);renderAll();
 }
 function renderWalletNft(){
-  if(state.ownedNfts.length){
+  const wallet=activeWallet();if(!wallet){renderWalletCreate();return}
+  const ownedEntries=state.ownedNfts.map((owned,index)=>({owned,index})).filter(entry=>nftOwnerWalletId(entry.owned)===wallet.id);
+  if(ownedEntries.length){
     walletContent.innerHTML=`
-      <div class="dashboard-title"><div><span class="kicker">COLLECTIBLES</span><h1>保有NFT</h1><p>購入したNFTチケットが表示されます。</p></div><span class="task-callout">${state.ownedNfts.length} NFT</span></div>
+      ${walletManagerPanel()}
+      <div class="dashboard-title"><div><span class="kicker">COLLECTIBLES</span><h1>${escapeHtml(wallet.name)}の保有NFT</h1><p>このウォレットで購入・受領したNFTチケットが表示されます。</p></div><span class="task-callout">${ownedEntries.length} NFT</span></div>
       <div class="notice info nft-tap-guide">保有NFTをタップすると、受付で提示する入館証や利用できる特典を確認できます。</div>
-      <div class="ticket-grid">${state.ownedNfts.map((owned,index)=>ticketCard(tickets.find(t=>t.id===owned.ticketId),false,true,index+1,index)).join("")}</div>`;
+      <div class="ticket-grid">${ownedEntries.map(({owned,index},position)=>ticketCard(tickets.find(t=>t.id===owned.ticketId),false,true,position+1,index)).join("")}</div>`;
     document.querySelectorAll("[data-owned-index]").forEach(card=>{
       card.onclick=()=>openOwnedNftDetail(Number(card.dataset.ownedIndex));
       card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openOwnedNftDetail(Number(card.dataset.ownedIndex))}};
     });
   }else{
-    walletContent.innerHTML=`<div class="dashboard-title"><div><span class="kicker">COLLECTIBLES</span><h1>保有NFT</h1><p>現在、保有しているNFTはありません。</p></div></div><div class="notice info" style="margin-top:18px">MintGateでNFTチケットを購入すると、ここに表示されます。</div>`;
+    walletContent.innerHTML=`${walletManagerPanel()}<div class="dashboard-title"><div><span class="kicker">COLLECTIBLES</span><h1>${escapeHtml(wallet.name)}の保有NFT</h1><p>現在、このウォレットが保有しているNFTはありません。</p></div></div><div class="notice info" style="margin-top:18px">MintGateでこのウォレットを接続してNFTチケットを購入すると、ここに表示されます。</div>`;
   }
+  bindWalletManager();
 }
 
 function benefitCards(ticketId,compact=false){
@@ -630,11 +772,13 @@ function benefitCards(ticketId,compact=false){
 }
 
 function renderWalletBenefits(){
-  const ownedProgramIds=Object.keys(NFT_BENEFIT_PROGRAMS).filter(ownsTicket);
+  const wallet=activeWallet();if(!wallet){renderWalletCreate();return}
+  const ownedProgramIds=Object.keys(NFT_BENEFIT_PROGRAMS).filter(ticketId=>ownsTicket(ticketId,wallet.id));
   const unlockedTotal=ownedProgramIds.reduce((sum,ticketId)=>sum+benefitProgram(ticketId).benefits.filter(benefit=>benefitUnlocked(ticketId,benefit)).length,0);
   const benefitTotal=ownedProgramIds.reduce((sum,ticketId)=>sum+benefitProgram(ticketId).benefits.length,0);
   walletContent.innerHTML=`
-    <div class="dashboard-title"><div><span class="kicker">HOLDER BENEFITS</span><h1>NFT特典</h1><p>保有NFTに追加された特典を確認できます。</p></div><span class="task-callout">${ownedProgramIds.length?`${unlockedTotal} / ${benefitTotal} 獲得`:`対象NFT未保有`}</span></div>
+    ${walletManagerPanel()}
+    <div class="dashboard-title"><div><span class="kicker">HOLDER BENEFITS</span><h1>${escapeHtml(wallet.name)}のNFT特典</h1><p>このウォレットの保有NFTに追加された特典を確認できます。</p></div><span class="task-callout">${ownedProgramIds.length?`${unlockedTotal} / ${benefitTotal} 獲得`:`対象NFT未保有`}</span></div>
     ${ownedProgramIds.length?ownedProgramIds.map(ticketId=>{
       const t=tickets.find(item=>item.id===ticketId),program=benefitProgram(ticketId),progress=gameProgress(ticketId),next=nextBenefit(ticketId);
       return `<section class="benefit-program-block"><div class="benefit-hero">
@@ -645,6 +789,7 @@ function renderWalletBenefits(){
       <div class="benefit-grid">${benefitCards(ticketId)}</div></section>`;
     }).join(""):`<div class="empty-benefit-state"><span>✦</span><h2>対象NFTを保有すると特典が表示されます</h2><p>NOVA LIVE 2026、TOKYO DIGITAL ART NIGHT、SKYLINE MUSIC FEST、ANIME CREATOR EXPO、または BAY AREA LIGHT SHOW の購入後、ゲームをプレイしてスコアに応じたホルダー特典を獲得できます。</p></div>`}`;
   document.querySelectorAll("[data-benefit-game]").forEach(button=>button.onclick=()=>openGameExperience(button.dataset.benefitGame));
+  bindWalletManager();
 }
 
 function openOwnedNftDetail(index){
@@ -656,7 +801,7 @@ function openOwnedNftDetail(index){
   const progress=program?gameProgress(t.id):null;
   openModal("OWNED NFT",t.title,`
     <div class="owned-detail-visual"><img src="${t.image}" alt=""><div><span>${t.category}</span><strong>${t.date}</strong></div></div>
-    <div class="summary owned-token-summary"><div class="summary-row"><span>トークンID</span><strong>${owned.tokenId}</strong></div><div class="summary-row"><span>会場</span><strong>${t.venue}</strong></div><div class="summary-row"><span>${owned.acquisitionType==="airdrop"?"獲得日時":"購入日時"}</span><strong>${new Date(owned.purchasedAt).toLocaleString("ja-JP")}</strong></div>${owned.acquisitionType==="airdrop"?`<div class="summary-row"><span>獲得方法</span><strong>3枚購入エアドロップ</strong></div>`:""}</div>
+    <div class="summary owned-token-summary"><div class="summary-row"><span>トークンID</span><strong>${owned.tokenId}</strong></div><div class="summary-row"><span>所有ウォレット</span><strong>${escapeHtml(walletById(nftOwnerWalletId(owned))?.name||"Orbit Wallet")}</strong></div><div class="summary-row"><span>会場</span><strong>${t.venue}</strong></div><div class="summary-row"><span>${owned.acquisitionType==="airdrop"?"獲得日時":"購入日時"}</span><strong>${new Date(owned.purchasedAt).toLocaleString("ja-JP")}</strong></div>${owned.acquisitionType==="airdrop"?`<div class="summary-row"><span>獲得方法</span><strong>3枚購入エアドロップ</strong></div>`:""}</div>
     <section class="admission-entry-callout"><div><span>EVENT ENTRY</span><h3>ウォレット署名型LIVE入館証</h3><p>NFTチケット保有と秘密鍵の所持を短時間の署名認証で証明します。</p></div><button id="openAdmissionPass" type="button">入館証を表示する <b>→</b></button></section>
     ${program?`<section class="dynamic-benefit-callout"><span class="dynamic-pill">新しい特典が追加されました</span><h3>ゲームをプレイすることで追加の特典を獲得できます</h3><p>ベストスコア：<strong>${fmtScore(progress.bestScore)}</strong></p><div class="benefit-mini-list">${benefitCards(t.id,true)}</div><button id="nftStartGame" class="benefit-play-button" type="button">${program.gameName}を開始する <span>→</span></button><button id="openBenefitsPage" class="benefit-text-button" type="button">すべての特典を確認する</button></section>`:`<div class="notice info" style="margin-top:14px">現在利用できる特典：${t.benefit}</div>`}`);
   $("openAdmissionPass").onclick=()=>openAdmissionPass(index);
@@ -784,6 +929,7 @@ function completeAdmissionCheckIn(){
 function openAdmissionPass(index){
   const owned=state.ownedNfts[index],t=tickets.find(item=>item.id===owned?.ticketId);
   if(!owned||!t){error("入館証を表示できません");return}
+  const ownerWallet=walletById(nftOwnerWalletId(owned));
   resetAdmissionLiveAuth();activeAdmissionIndex=index;closeModal();
   $("admissionEventImage").src=t.image;$("admissionEventImage").alt=`${t.title} のチケットビジュアル`;
   $("admissionEventCategory").textContent=t.category.toUpperCase();
@@ -792,12 +938,12 @@ function openAdmissionPass(index){
   $("admissionEventTitle").textContent=t.title;
   $("admissionEventVenue").textContent=t.venue;
   $("admissionTokenId").textContent=owned.tokenId;
-  $("admissionOwner").textContent=`${WALLET_ADDRESS.slice(0,10)}...${WALLET_ADDRESS.slice(-6)}`;
+  $("admissionOwner").textContent=shortWalletAddress(owned.ownerAddress||ownerWallet?.address);
   $("admissionIssuedAt").textContent=new Date(owned.purchasedAt).toLocaleString("ja-JP");
   $("admissionPass").classList.remove("hidden");document.body.classList.add("admission-pass-open");
   renderAdmissionAuthState();
   state.admissionPassViewed=true;renderMission();
-  log("admission_pass_opened",{ticket_id:t.id,token_id:owned.tokenId});
+  log("admission_pass_opened",{ticket_id:t.id,token_id:owned.tokenId,wallet_id:ownerWallet?.id||null});
   requestAnimationFrame(()=>$("admissionPassClose").focus());
 }
 
@@ -850,7 +996,7 @@ function exitGameFullscreen(){
 function openGameExperience(ticketId){
   const program=benefitProgram(ticketId),t=tickets.find(item=>item.id===ticketId);
   if(!program||!t)return;
-  if(!ownsTicket(ticketId)){error(`このゲームは${t.title}の保有者限定です`);return}
+  if(!ownsTicket(ticketId,activeWallet()?.id)){error(`このゲームは${t.title}の保有者限定です`);return}
   closeModal();
   state.activeGameTicketId=ticketId;
   const progress=gameProgress(ticketId);progress.playCount++;
@@ -880,29 +1026,33 @@ function closeGameExperience(){
 }
 
 function renderMarket(){
-  const walletReady=state.walletCreated&&state.seedConfirmed;
-  $("marketWalletButton").textContent=state.marketConnected?"0x7A4F...93C2":walletReady?"ウォレットを接続":"ウォレット作成が必要";
-  $("marketWalletButton").disabled=!walletReady&&!state.marketConnected;
-  $("marketWalletButton").classList.toggle("connected",state.marketConnected);
-  const ownedCount=state.ownedNfts.length;
+  const walletReady=state.wallets.length>0;
+  let connected=connectedWallet();
+  if(state.marketConnected&&!connected){state.marketConnected=false;state.connectionSigned=false;state.connectedWalletId=null;connected=null}
+  $("marketWalletButton").textContent=connected?shortWalletAddress(connected.address):walletReady?"ウォレットを接続":"ウォレット作成が必要";
+  $("marketWalletButton").disabled=!walletReady;
+  $("marketWalletButton").classList.toggle("connected",!!connected);
+  $("marketWalletButton").title=connected?`${connected.name}を接続中。押すと接続先を変更できます`:"";
+  const ownedCount=connected?ownedNftsForWallet(connected.id).length:0;
   const purchaseCount=purchasedNftCount(),rewardOwned=ownsTicket(AIRDROP_TICKET_ID),airdropRemaining=Math.max(0,AIRDROP_PURCHASE_THRESHOLD-purchaseCount);
   marketContent.innerHTML=`
-    ${ownedCount?`<div class="completion-card"><div class="success-check">✓</div><h2>${ownedCount}枚のNFTチケットを保有しています</h2><p>購入後も残高があれば、別のチケットや同じチケットを続けて購入できます。</p><div class="button-row" style="justify-content:center;margin-top:15px"><button id="openOwnedNft" class="primary" type="button">ウォレットでNFTを見る</button><button id="downloadResult" class="secondary" type="button">結果をJSONで保存</button></div></div>`:""}
-    <div class="dashboard-title" style="margin-top:${ownedCount?22:0}px"><div><span class="kicker">EXPLORE TICKETS</span><h1>NFTチケットを探す</h1><p>ウォレット残高を使用して何度でも購入できます。</p></div><span class="task-callout">${state.marketConnected?`残高 ${fmtEth(state.walletEth)}`:"購入前にウォレット接続が必要"}</span></div>
+    ${ownedCount?`<div class="completion-card"><div class="success-check">✓</div><h2>${escapeHtml(connected.name)}で${ownedCount}枚のNFTチケットを保有しています</h2><p>購入後も残高があれば、別のチケットや同じチケットを続けて購入できます。</p><div class="button-row" style="justify-content:center;margin-top:15px"><button id="openOwnedNft" class="primary" type="button">ウォレットでNFTを見る</button><button id="downloadResult" class="secondary" type="button">結果をJSONで保存</button></div></div>`:""}
+    <div class="dashboard-title" style="margin-top:${ownedCount?22:0}px"><div><span class="kicker">EXPLORE TICKETS</span><h1>NFTチケットを探す</h1><p>${connected?`${escapeHtml(connected.name)}を接続中です。`:"接続するウォレットを選んで購入できます。"}</p></div><span class="task-callout">${connected?`残高 ${fmtEth(connected.ethBalance)}`:"購入前にウォレット接続が必要"}</span></div>
     <section class="airdrop-market-banner ${rewardOwned?"unlocked":""}"><div><span>${rewardOwned?"AIRDROP RECEIVED":"LIMITED AIRDROP"}</span><h2>${rewardOwned?"NEXUS FUTURE PASSを獲得しました":"NFTチケットを3枚購入して限定NFTを獲得"}</h2><p>${rewardOwned?"限定NFTはOrbit Walletの保有NFTから確認できます。":`同じチケットを複数購入しても対象です。現在${purchaseCount}枚購入済み、あと${airdropRemaining}枚。`}</p></div><div class="airdrop-mini-art"><img src="${airdropTicket().image}" alt="" aria-hidden="true"></div></section>
-    ${!state.marketConnected?`<div class="notice warning" style="margin-top:17px">${walletReady?`右上の「ウォレットを接続」からOrbit Walletを接続してください。接続時にメッセージ署名が求められます。`:`Orbit Walletを作成すると、このチケットサイトに接続できます。先にウォレット画面で作成を完了してください。`}</div>`:""}
+    ${!connected?`<div class="notice warning" style="margin-top:17px">${walletReady?`右上の「ウォレットを接続」から使用するOrbit Walletを選択してください。接続時にメッセージ署名が求められます。`:`Orbit Walletを作成すると、このチケットサイトに接続できます。先にウォレット画面で作成を完了してください。`}</div>`:""}
     <div class="ticket-grid">${tickets.filter(t=>!t.airdropOnly).map(t=>ticketCard(t,true,false)).join("")}</div>`;
-  if($("openOwnedNft"))$("openOwnedNft").onclick=()=>{switchApp("wallet");state.currentWalletTab="wallet-nft";renderWallet()};
+  if($("openOwnedNft"))$("openOwnedNft").onclick=()=>{state.activeWalletId=connected.id;syncLegacyWalletState();switchApp("wallet");state.currentWalletTab="wallet-nft";renderWallet()};
   if($("downloadResult"))$("downloadResult").onclick=downloadResult;
   document.querySelectorAll("[data-select-ticket]").forEach(b=>b.onclick=()=>{
     if(!walletReady){error("先にOrbit Walletを作成してください");return}
-    if(!state.marketConnected){error("先にウォレットを接続してください");return}
+    if(!connectedWallet()){error("先にウォレットを接続してください");return}
     state.selectedTicketId=b.dataset.selectTicket;log("ticket_selected",{ticket_id:state.selectedTicketId});renderMarket();openPurchaseModal();
   });
 }
 function ticketCard(t,selectable,owned,holdingNumber=null,ownedIndex=null){
   if(!t)return"";
-  const count=state.ownedNfts.filter(item=>item.ticketId===t.id).length;
+  const marketWallet=connectedWallet();
+  const count=state.ownedNfts.filter(item=>item.ticketId===t.id&&(!selectable||(marketWallet&&nftOwnerWalletId(item)===marketWallet.id))).length;
   const actionLabel=count?"もう一度購入":"購入する";
   return `<article class="ticket-card ${owned?"owned-ticket-card":""} ${t.airdropOnly?"airdrop-ticket-card":""} ${state.selectedTicketId===t.id?"selected":""}" ${owned?`data-owned-index="${ownedIndex}" role="button" tabindex="0" aria-label="${t.title}の詳細と特典を開く"`:""}>
     <div class="ticket-art"><img src="${t.image}" alt="" aria-hidden="true" loading="lazy" decoding="async"><span>${t.category.toUpperCase()}</span><span>${t.date}</span></div>
@@ -916,51 +1066,74 @@ function showAirdropReward(reward){
     <div class="airdrop-reward-copy"><span>✓ AIRDROP COMPLETED</span><h3>NFTチケット3枚購入特典</h3><p>同じチケットを含む合計3枚の購入を達成したため、新しい限定NFTチケットをOrbit Walletへ自動で追加しました。</p></div>
     <div class="summary"><div class="summary-row"><span>トークンID</span><strong>${reward.tokenId}</strong></div><div class="summary-row"><span>価格</span><strong>無料エアドロップ</strong></div></div>
     <button id="viewAirdropReward" class="primary" style="width:100%;margin-top:15px" type="button">ウォレットで確認する</button>`);
-  $("viewAirdropReward").onclick=()=>{closeModal();switchApp("wallet");state.currentWalletTab="wallet-nft";renderWallet()};
+  $("viewAirdropReward").onclick=()=>{closeModal();if(walletById(reward.ownerWalletId)){state.activeWalletId=reward.ownerWalletId;syncLegacyWalletState()}switchApp("wallet");state.currentWalletTab="wallet-nft";renderWallet()};
 }
 function connectMarketWallet(){
-  if(!state.walletCreated||!state.seedConfirmed){error("先にOrbit Walletを作成してください");return}
-  if(state.marketConnected){toast("Orbit Walletは接続済みです");return}
+  if(!state.wallets.length){error("先にOrbit Walletを作成してください");return}
+  if(state.wallets.length>1){openMarketWalletSelector();return}
+  const wallet=state.wallets[0];
+  if(state.marketConnected&&state.connectedWalletId===wallet.id){toast(`${wallet.name}は接続済みです`);return}
+  openMarketConnectionSignature(wallet.id);
+}
+function openMarketWalletSelector(){
+  const current=connectedWallet();
+  openModal("SELECT WALLET","接続するウォレットを選択",`
+    <p class="wallet-selection-intro">MintGateで購入に使用するウォレットを選んでください。購入代金とNFTは選択したウォレットに反映されます。</p>
+    <div class="market-wallet-selection">${state.wallets.map(wallet=>`<button class="market-wallet-option ${wallet.id===current?.id?"connected":""}" data-market-wallet-id="${escapeHtml(wallet.id)}" type="button">
+      <span class="market-wallet-option-head"><span class="market-wallet-option-icon">O</span><span><strong>${escapeHtml(wallet.name)}</strong><small>${wallet.id===current?.id?"現在接続中":"接続して署名"}</small></span><b>${fmtEth(wallet.ethBalance)}</b></span>
+      <span class="market-wallet-public-label">公開鍵</span><code>${escapeHtml(wallet.address)}</code>
+    </button>`).join("")}</div>
+    <button id="cancelWalletSelection" class="secondary" style="width:100%;margin-top:14px" type="button">キャンセル</button>`);
+  document.querySelectorAll("[data-market-wallet-id]").forEach(button=>button.onclick=()=>openMarketConnectionSignature(button.dataset.marketWalletId));
+  $("cancelWalletSelection").onclick=closeModal;
+}
+function openMarketConnectionSignature(walletId){
+  const wallet=walletById(walletId);if(!wallet){error("選択したウォレットを確認できません");return}
   openModal("CONNECT WALLET","Orbit Walletを接続",`
     <div class="signature-card"><div class="signature-head"><span class="signature-icon">O</span><div><strong>署名リクエスト</strong><small>MintGateへの接続を確認</small></div></div>
       <div class="signature-details"><p class="hint">この署名はウォレット所有者であることを証明するもので、ガス代や資産移動は発生しません。</p>
-      <div class="signature-message">Welcome to MintGate.<br><br>Wallet: ${WALLET_ADDRESS}<br>Nonce: MG-${Date.now().toString().slice(-6)}<br>Purpose: Sign in to MintGate</div>
+      <div class="risk-row"><span>選択ウォレット</span><strong>${escapeHtml(wallet.name)} · ${fmtEth(wallet.ethBalance)}</strong></div>
+      <div class="signature-message">Welcome to MintGate.<br><br>Wallet: ${escapeHtml(wallet.address)}<br>Nonce: MG-${Date.now().toString().slice(-6)}<br>Purpose: Sign in to MintGate</div>
       <div class="risk-row"><span>要求元</span><strong>mintgate.demo</strong></div><div class="risk-row"><span>資産移動</span><strong>なし</strong></div></div></div>
     <label class="check" style="margin-top:14px"><input id="connectUnderstand" type="checkbox"><span>署名内容と要求元を確認しました。</span></label>
     <div class="button-row" style="margin-top:15px"><button id="signConnect" class="primary" type="button">メッセージに署名</button><button id="rejectConnect" class="secondary" type="button">拒否</button></div>`);
   $("rejectConnect").onclick=()=>{log("signature_rejected",{purpose:"connect"});closeModal()};
   $("signConnect").onclick=()=>{
     if(!$("connectUnderstand").checked){error("署名内容を確認してください");return}
-    state.signatureCount++;state.connectionSigned=true;state.marketConnected=true;log("message_signed",{purpose:"market_connect"});closeModal();toast("MintGateに接続しました");renderAll();
+    state.signatureCount++;state.connectionSigned=true;state.marketConnected=true;state.connectedWalletId=wallet.id;
+    log("message_signed",{purpose:"market_connect",wallet_id:wallet.id,address:wallet.address});closeModal();toast(`${wallet.name}をMintGateに接続しました`);renderAll();
   };
 }
 function openPurchaseModal(){
-  const t=ticket();if(!t)return;
+  const t=ticket(),wallet=connectedWallet();if(!t)return;
+  if(!wallet){error("接続中のウォレットを確認できません");renderMarket();return}
   const total=t.price+PURCHASE_GAS_ETH;
   openModal("CHECKOUT","NFTチケットを購入",`
-    <div class="summary"><div class="summary-row"><span>商品</span><strong>${t.title}</strong></div><div class="summary-row"><span>NFT価格</span><strong>${fmtEth(t.price)}</strong></div><div class="summary-row"><span>推定ガス代</span><strong>${fmtEth(PURCHASE_GAS_ETH)}</strong></div><div class="summary-row"><span>支払合計</span><strong>${fmtEth(total)}</strong></div><div class="summary-row"><span>ウォレット残高</span><strong>${fmtEth(state.walletEth)}</strong></div></div>
-    ${state.walletEth<total?`<div class="notice danger" style="margin-top:13px">残高が不足しています。別のチケットを選択するか、追加でETHを送金してください。</div>`:`<div class="notice info" style="margin-top:13px">次にOrbit Walletで購入トランザクションを確認・署名します。</div>`}
-    <div class="button-row" style="margin-top:15px"><button id="continuePurchase" class="primary" type="button" ${state.walletEth<total?"disabled":""}>ウォレットで確認</button><button id="cancelPurchase" class="secondary" type="button">キャンセル</button></div>`);
+    <div class="summary"><div class="summary-row"><span>商品</span><strong>${t.title}</strong></div><div class="summary-row"><span>支払い元</span><strong>${escapeHtml(wallet.name)}</strong></div><div class="summary-row"><span>NFT価格</span><strong>${fmtEth(t.price)}</strong></div><div class="summary-row"><span>推定ガス代</span><strong>${fmtEth(PURCHASE_GAS_ETH)}</strong></div><div class="summary-row"><span>支払合計</span><strong>${fmtEth(total)}</strong></div><div class="summary-row"><span>ウォレット残高</span><strong>${fmtEth(wallet.ethBalance)}</strong></div></div>
+    ${wallet.ethBalance<total?`<div class="notice danger" style="margin-top:13px">${escapeHtml(wallet.name)}の残高が不足しています。別のウォレットを接続するか、ETHを追加送金してください。</div>`:`<div class="notice info" style="margin-top:13px">次に${escapeHtml(wallet.name)}で購入トランザクションを確認・署名します。</div>`}
+    <div class="button-row" style="margin-top:15px"><button id="continuePurchase" class="primary" type="button" ${wallet.ethBalance<total?"disabled":""}>ウォレットで確認</button><button id="cancelPurchase" class="secondary" type="button">キャンセル</button></div>`);
   $("cancelPurchase").onclick=closeModal;
   $("continuePurchase").onclick=()=>openTransactionSignature();
 }
 function openTransactionSignature(){
-  const t=ticket();const total=t.price+PURCHASE_GAS_ETH;
+  const t=ticket(),wallet=connectedWallet();if(!t||!wallet){error("接続中のウォレットを確認できません");closeModal();return}const total=t.price+PURCHASE_GAS_ETH;
   openModal("ORBIT WALLET","トランザクションを確認",`
     <div class="signature-card"><div class="signature-head"><span class="signature-icon">O</span><div><strong>コントラクト実行</strong><small>Ethereum Mainnet（疑似）</small></div></div>
-    <div class="signature-details"><div class="risk-row"><span>接続先</span><strong>MintGate</strong></div><div class="risk-row"><span>操作</span><strong>NFTチケット購入</strong></div><div class="risk-row"><span>コントラクト</span><strong>0x91D2...44AF</strong></div><div class="risk-row"><span>NFT価格</span><strong>${fmtEth(t.price)}</strong></div><div class="risk-row"><span>推定ガス代</span><strong>${fmtEth(PURCHASE_GAS_ETH)}</strong></div><div class="risk-row"><span>最大支払額</span><strong>${fmtEth(total)}</strong></div></div></div>
+    <div class="signature-details"><div class="risk-row"><span>署名ウォレット</span><strong>${escapeHtml(wallet.name)}</strong></div><div class="risk-row"><span>公開鍵</span><strong style="max-width:270px;overflow-wrap:anywhere">${escapeHtml(wallet.address)}</strong></div><div class="risk-row"><span>接続先</span><strong>MintGate</strong></div><div class="risk-row"><span>操作</span><strong>NFTチケット購入</strong></div><div class="risk-row"><span>コントラクト</span><strong>0x91D2...44AF</strong></div><div class="risk-row"><span>NFT価格</span><strong>${fmtEth(t.price)}</strong></div><div class="risk-row"><span>推定ガス代</span><strong>${fmtEth(PURCHASE_GAS_ETH)}</strong></div><div class="risk-row"><span>最大支払額</span><strong>${fmtEth(total)}</strong></div></div></div>
     <div class="notice warning" style="margin-top:13px">署名すると、ブロックチェーンへ購入トランザクションが送信されます。内容を確認してください。</div>
     <label class="check" style="margin-top:14px"><input id="txUnderstand" type="checkbox"><span>送信先、金額、ガス代、コントラクトの内容を確認しました。</span></label>
     <div class="button-row" style="margin-top:15px"><button id="signTransaction" class="primary" type="button">確認して署名</button><button id="rejectTransaction" class="secondary" type="button">拒否</button></div>`);
   $("rejectTransaction").onclick=()=>{log("signature_rejected",{purpose:"purchase"});closeModal()};
   $("signTransaction").onclick=()=>{
     if(!$("txUnderstand").checked){error("トランザクション内容を確認してください");return}
-    state.signatureCount++;state.purchaseSigned=true;state.walletEth-=total;log("transaction_signed",{ticket_id:t.id,total_eth:total});
+    if(wallet.ethBalance<total){error("ウォレット残高が不足しています");closeModal();renderMarket();return}
+    state.signatureCount++;state.purchaseSigned=true;wallet.ethBalance-=total;state.pendingPurchaseWalletId=wallet.id;syncLegacyWalletState();log("transaction_signed",{ticket_id:t.id,total_eth:total,wallet_id:wallet.id,address:wallet.address});
     openTransactionPending();
   };
 }
 function openTransactionPending(){
   state.pendingPurchaseTicketId=state.selectedTicketId;
+  if(!state.pendingPurchaseWalletId)state.pendingPurchaseWalletId=connectedWallet()?.id||null;
   state.purchaseCompletesAt=Date.now()+PURCHASE_DELAY_MS;
   showTransactionPending();schedulePurchaseCompletion(PURCHASE_DELAY_MS);
 }
@@ -968,14 +1141,15 @@ function showTransactionPending(){
   openModal("TRANSACTION","購入処理を送信中",`<div class="transaction-status"><div class="spinner"></div><h3>ネットワーク承認を待っています</h3><p>署名済みトランザクションをEthereumネットワークへ送信しました。</p></div>`,false);
 }
 function completePurchase(){
-  const purchasedTicketId=state.pendingPurchaseTicketId;
+  const purchasedTicketId=state.pendingPurchaseTicketId,purchaseWallet=walletById(state.pendingPurchaseWalletId)||connectedWallet();
   if(!purchasedTicketId)return;
-  state.ownedNfts.push({tokenId:`MG-${Date.now().toString().slice(-8)}`,ticketId:purchasedTicketId,purchasedAt:now(),acquisitionType:"purchase"});
+  if(!purchaseWallet){state.pendingPurchaseTicketId=null;state.pendingPurchaseWalletId=null;state.purchaseCompletesAt=null;closeModal();error("購入先ウォレットを確認できませんでした");return}
+  state.ownedNfts.push({tokenId:`MG-${Date.now().toString().slice(-8)}`,ticketId:purchasedTicketId,purchasedAt:now(),acquisitionType:"purchase",ownerWalletId:purchaseWallet.id,ownerAddress:purchaseWallet.address});
   state.nftOwned=true;if(!state.completedAt)state.completedAt=now();
-  log("nft_purchase_confirmed",{ticket_id:purchasedTicketId,owned_count:state.ownedNfts.length});
-  const airdropReward=maybeGrantAirdrop();
-  state.pendingPurchaseTicketId=null;state.purchaseCompletesAt=null;closeModal();renderAll();
-  if(airdropReward)showAirdropReward(airdropReward);else toast("NFTチケットの購入が完了しました。続けて購入できます");
+  log("nft_purchase_confirmed",{ticket_id:purchasedTicketId,owned_count:state.ownedNfts.length,wallet_id:purchaseWallet.id,address:purchaseWallet.address});
+  const airdropReward=maybeGrantAirdrop("purchase_threshold",purchaseWallet.id);
+  state.pendingPurchaseTicketId=null;state.pendingPurchaseWalletId=null;state.purchaseCompletesAt=null;closeModal();renderAll();
+  if(airdropReward)showAirdropReward(airdropReward);else toast(`${purchaseWallet.name}にNFTチケットを追加しました`);
 }
 function schedulePurchaseCompletion(delay){
   clearTimeout(purchaseTimer);purchaseTimer=setTimeout(completePurchase,Math.max(0,delay));
@@ -1032,14 +1206,15 @@ function benefitResult(ticketId){
 }
 function resultData(){
   if(state.appEnteredAt!==null){state.appTimes[state.currentApp]+=Math.round((performance.now()-state.appEnteredAt)/1000);state.appEnteredAt=performance.now()}
+  const currentWallet=activeWallet(),marketWallet=connectedWallet();
   return {participant_id:state.participantId,condition:"multi_service_traditional_nft_flow",started_at:state.startedAt,completed_at:state.completedAt,
     completion_time_seconds:state.completedAt?Math.round((new Date(state.completedAt)-new Date(state.startedAt))/1000):null,
     app_switch_count:state.appSwitchCount,help_open_count:state.helpOpenCount,copy_count:state.copyCount,paste_count:state.pasteCount,
     signature_count:state.signatureCount,validation_error_count:state.validationErrors,app_times_seconds:state.appTimes,
     exchange:{yen_balance:state.exchangeYen,eth_purchased_total:state.purchasedEth,last_rate_at_purchase:state.ethPriceAtPurchase,eth_remaining:state.exchangeEth,purchase_history:state.purchaseHistory},
-    wallet:{address:WALLET_ADDRESS,eth_balance:state.walletEth,transfer_amount:state.transferAmount,transfer_received:state.transferReceived,receipt_checked:state.receiptChecked,owned_nfts:state.ownedNfts,
+    wallet:{active_wallet_id:currentWallet?.id||null,address:currentWallet?.address||null,eth_balance:currentWallet?.ethBalance||0,wallet_count:state.wallets.length,wallets:state.wallets.map(wallet=>({id:wallet.id,name:wallet.name,address:wallet.address,eth_balance:wallet.ethBalance,created_at:wallet.createdAt,owned_nfts:ownedNftsForWallet(wallet.id)})),transfer_amount:state.transferAmount,transfer_received:state.transferReceived,receipt_checked:state.receiptChecked,owned_nfts:state.ownedNfts,
       nova_live_benefits:benefitResult("nova-live"),digital_art_benefits:benefitResult("digital-art"),skyline_fest_benefits:benefitResult("skyline-fest"),anime_creator_expo_benefits:benefitResult("creator-expo"),bay_area_light_show_benefits:benefitResult("light-show")},
-    marketplace:{connected:state.marketConnected,selected_ticket:state.selectedTicketId,purchase_signed:state.purchaseSigned,nft_owned:state.ownedNfts.length>0,nft_count:state.ownedNfts.length,purchased_nft_count:purchasedNftCount(),purchases:state.ownedNfts,admission_pass_viewed:state.admissionPassViewed,
+    marketplace:{connected:state.marketConnected,connected_wallet_id:marketWallet?.id||null,connected_wallet_address:marketWallet?.address||null,connected_wallet_eth_balance:marketWallet?.ethBalance||null,selected_ticket:state.selectedTicketId,purchase_signed:state.purchaseSigned,nft_owned:state.ownedNfts.length>0,nft_count:state.ownedNfts.length,purchased_nft_count:purchasedNftCount(),purchases:state.ownedNfts,admission_pass_viewed:state.admissionPassViewed,
       airdrop:{threshold:AIRDROP_PURCHASE_THRESHOLD,received:ownsTicket(AIRDROP_TICKET_ID),ticket_id:AIRDROP_TICKET_ID}},
     event_log:state.eventLog};
 }
