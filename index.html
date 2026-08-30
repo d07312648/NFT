@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
   <title>NFT Journey Lab｜従来型NFT購入体験</title>
-  <link rel="stylesheet" href="./styles.css?v=4.11.0" />
+  <link rel="stylesheet" href="./styles.css?v=4.11.2" />
 </head>
 <body>
   <div id="toast" class="toast hidden" role="status"></div>
@@ -115,21 +115,22 @@
         <p id="participantText">参加者ID：—</p>
       </div>
 
-      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle">
-        <span class="progress-guide-label">GUIDE</span>
-        <h2 id="progressGuideTitle">進捗フローを確認</h2>
-        <p>進捗フローを参考にNFTチケットを獲得してください。</p>
-        <p class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
-        <p class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
-        <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
-      </section>
-
       <div class="overall-progress">
         <div><span>全体の進捗</span><strong id="progressPercent">0%</strong></div>
         <div class="track"><i id="progressFill"></i></div>
       </div>
 
       <ol id="missionList" class="mission-list"></ol>
+
+      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle">
+        <span class="progress-guide-label">GUIDE</span>
+        <h2 id="progressGuideTitle">進捗フローを確認</h2>
+        <p>進捗フローを参考にNFTチケットを獲得してください。</p>
+        <p class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
+        <p class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
+        <p class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
+        <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
+      </section>
 
       <div class="wallet-mini-status">
         <div>
@@ -329,6 +330,6 @@
     </div>
   </section>
 
-  <script src="./app.js?v=4.13.0"></script>
+  <script src="./app.js?v=4.13.1"></script>
 </body>
 </html>

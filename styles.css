@@ -1327,6 +1327,10 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   line-height: 1.65;
 }
 
+.progress-guide-bubble .progress-guide-scroll-note {
+  display: none;
+}
+
 .progress-guide-bubble .progress-guide-hint-note {
   margin-top: 9px;
   padding: 10px 11px;
@@ -1408,6 +1412,11 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
 }
 
 @media (max-width: 760px) {
+  body.progress-guide-open {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   .progress-guide-backdrop {
     background: rgba(6, 9, 18, .81);
   }
@@ -1422,6 +1431,17 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
       0 0 0 3px rgba(255,255,255,.15),
       0 0 38px 13px rgba(221,228,255,.34),
       0 24px 55px rgba(0,0,0,.42);
+  }
+
+  body.progress-guide-open .mission-panel > .mission-list {
+    pointer-events: auto;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  body.progress-guide-open .mission-list .mission-hint-button {
+    pointer-events: none;
   }
 
   .progress-guide-bubble {
@@ -1441,6 +1461,33 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   .progress-guide-bubble .progress-guide-note {
     padding: 9px 10px;
     font-size: 8px;
+  }
+
+  .progress-guide-bubble .progress-guide-scroll-note {
+    margin-top: 9px;
+    padding: 9px 10px;
+    display: grid;
+    grid-template-columns: 26px minmax(0,1fr);
+    gap: 8px;
+    align-items: center;
+    border: 1px solid #cfdcff;
+    border-radius: 11px;
+    color: #314b82;
+    background: #eef4ff;
+    font-size: 9px;
+    line-height: 1.6;
+  }
+
+  .progress-guide-scroll-note > span {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: #1769ff;
+    font-size: 14px;
+    font-weight: 950;
   }
 
   .progress-guide-bubble .progress-guide-hint-note {
@@ -2456,20 +2503,31 @@ body.admission-pass-open {
   from{opacity:0;transform:translate(-50%,-18px) scale(.96)}
   to{opacity:1;transform:translate(-50%,0) scale(1)}
 }
+@keyframes ethSuccessToastInMobile{
+  from{opacity:0;transform:translateY(-14px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
 @keyframes ethSuccessToastTimer{to{transform:scaleX(0)}}
 @media(max-width:760px){
   .toast.eth-success-toast{
     top:max(74px,calc(env(safe-area-inset-top) + 66px));
-    width:calc(100% - 24px);
+    right:max(12px,env(safe-area-inset-right));
+    bottom:auto;
+    left:max(12px,env(safe-area-inset-left));
+    width:auto;
+    max-width:none;
     min-height:74px;
     padding:14px 15px;
     grid-template-columns:42px minmax(0,1fr);
     gap:11px;
     border-radius:16px;
+    transform:none;
+    animation-name:ethSuccessToastInMobile;
   }
+  .eth-success-toast>div{min-width:0}
   .eth-success-toast-icon{width:42px;height:42px;font-size:20px}
-  .eth-success-toast strong{font-size:13px}
-  .eth-success-toast small{font-size:9px}
+  .eth-success-toast strong{font-size:13px;overflow-wrap:anywhere}
+  .eth-success-toast small{font-size:9px;overflow-wrap:anywhere}
 }
 @media(prefers-reduced-motion:reduce){
   .toast.eth-success-toast,

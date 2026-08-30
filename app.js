@@ -302,7 +302,7 @@ function showProgressGuide(){
   $("progressGuideBubble").classList.remove("hidden");
   document.body.classList.add("progress-guide-open");
   log("progress_guide_opened");
-  requestAnimationFrame(()=>$("progressGuideStart").focus());
+  requestAnimationFrame(()=>$("progressGuideStart").focus({preventScroll:true}));
 }
 
 function closeProgressGuide(){
