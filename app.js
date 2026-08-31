@@ -12,14 +12,17 @@ const STORAGE_KEY = "nft-journey-lab-session-v1";
 const GAME_STORAGE_KEYS = ["hoshiwatari-momo-best","tokyo-digital-art-night-jump-best","skyline-music-fest-bounce-best-score","anime-creator-expo-tower-best-score","momo-spike-wall-best"];
 const TRANSFER_DELAY_MS = 2200;
 const PURCHASE_DELAY_MS = 2400;
+const WALLET_CREATION_NOTICE_MS = 2600;
+const MISSION_COMPLETION_NOTICE_MS = 3600;
 const ADMISSION_AUTH_TTL_MS = 30000;
 const AIRDROP_PURCHASE_THRESHOLD = 3;
 const AIRDROP_TICKET_ID = "nexus-future-pass";
 const MAX_WALLETS = 5;
 const WALLET_SECURITY_GUIDE_STEPS = [
-  {target:".address-box",label:"1 / 3 · 公開鍵",title:"公開鍵は、暗号資産の受取先を伝えるアドレスです",description:"取引所から暗号資産を送るとき、この公開鍵を送金先へ貼り付けます。\n公開鍵は、暗号資産を受け取るために相手へ共有できます。\n実際のウォレットアプリでは、ウォレットを無制限に作成できます。\nこのサイト内では、体験用として最大5個まで作成できるようにしています。",action:"次へ"},
-  {target:".seed-phrase-display",label:"2 / 3 · シードフレーズ",title:"ウォレットを復旧するための12単語です",description:"端末の紛失や故障時に、ウォレットを復旧できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\nこの12単語を知る人はウォレットを復旧できるため、第三者には共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"次へ"},
-  {target:".private-key-display",label:"3 / 3 · 秘密鍵",title:"資産を操作するための最も重要な情報です",description:"秘密鍵を知る人は、ウォレット内の資産を操作できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\n絶対に第三者へ共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"閉じる"}
+  {tab:"wallet-home",targets:[".wallet-overview-title",".wallet-balance"],label:"1 / 4 · ウォレット",title:"ウォレットが作成されました",description:"実際のウォレットアプリでは、ウォレットを無制限に作成できます。\nこのサイト内では、体験用として最大5個まで作成できるようにしています。",action:"次へ"},
+  {tab:"wallet-receive",target:".address-box",label:"2 / 4 · 公開鍵",title:"公開鍵は、暗号資産の受取先を伝えるアドレスです",description:"取引所から暗号資産を送るとき、この公開鍵を送金先へ貼り付けます。\n公開鍵は、暗号資産を受け取るために相手へ共有できます。",action:"次へ"},
+  {tab:"wallet-receive",target:".seed-phrase-display",reveal:"seed",label:"3 / 4 · シードフレーズ",title:"ウォレットを復旧するための12単語です",description:"端末の紛失や故障時に、ウォレットを復旧できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\nこの12単語を知る人はウォレットを復旧できるため、第三者には共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"次へ"},
+  {tab:"wallet-receive",target:".private-key-display",reveal:"private",label:"4 / 4 · 秘密鍵",title:"資産を操作するための最も重要な情報です",description:"秘密鍵を知る人は、ウォレット内の資産を操作できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\n絶対に第三者へ共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"閉じる"}
 ];
 const NFT_BENEFIT_PROGRAMS = {
   "nova-live":{
@@ -222,14 +225,19 @@ function makePersistent(target,cache=new WeakMap()){
   cache.set(target,proxy);return proxy;
 }
 const state = makePersistent(loadSavedState());
+const missionCompletionAnnounced=new Set(missions.filter(([key])=>missionStatus(key)).map(([key])=>key));
 
 let tickerTimer=null;
 let transferTimer=null;
 let purchaseTimer=null;
+let missionCompletionNoticeTimer=null;
+let missionCompletionNoticeActive=false;
+const missionCompletionNoticeQueue=[];
 let privateKeyVisible=false;
 let seedPhraseVisible=false;
 let walletSecurityGuideStep=0;
 let walletSecurityGuideTarget=null;
+let walletSecurityGuideTargets=[];
 let walletSecurityGuideInitialScroll={x:0,y:0};
 let mobileGuideTouchY=null;
 let activeAdmissionIndex=null;
@@ -303,10 +311,11 @@ function toast(message){
   const el=$("toast");el.className="toast";el.textContent=message;
   clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add("hidden"),2100);
 }
-function showEthSuccess(title,detail){
-  const el=$("toast");el.className="toast eth-success-toast";
+function showEthSuccess(title,detail,duration=4200,extraClass=""){
+  const el=$("toast");el.className=`toast eth-success-toast${extraClass?` ${extraClass}`:""}`;
+  el.style.setProperty("--success-toast-duration",`${duration}ms`);
   el.innerHTML=`<span class="eth-success-toast-icon">✓</span><div><strong>${escapeHtml(title)}</strong><small>${escapeHtml(detail)}</small></div>`;
-  clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add("hidden"),4200);
+  clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add("hidden"),duration);
 }
 function showEthPurchaseSuccess(received){
   showEthSuccess("ETHの購入が完了しました",`${Number(received).toFixed(6)} ETH を取引所残高に追加しました`);
@@ -316,6 +325,9 @@ function showEthTransferStarted(amount){
 }
 function showEthTransferCompleted(amount){
   showEthSuccess("ETHの送金が完了しました",`${Number(amount).toFixed(6)} ETH が Orbit Wallet に反映されました`);
+}
+function showWalletCreationSuccess(wallet){
+  showEthSuccess("ウォレットの作成が完了しました",`${wallet.name}の公開鍵・シードフレーズ・秘密鍵を生成しました`,WALLET_CREATION_NOTICE_MS,"wallet-creation-success-toast");
 }
 function error(message){state.validationErrors++;log("validation_error",{message});toast(message)}
 
@@ -362,7 +374,7 @@ function preventMobileGuideViewportScroll(event){
 function startWalletSecurityGuide(){
   if(!state.wallets.length||state.walletSecurityGuideCompleted)return;
   if(state.currentApp!=="wallet")switchApp("wallet");
-  state.currentWalletTab="wallet-receive";renderWallet();
+  state.currentWalletTab="wallet-home";renderWallet();
   document.documentElement.classList.add("wallet-security-guide-open");
   window.scrollTo({left:window.scrollX,top:window.scrollY,behavior:"auto"});
   walletSecurityGuideInitialScroll={x:window.scrollX,y:window.scrollY};
@@ -376,18 +388,22 @@ function startWalletSecurityGuide(){
 }
 function renderWalletSecurityGuideStep(){
   const step=WALLET_SECURITY_GUIDE_STEPS[walletSecurityGuideStep];if(!step)return;
-  setSeedPhraseVisibility(walletSecurityGuideStep===1);
-  setPrivateKeyVisibility(walletSecurityGuideStep===2);
-  walletSecurityGuideTarget?.classList.remove("wallet-guide-highlight");
-  walletSecurityGuideTarget=document.querySelector(`#walletContent ${step.target}`);
-  if(!walletSecurityGuideTarget){closeWalletSecurityGuide();return}
-  walletSecurityGuideTarget.classList.add("wallet-guide-highlight");
+  $("walletSecurityGuide").classList.toggle("wallet-overview-guide",walletSecurityGuideStep===0);
+  walletSecurityGuideTargets.forEach(target=>target.classList.remove("wallet-guide-highlight"));walletSecurityGuideTargets=[];walletSecurityGuideTarget=null;
+  if(state.currentWalletTab!==step.tab){state.currentWalletTab=step.tab;renderWallet()}
+  setSeedPhraseVisibility(step.reveal==="seed");
+  setPrivateKeyVisibility(step.reveal==="private");
+  const selectors=step.targets||[step.target];
+  walletSecurityGuideTargets=selectors.map(selector=>document.querySelector(`#walletContent ${selector}`)).filter(Boolean);
+  walletSecurityGuideTarget=walletSecurityGuideTargets[0]||null;
+  if(!walletSecurityGuideTargets.length){closeWalletSecurityGuide();return}
+  walletSecurityGuideTargets.forEach(target=>target.classList.add("wallet-guide-highlight"));
   $("walletSecurityGuideLabel").textContent=step.label;
   $("walletSecurityGuideTitle").textContent=step.title;
   $("walletSecurityGuideDescription").textContent=step.description;
   $("walletSecurityGuideNext").innerHTML=`${step.action}<span aria-hidden="true">${walletSecurityGuideStep===WALLET_SECURITY_GUIDE_STEPS.length-1?"✓":"→"}</span>`;
   $("walletSecurityGuideNext").setAttribute("aria-label",step.action);
-  log("wallet_security_guide_step_viewed",{step:walletSecurityGuideStep+1,target:step.target});
+  log("wallet_security_guide_step_viewed",{step:walletSecurityGuideStep+1,target:selectors.join(",")});
   requestAnimationFrame(()=>{
     if(!walletSecurityGuideOpen())return;
     for(let attempt=0;attempt<3;attempt++){
@@ -398,56 +414,86 @@ function renderWalletSecurityGuideStep(){
     $("walletSecurityGuideNext").focus({preventScroll:true});
   });
 }
+function walletSecurityGuideTargetRect(){
+  const rects=walletSecurityGuideTargets.filter(target=>target.isConnected).map(target=>target.getBoundingClientRect());
+  if(!rects.length)return null;
+  const left=Math.min(...rects.map(rect=>rect.left)),top=Math.min(...rects.map(rect=>rect.top));
+  const right=Math.max(...rects.map(rect=>rect.right)),bottom=Math.max(...rects.map(rect=>rect.bottom));
+  return {left,top,right,bottom,width:right-left,height:bottom-top};
+}
 function positionWalletSecurityGuide(){
-  if(!walletSecurityGuideOpen()||!walletSecurityGuideTarget)return;
-  const bubble=$("walletSecurityGuide"),targetRect=walletSecurityGuideTarget.getBoundingClientRect();
+  const targetRect=walletSecurityGuideTargetRect();if(!walletSecurityGuideOpen()||!targetRect)return;
+  const bubble=$("walletSecurityGuide");
   bubble.style.removeProperty("top");bubble.style.removeProperty("right");bubble.style.removeProperty("bottom");bubble.style.removeProperty("left");
   if(window.matchMedia("(max-width: 760px)").matches){
-    const bottomBubbleTop=window.innerHeight-bubble.offsetHeight-12;
-    if(targetRect.bottom+14>bottomBubbleTop&&targetRect.top>bubble.offsetHeight+32){bubble.style.top="12px";bubble.style.bottom="auto"}
+    const viewportMargin=12,margin=14,bubbleHeight=bubble.offsetHeight;
+    const creationNotice=$("toast"),creationNoticeVisible=creationNotice.classList.contains("wallet-creation-success-toast")&&!creationNotice.classList.contains("hidden");
+    const noticeBottom=creationNoticeVisible?creationNotice.offsetTop+creationNotice.offsetHeight+12:viewportMargin;
+    const minTop=Math.max(viewportMargin,noticeBottom),maxTop=Math.max(minTop,window.innerHeight-bubbleHeight-viewportMargin);
+    const canUseBelow=targetRect.bottom+margin+bubbleHeight<=window.innerHeight-viewportMargin;
+    const canUseAbove=targetRect.top-margin-bubbleHeight>=viewportMargin;
+    let top;
+    if(canUseBelow)top=targetRect.bottom+margin;
+    else if(canUseAbove)top=targetRect.top-bubbleHeight-margin;
+    else{
+      const spaceBelow=window.innerHeight-targetRect.bottom,spaceAbove=targetRect.top;
+      top=spaceBelow>=spaceAbove?targetRect.bottom+margin:targetRect.top-bubbleHeight-margin;
+    }
+    bubble.style.top=`${Math.min(maxTop,Math.max(minTop,top))}px`;bubble.style.bottom="auto";
     return;
   }
-  const margin=20,bubbleWidth=Math.min(380,window.innerWidth-32),bubbleHeight=bubble.offsetHeight;
+  const margin=16,bubbleWidth=Math.min(380,window.innerWidth-32),bubbleHeight=bubble.offsetHeight;
+  const creationNotice=$("toast"),creationNoticeVisible=creationNotice.classList.contains("wallet-creation-success-toast")&&!creationNotice.classList.contains("hidden");
+  const minTop=creationNoticeVisible?creationNotice.offsetTop+creationNotice.offsetHeight+12:16,maxTop=Math.max(minTop,window.innerHeight-bubbleHeight-16);
   const canUseRight=targetRect.right+margin+bubbleWidth<=window.innerWidth-16;
   const canUseLeft=targetRect.left-margin-bubbleWidth>=16;
   let left,top;
   if(canUseRight||canUseLeft){
     left=canUseRight?targetRect.right+margin:targetRect.left-bubbleWidth-margin;
-    top=Math.min(window.innerHeight-bubbleHeight-16,Math.max(16,targetRect.top+(targetRect.height-bubbleHeight)/2));
+    top=Math.min(maxTop,Math.max(minTop,targetRect.top+(targetRect.height-bubbleHeight)/2));
   }else{
     left=Math.min(window.innerWidth-bubbleWidth-16,Math.max(16,targetRect.left+(targetRect.width-bubbleWidth)/2));
     const canUseBelow=targetRect.bottom+margin+bubbleHeight<=window.innerHeight-16;
-    top=canUseBelow?targetRect.bottom+margin:Math.max(16,targetRect.top-bubbleHeight-margin);
+    top=canUseBelow?targetRect.bottom+margin:targetRect.top-bubbleHeight-margin;
+    top=Math.min(maxTop,Math.max(minTop,top));
   }
   bubble.style.left=`${left}px`;bubble.style.top=`${top}px`;
 }
 function keepWalletSecurityGuideTargetInView(){
-  if(!walletSecurityGuideOpen()||!walletSecurityGuideTarget)return false;
-  const bubbleRect=$("walletSecurityGuide").getBoundingClientRect(),targetRect=walletSecurityGuideTarget.getBoundingClientRect();
-  const horizontallyOverlapping=targetRect.right>bubbleRect.left&&targetRect.left<bubbleRect.right;
-  let safeTop=12,safeBottom=window.innerHeight-12;
-  if(horizontallyOverlapping){
-    if(bubbleRect.top<window.innerHeight/2)safeTop=bubbleRect.bottom+16;
-    else safeBottom=bubbleRect.top-16;
-  }
-  if(safeBottom<=safeTop)return false;
+  const targetRect=walletSecurityGuideTargetRect();if(!walletSecurityGuideOpen()||!targetRect)return false;
+  const bubbleRect=$("walletSecurityGuide").getBoundingClientRect();
+  const viewportTop=12,viewportBottom=window.innerHeight-12;
   let delta=0;
-  if(targetRect.height>safeBottom-safeTop)delta=targetRect.top-safeTop;
-  else if(targetRect.top<safeTop)delta=targetRect.top-safeTop;
-  else if(targetRect.bottom>safeBottom)delta=targetRect.bottom-safeBottom;
+  if(targetRect.height>viewportBottom-viewportTop)delta=targetRect.top-viewportTop;
+  else if(targetRect.top<viewportTop)delta=targetRect.top-viewportTop;
+  else if(targetRect.bottom>viewportBottom)delta=targetRect.bottom-viewportBottom;
+  if(Math.abs(delta)>=1){window.scrollBy({top:delta,behavior:"auto"});return true}
+  const horizontallyOverlapping=targetRect.right>bubbleRect.left&&targetRect.left<bubbleRect.right;
+  const verticallyOverlapping=targetRect.bottom>bubbleRect.top&&targetRect.top<bubbleRect.bottom;
+  if(!horizontallyOverlapping||!verticallyOverlapping)return false;
+  const margin=14;
+  if((bubbleRect.top+bubbleRect.bottom)/2<(targetRect.top+targetRect.bottom)/2){
+    delta=targetRect.top-(bubbleRect.bottom+margin);
+  }else{
+    delta=targetRect.bottom-(bubbleRect.top-margin);
+  }
   if(Math.abs(delta)<1)return false;
   window.scrollBy({top:delta,behavior:"auto"});return true;
 }
 function advanceWalletSecurityGuide(){
   if(!walletSecurityGuideOpen())return;
   if(walletSecurityGuideStep>=WALLET_SECURITY_GUIDE_STEPS.length-1){closeWalletSecurityGuide();return}
+  if(walletSecurityGuideStep===0){
+    const creationNotice=$("toast");
+    if(creationNotice.classList.contains("wallet-creation-success-toast")){clearTimeout(toast.t);creationNotice.classList.add("hidden")}
+  }
   walletSecurityGuideStep++;renderWalletSecurityGuideStep();
 }
 function closeWalletSecurityGuide(){
   setSeedPhraseVisibility(false);setPrivateKeyVisibility(false);
-  walletSecurityGuideTarget?.classList.remove("wallet-guide-highlight");walletSecurityGuideTarget=null;
+  walletSecurityGuideTargets.forEach(target=>target.classList.remove("wallet-guide-highlight"));walletSecurityGuideTargets=[];walletSecurityGuideTarget=null;
   $("walletSecurityGuideBackdrop").classList.add("hidden");$("walletSecurityGuideBackdrop").setAttribute("aria-hidden","true");
-  $("walletSecurityGuide").classList.add("hidden");document.body.classList.remove("wallet-security-guide-open");
+  $("walletSecurityGuide").classList.add("hidden");$("walletSecurityGuide").classList.remove("wallet-overview-guide");document.body.classList.remove("wallet-security-guide-open");
   window.scrollTo({left:walletSecurityGuideInitialScroll.x,top:walletSecurityGuideInitialScroll.y,behavior:"auto"});
   document.documentElement.classList.remove("wallet-security-guide-open");
   state.walletSecurityGuideCompleted=true;log("wallet_security_guide_completed",{wallet_id:activeWallet()?.id||null});
@@ -499,6 +545,27 @@ function progress(){
   const done=missions.filter(([k])=>missionStatus(k)).length;
   return Math.round(done/missions.length*100);
 }
+function showNextMissionCompletionNotice(){
+  if(missionCompletionNoticeActive||!missionCompletionNoticeQueue.length)return;
+  const [key,title,index]=missionCompletionNoticeQueue.shift();
+  missionCompletionNoticeActive=true;
+  const extraClass=`mission-completion-success-toast${key==="wallet"?" wallet-creation-success-toast":""}`;
+  showEthSuccess(`進捗${index+1}を達成しました`,`「${title}」が完了しました`,MISSION_COMPLETION_NOTICE_MS,extraClass);
+  log("mission_completion_notice_shown",{mission:key,step:index+1});
+  clearTimeout(missionCompletionNoticeTimer);
+  missionCompletionNoticeTimer=setTimeout(()=>{
+    missionCompletionNoticeActive=false;
+    showNextMissionCompletionNotice();
+  },MISSION_COMPLETION_NOTICE_MS+120);
+}
+function notifyNewlyCompletedMissions(){
+  missions.forEach(([key,title],index)=>{
+    if(!missionStatus(key)||missionCompletionAnnounced.has(key))return;
+    missionCompletionAnnounced.add(key);
+    missionCompletionNoticeQueue.push([key,title,index]);
+  });
+  showNextMissionCompletionNotice();
+}
 function renderMission(){
   const next=nextMissionKey();
   $("missionList").innerHTML=missions.map(([key,title,desc],i)=>{
@@ -513,6 +580,7 @@ function renderMission(){
   const marketWallet=connectedWallet();
   $("sideNetworkStatus").innerHTML=marketWallet?`<i></i>${escapeHtml(marketWallet.name)} 接続済み`:"<i></i>未接続";
   $("sideNetworkStatus").classList.toggle("connected",state.marketConnected);
+  notifyNewlyCompletedMissions();
 }
 
 function resolveMissionHintTarget(key){
@@ -596,7 +664,7 @@ function openAccountModal(){
     if(password.length<8){error("パスワードは8文字以上で入力してください");return}
     if(password!==passwordConfirmation){error("パスワードと確認用パスワードが一致しません");return}
     if(!$("mAgree").checked){error("利用規約とリスク説明を確認してください");return}
-    state.accountCreated=true;log("exchange_account_created");closeModal();toast("本人確認が完了しました");renderAll();
+    state.accountCreated=true;log("exchange_account_created");closeModal();renderAll();
   };
 }
 function setExchangeTab(tab){
@@ -668,13 +736,14 @@ function renderExchangeBuy(){
     if(!state.buyAgreementChecked){error("価格変動と手数料を確認してください");return}
     if(quote.amount<1000){error("1,000円以上を入力してください");return}
     if(quote.total>state.exchangeYen){error("日本円残高が不足しています");return}
+    const completesMission=!missionStatus("buy");
     state.ethPriceAtPurchase=markets.ETH.price;
     const received=quote.amount/state.ethPriceAtPurchase;
     state.purchasedEth+=received;state.exchangeEth+=received;state.exchangeYen-=quote.total;state.ethPurchased=true;
     state.purchaseHistory.push({timestamp:now(),yen:quote.amount,fee_yen:quote.fee,eth:received,rate:state.ethPriceAtPurchase});
     state.buyAgreementChecked=false;
     log("eth_purchased",{yen:quote.amount,fee_yen:quote.fee,eth:received,rate:state.ethPriceAtPurchase,purchase_number:state.purchaseHistory.length});
-    showEthPurchaseSuccess(received);renderAll();
+    if(!completesMission)showEthPurchaseSuccess(received);renderAll();
   };
 }
 function renderExchangeSend(){
@@ -722,10 +791,11 @@ function openSendReview(sendAmount,targetWallet){
     <div class="button-row" style="margin-top:16px"><button id="confirmSend" class="danger-btn" type="button">このアドレスへ送金する</button><button id="cancelSend" class="secondary" type="button">戻る</button></div>`);
   $("cancelSend").onclick=closeModal;
   $("confirmSend").onclick=()=>{
+    const completesMission=!missionStatus("send");
     state.transferAmount=sendAmount;state.exchangeEth-=sendAmount+NETWORK_FEE_ETH;state.transferSent=true;state.transferPending=true;state.transferDestinationWalletId=targetWallet.id;state.receiptChecked=false;
     state.transferCompletesAt=Date.now()+TRANSFER_DELAY_MS;
     log("eth_transfer_sent",{destination:targetWallet.address,wallet_id:targetWallet.id,amount:sendAmount,fee:NETWORK_FEE_ETH});
-    closeModal();showEthTransferStarted(sendAmount);renderAll();
+    closeModal();if(!completesMission)showEthTransferStarted(sendAmount);renderAll();
     scheduleTransferCompletion(TRANSFER_DELAY_MS);
   };
 }
@@ -798,9 +868,10 @@ function openSeedModal(){
     if($("seed3").value!==seedWords[2]||$("seed9").value!==seedWords[8]){error("指定された単語を確認してください");return}
     let address=state.wallets.length?generateDemoWalletAddress():WALLET_ADDRESS;
     while(walletByAddress(address))address=generateDemoWalletAddress();
+    const completesMission=!missionStatus("wallet");
     const wallet={id:`wallet-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name:`ウォレット ${walletNumber}`,address,privateKey:generateDemoPrivateKey(),ethBalance:0,createdAt:now(),seedPhrase:seedWords};
     state.wallets.push(wallet);state.activeWalletId=wallet.id;syncLegacyWalletState();
-    log("wallet_created",{wallet_id:wallet.id,wallet_number:walletNumber,address:wallet.address});closeModal();toast(`${wallet.name}と秘密鍵を作成しました`);renderAll();
+    log("wallet_created",{wallet_id:wallet.id,wallet_number:walletNumber,address:wallet.address});closeModal();if(!completesMission)showWalletCreationSuccess(wallet);renderAll();
     state.currentWalletTab="wallet-receive";renderWallet();
     if(walletNumber===1&&!state.walletSecurityGuideCompleted)requestAnimationFrame(startWalletSecurityGuide);
   };
@@ -814,7 +885,7 @@ function renderWalletHome(){
   }
   walletContent.innerHTML=`
     ${walletManagerPanel()}
-    <div class="dashboard-title"><div><span class="kicker">PORTFOLIO</span><h1>${escapeHtml(wallet.name)}</h1><p>${escapeHtml(shortWalletAddress(wallet.address))}</p></div><span class="task-callout">${pendingHere?"入金確認中":"Ethereum Mainnet"}</span></div>
+    <div class="dashboard-title wallet-overview-title"><div><span class="kicker">PORTFOLIO</span><h1>${escapeHtml(wallet.name)}</h1><p>${escapeHtml(shortWalletAddress(wallet.address))}</p></div><span class="task-callout">${pendingHere?"入金確認中":"Ethereum Mainnet"}</span></div>
     <div class="balance-grid"><div class="balance-card wallet-balance"><small>TOTAL BALANCE</small><strong>${fmtEth(wallet.ethBalance)}</strong><span>${fmtYen(wallet.ethBalance*markets.ETH.price)}</span></div>
       <div class="action-card"><h3>${wallet.ethBalance>0?"チケット購入の準備完了":"ETHを受け取る"}</h3><p>${wallet.ethBalance>0?"MintGateでこのウォレットを接続できます。":"公開鍵をコピーし、取引所の送金先へ貼り付けます。"}</p><button id="walletPrimary" class="primary" type="button">${wallet.ethBalance>0?"MintGateを開く":"受取用アドレスを表示"}</button></div></div>
     ${pendingHere?`<div class="notice info" style="margin-top:16px">ネットワーク確認中です。通常は複数の承認を待って残高へ反映されます。</div>`:""}
@@ -844,8 +915,9 @@ function renderWalletReceive(){
   $("checkWallet").onclick=()=>{
     if(pendingHere){toast("まだネットワーク確認中です");return}
     if(!receivingHere){toast("このウォレットへの入金はまだありません");return}
+    const completesMission=!missionStatus("receive");
     if(!state.receiptChecked){state.receiptChecked=true;log("wallet_receipt_checked",{amount:state.lastReceivedAmount,wallet_id:wallet.id})}
-    renderAll();toast("入金を確認しました");
+    renderAll();if(!completesMission)toast("入金は確認済みです");
   };
   bindWalletManager();bindPrivateKeyPanel();
 }
@@ -913,7 +985,8 @@ async function copyWalletAddress(){
   }
   state.copyCount++;log("wallet_address_copy_attempted",{clipboard_success:copied,wallet_id:wallet.id,address:wallet.address});
   if(!copied){error("公開鍵をコピーできませんでした。ブラウザのクリップボード許可を確認してください");renderWallet();return}
-  state.addressCopied=true;state.copiedWalletId=wallet.id;log("wallet_address_copied",{wallet_id:wallet.id,address:wallet.address});toast(`${wallet.name}の公開鍵をコピーしました`);renderAll();
+  const completesMission=!missionStatus("copy");
+  state.addressCopied=true;state.copiedWalletId=wallet.id;log("wallet_address_copied",{wallet_id:wallet.id,address:wallet.address});renderAll();if(!completesMission)toast(`${wallet.name}の公開鍵をコピーしました`);
 }
 function renderWalletNft(){
   const wallet=activeWallet();if(!wallet){renderWalletCreate();return}
@@ -1096,10 +1169,11 @@ function completeAdmissionCheckIn(){
   const owned=currentAdmissionOwned();
   if(!owned||admissionVerifiedTokenId!==owned.tokenId||Date.now()>=admissionAuthExpiresAt){error("有効なLIVE認証が必要です");renderAdmissionAuthState();return}
   if(!window.confirm("このNFTチケットを入館処理済みにします。処理後は再利用できません。よろしいですか？"))return;
+  const completesMission=!missionStatus("admission");
   owned.admissionUsedAt=now();
   log("admission_check_in_completed",{ticket_id:owned.ticketId,token_id:owned.tokenId,used_at:owned.admissionUsedAt});
   clearInterval(admissionAuthTimer);admissionAuthTimer=null;admissionVerifiedTokenId=null;
-  renderAdmissionAuthState();renderMission();toast("入館処理が完了し、進捗へ反映されました");
+  renderAdmissionAuthState();renderMission();if(!completesMission)toast("入館処理が完了しました");
 }
 
 function openAdmissionPass(index){
@@ -1276,8 +1350,9 @@ function openMarketConnectionSignature(walletId){
   $("rejectConnect").onclick=()=>{log("signature_rejected",{purpose:"connect"});closeModal()};
   $("signConnect").onclick=()=>{
     if(!$("connectUnderstand").checked){error("署名内容を確認してください");return}
+    const completesMission=!missionStatus("connect");
     state.signatureCount++;state.connectionSigned=true;state.marketConnected=true;state.connectedWalletId=wallet.id;
-    log("message_signed",{purpose:"market_connect",wallet_id:wallet.id,address:wallet.address});closeModal();toast(`${wallet.name}をMintGateに接続しました`);renderAll();
+    log("message_signed",{purpose:"market_connect",wallet_id:wallet.id,address:wallet.address});closeModal();renderAll();if(!completesMission)toast(`${wallet.name}をMintGateに接続しました`);
   };
 }
 function openPurchaseModal(){
@@ -1320,12 +1395,13 @@ function completePurchase(){
   const purchasedTicketId=state.pendingPurchaseTicketId,purchaseWallet=walletById(state.pendingPurchaseWalletId)||connectedWallet();
   if(!purchasedTicketId)return;
   if(!purchaseWallet){state.pendingPurchaseTicketId=null;state.pendingPurchaseWalletId=null;state.purchaseCompletesAt=null;closeModal();error("購入先ウォレットを確認できませんでした");return}
+  const completesMission=!missionStatus("purchase");
   state.ownedNfts.push({tokenId:`MG-${Date.now().toString().slice(-8)}`,ticketId:purchasedTicketId,purchasedAt:now(),acquisitionType:"purchase",ownerWalletId:purchaseWallet.id,ownerAddress:purchaseWallet.address});
   state.nftOwned=true;if(!state.completedAt)state.completedAt=now();
   log("nft_purchase_confirmed",{ticket_id:purchasedTicketId,owned_count:state.ownedNfts.length,wallet_id:purchaseWallet.id,address:purchaseWallet.address});
   const airdropReward=maybeGrantAirdrop("purchase_threshold",purchaseWallet.id);
   state.pendingPurchaseTicketId=null;state.pendingPurchaseWalletId=null;state.purchaseCompletesAt=null;closeModal();renderAll();
-  if(airdropReward)showAirdropReward(airdropReward);else toast(`${purchaseWallet.name}にNFTチケットを追加しました`);
+  if(airdropReward)showAirdropReward(airdropReward);else if(!completesMission)toast(`${purchaseWallet.name}にNFTチケットを追加しました`);
 }
 function schedulePurchaseCompletion(delay){
   clearTimeout(purchaseTimer);purchaseTimer=setTimeout(completePurchase,Math.max(0,delay));

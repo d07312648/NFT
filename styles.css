@@ -1592,6 +1592,16 @@ body.wallet-security-guide-open #walletApp {
   background: #f8f9fb;
 }
 
+.wallet-balance.wallet-guide-highlight {
+  outline-width: 2px;
+  outline-offset: 5px;
+  box-shadow: 0 0 0 6px rgba(108,77,246,.2),0 0 28px 8px rgba(108,77,246,.36);
+}
+
+.wallet-balance.wallet-guide-highlight::before {
+  content: none;
+}
+
 .seed-phrase-display.wallet-guide-highlight,
 .private-key-display.wallet-guide-highlight {
   border-color: var(--line);
@@ -2807,6 +2817,29 @@ body.admission-pass-open {
   font-size:initial;
   animation:ethSuccessToastIn .34s cubic-bezier(.2,.8,.2,1) both;
 }
+.toast.wallet-creation-success-toast{z-index:290}
+.wallet-security-guide.wallet-overview-guide{
+  max-height:min(208px,calc(100dvh - 32px));
+  padding:14px 16px;
+}
+.wallet-security-guide.wallet-overview-guide .wallet-security-guide-label{
+  font-size:12px;
+  line-height:1.45;
+}
+.wallet-security-guide.wallet-overview-guide h2{
+  margin:4px 0 6px;
+  font-size:16px;
+  line-height:1.4;
+}
+.wallet-security-guide.wallet-overview-guide p{
+  font-size:10.5px;
+  line-height:1.6;
+}
+.wallet-security-guide.wallet-overview-guide button{
+  position:sticky;
+  z-index:1;
+  bottom:0;
+}
 .toast.eth-success-toast::after{
   content:"";
   position:absolute;
@@ -2816,7 +2849,7 @@ body.admission-pass-open {
   height:4px;
   background:rgba(255,255,255,.7);
   transform-origin:left;
-  animation:ethSuccessToastTimer 4.2s linear forwards;
+  animation:ethSuccessToastTimer var(--success-toast-duration,4200ms) linear forwards;
 }
 .eth-success-toast-icon{
   width:46px;
@@ -2863,6 +2896,30 @@ body.admission-pass-open {
     border-radius:16px;
     transform:none;
     animation-name:ethSuccessToastInMobile;
+  }
+  .toast.wallet-creation-success-toast{
+    top:max(12px,env(safe-area-inset-top));
+  }
+  .wallet-security-guide.wallet-overview-guide{
+    max-height:min(182px,calc(100dvh - 24px));
+    padding:12px 14px;
+  }
+  .wallet-security-guide.wallet-overview-guide .wallet-security-guide-label{
+    font-size:11px;
+    line-height:1.45;
+  }
+  .wallet-security-guide.wallet-overview-guide h2{
+    margin:3px 0 5px;
+    font-size:14px;
+    line-height:1.35;
+  }
+  .wallet-security-guide.wallet-overview-guide p{
+    font-size:9.5px;
+    line-height:1.45;
+  }
+  .wallet-security-guide.wallet-overview-guide button{
+    min-height:43px;
+    margin-top:12px;
   }
   .eth-success-toast>div{min-width:0}
   .eth-success-toast-icon{width:42px;height:42px;font-size:20px}
