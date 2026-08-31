@@ -15,8 +15,9 @@ const PURCHASE_DELAY_MS = 2400;
 const ADMISSION_AUTH_TTL_MS = 30000;
 const AIRDROP_PURCHASE_THRESHOLD = 3;
 const AIRDROP_TICKET_ID = "nexus-future-pass";
+const MAX_WALLETS = 5;
 const WALLET_SECURITY_GUIDE_STEPS = [
-  {target:".address-box",label:"1 / 3 · 公開鍵",title:"公開鍵は、暗号資産の受取先を伝えるアドレスです",description:"取引所から暗号資産を送るとき、この公開鍵を送金先へ貼り付けます。\n公開鍵は、暗号資産を受け取るために相手へ共有できます。",action:"次へ"},
+  {target:".address-box",label:"1 / 3 · 公開鍵",title:"公開鍵は、暗号資産の受取先を伝えるアドレスです",description:"取引所から暗号資産を送るとき、この公開鍵を送金先へ貼り付けます。\n公開鍵は、暗号資産を受け取るために相手へ共有できます。\n実際のウォレットアプリでは、ウォレットを無制限に作成できます。\nこのサイト内では、体験用として最大5個まで作成できるようにしています。",action:"次へ"},
   {target:".seed-phrase-display",label:"2 / 3 · シードフレーズ",title:"ウォレットを復旧するための12単語です",description:"端末の紛失や故障時に、ウォレットを復旧できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\nこの12単語を知る人はウォレットを復旧できるため、第三者には共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"次へ"},
   {target:".private-key-display",label:"3 / 3 · 秘密鍵",title:"資産を操作するための最も重要な情報です",description:"秘密鍵を知る人は、ウォレット内の資産を操作できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\n絶対に第三者へ共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"閉じる"}
 ];
@@ -94,7 +95,7 @@ const missions = [
   ["receive","ウォレットで受取確認","入金の反映を確認する"],
   ["connect","チケットサイトに接続","接続メッセージへ署名"],
   ["purchase","NFTチケットを購入","取引内容を確認・署名"],
-  ["admission","入館証を表示する","所有NFTを受付用画面で開く"]
+  ["admission","入館証を表示する","受付で入館処理を完了する"]
 ];
 
 const missionHints = {
@@ -106,7 +107,7 @@ const missionHints = {
   receive:{service:"Orbit Wallet",summary:"取引所から送ったETHがウォレット残高へ反映されたことを確認します。",steps:["送金後、数秒間ネットワーク確認が完了するのを待ちます。","画面上部の「ウォレット」を開きます。","ウォレットの「資産」画面を開くと、受取確認が進捗へ反映されます。"],tip:"まだ反映されない場合は「受け取る」画面の「残高を再確認」も利用できます。",app:"wallet",tab:"wallet-home",action:"ウォレットの資産を開く"},
   connect:{service:"MintGate",summary:"NFTチケットサイトへOrbit Walletを接続し、ウォレット所有者であることを証明します。",steps:["画面上部の「チケットサイト」を開きます。","右上の「ウォレットを接続」を押します。","要求元と署名内容を確認してチェックを入れ、「メッセージに署名」を押します。"],tip:"この接続署名ではETHの送金や手数料は発生しません。",app:"market",tab:null,action:"チケットサイトを開く"},
   purchase:{service:"MintGate",summary:"購入したいNFTチケットを選び、ウォレットで取引内容へ署名します。",steps:["チケットサイトで希望するNFTの「購入する」を押します。","NFT価格、ガス代、ウォレット残高を確認して「ウォレットで確認」を押します。","トランザクション内容を確認してチェックを入れ、「確認して署名」を押します。"],tip:"残高不足の場合は、価格の低いチケットを選ぶかETHを追加送金してください。",app:"market",tab:null,action:"NFTチケットを選ぶ"},
-  admission:{service:"Orbit Wallet",summary:"購入したNFTチケットを開き、受付で提示するLIVE入館証を表示します。",steps:["ウォレット上部の「NFT」タブを開きます。","保有NFTの中から入館するチケットをタップします。","「入館証を表示する」を押し、必要に応じてウォレット署名でLIVE認証します。"],tip:"NFTをまだ保有していない場合は、先にチケットサイトで購入してください。",app:"wallet",tab:"wallet-nft",action:"保有NFTを開く"}
+  admission:{service:"Orbit Wallet",summary:"購入したNFTチケットの入館証を表示し、ウォレット認証から受付での入館処理まで完了します。",steps:["ウォレット上部の「NFT」タブを開き、保有NFTから入館するチケットをタップします。","「入館証を表示する」を押し、「ウォレットで入館認証」へ進みます。","認証内容を確認してチェックを入れ、「メッセージに署名」を押します。","6桁のLIVE認証コードが表示されている30秒以内に、「受付で入館処理を完了する」を押します。"],tip:"進捗へ反映されるのは、入館証を開いた時点ではなく、受付での入館処理を完了した時点です。コードの有効期限が切れた場合は、もう一度ウォレット認証を行ってください。",app:"wallet",tab:"wallet-nft",action:"保有NFTを開く"}
 };
 
 function createDefaultState(){
@@ -229,6 +230,7 @@ let privateKeyVisible=false;
 let seedPhraseVisible=false;
 let walletSecurityGuideStep=0;
 let walletSecurityGuideTarget=null;
+let walletSecurityGuideInitialScroll={x:0,y:0};
 let activeAdmissionIndex=null;
 let admissionAuthTimer=null;
 let admissionAuthExpiresAt=0;
@@ -339,6 +341,9 @@ function startWalletSecurityGuide(){
   if(!state.wallets.length||state.walletSecurityGuideCompleted)return;
   if(state.currentApp!=="wallet")switchApp("wallet");
   state.currentWalletTab="wallet-receive";renderWallet();
+  document.documentElement.classList.add("wallet-security-guide-open");
+  window.scrollTo({left:window.scrollX,top:window.scrollY,behavior:"auto"});
+  walletSecurityGuideInitialScroll={x:window.scrollX,y:window.scrollY};
   walletSecurityGuideStep=0;
   $("walletSecurityGuideBackdrop").classList.remove("hidden");
   $("walletSecurityGuideBackdrop").setAttribute("aria-hidden","false");
@@ -361,14 +366,15 @@ function renderWalletSecurityGuideStep(){
   $("walletSecurityGuideNext").innerHTML=`${step.action}<span aria-hidden="true">${walletSecurityGuideStep===WALLET_SECURITY_GUIDE_STEPS.length-1?"✓":"→"}</span>`;
   $("walletSecurityGuideNext").setAttribute("aria-label",step.action);
   log("wallet_security_guide_step_viewed",{step:walletSecurityGuideStep+1,target:step.target});
-  const mobile=window.matchMedia("(max-width: 760px)").matches;
-  walletSecurityGuideTarget.scrollIntoView({behavior:"smooth",block:mobile?"start":"center"});
-  window.setTimeout(()=>{
+  requestAnimationFrame(()=>{
     if(!walletSecurityGuideOpen())return;
-    if(mobile)window.scrollBy({top:-84,behavior:"auto"});
+    for(let attempt=0;attempt<3;attempt++){
+      positionWalletSecurityGuide();
+      if(!keepWalletSecurityGuideTargetInView())break;
+    }
     positionWalletSecurityGuide();
     $("walletSecurityGuideNext").focus({preventScroll:true});
-  },mobile?340:260);
+  });
 }
 function positionWalletSecurityGuide(){
   if(!walletSecurityGuideOpen()||!walletSecurityGuideTarget)return;
@@ -393,6 +399,23 @@ function positionWalletSecurityGuide(){
   }
   bubble.style.left=`${left}px`;bubble.style.top=`${top}px`;
 }
+function keepWalletSecurityGuideTargetInView(){
+  if(!walletSecurityGuideOpen()||!walletSecurityGuideTarget)return false;
+  const bubbleRect=$("walletSecurityGuide").getBoundingClientRect(),targetRect=walletSecurityGuideTarget.getBoundingClientRect();
+  const horizontallyOverlapping=targetRect.right>bubbleRect.left&&targetRect.left<bubbleRect.right;
+  let safeTop=12,safeBottom=window.innerHeight-12;
+  if(horizontallyOverlapping){
+    if(bubbleRect.top<window.innerHeight/2)safeTop=bubbleRect.bottom+16;
+    else safeBottom=bubbleRect.top-16;
+  }
+  if(safeBottom<=safeTop)return false;
+  let delta=0;
+  if(targetRect.height>safeBottom-safeTop)delta=targetRect.top-safeTop;
+  else if(targetRect.top<safeTop)delta=targetRect.top-safeTop;
+  else if(targetRect.bottom>safeBottom)delta=targetRect.bottom-safeBottom;
+  if(Math.abs(delta)<1)return false;
+  window.scrollBy({top:delta,behavior:"auto"});return true;
+}
 function advanceWalletSecurityGuide(){
   if(!walletSecurityGuideOpen())return;
   if(walletSecurityGuideStep>=WALLET_SECURITY_GUIDE_STEPS.length-1){closeWalletSecurityGuide();return}
@@ -403,6 +426,8 @@ function closeWalletSecurityGuide(){
   walletSecurityGuideTarget?.classList.remove("wallet-guide-highlight");walletSecurityGuideTarget=null;
   $("walletSecurityGuideBackdrop").classList.add("hidden");$("walletSecurityGuideBackdrop").setAttribute("aria-hidden","true");
   $("walletSecurityGuide").classList.add("hidden");document.body.classList.remove("wallet-security-guide-open");
+  window.scrollTo({left:walletSecurityGuideInitialScroll.x,top:walletSecurityGuideInitialScroll.y,behavior:"auto"});
+  document.documentElement.classList.remove("wallet-security-guide-open");
   state.walletSecurityGuideCompleted=true;log("wallet_security_guide_completed",{wallet_id:activeWallet()?.id||null});
   $("copyAddress")?.focus({preventScroll:true});
 }
@@ -444,7 +469,7 @@ function missionStatus(key){
     account:state.accountCreated,buy:state.ethPurchased,wallet:state.walletCreated&&state.seedConfirmed,
     copy:state.addressCopied,send:state.transferSent,receive:state.receiptChecked,
     connect:state.marketConnected&&state.connectionSigned,purchase:state.ownedNfts.length>0,
-    admission:state.admissionPassViewed
+    admission:state.ownedNfts.some(item=>!!item.admissionUsedAt)
   };return !!map[key];
 }
 function nextMissionKey(){return missions.find(([key])=>!missionStatus(key))?.[0]||null}
@@ -698,9 +723,9 @@ function scheduleTransferCompletion(delay){
 }
 
 function walletManagerPanel(){
-  const current=activeWallet();
+  const current=activeWallet(),atWalletLimit=state.wallets.length>=MAX_WALLETS;
   return `<section class="wallet-manager-panel" aria-label="ウォレット一覧">
-    <div class="wallet-manager-heading"><div><span class="kicker">YOUR WALLETS</span><h2>ウォレットを選択</h2><p>資産・公開鍵・保有NFTはウォレットごとに管理されます。</p></div><button id="addWalletButton" class="wallet-add-button" type="button"><span>＋</span> 新規作成</button></div>
+    <div class="wallet-manager-heading"><div><span class="kicker">YOUR WALLETS</span><h2>ウォレットを選択</h2><p>資産・公開鍵・保有NFTはウォレットごとに管理されます。</p></div><button id="addWalletButton" class="wallet-add-button" type="button" ${atWalletLimit?"disabled":""}><span>${atWalletLimit?"✓":"＋"}</span> ${atWalletLimit?`最大${MAX_WALLETS}個まで作成済み`:"新規作成"}</button></div>
     <div class="wallet-account-list">${state.wallets.map(wallet=>`<button class="wallet-account-card ${wallet.id===current?.id?"active":""}" data-wallet-switch="${escapeHtml(wallet.id)}" type="button" aria-pressed="${wallet.id===current?.id}">
       <span class="wallet-account-icon">O</span><span class="wallet-account-copy"><strong>${escapeHtml(wallet.name)}</strong><code>${escapeHtml(shortWalletAddress(wallet.address))}</code></span><span class="wallet-account-balance">${fmtEth(wallet.ethBalance)}</span>
     </button>`).join("")}</div>
@@ -734,6 +759,7 @@ function renderWalletCreate(){
   $("createWallet").onclick=()=>openSeedModal();
 }
 function openSeedModal(){
+  if(state.wallets.length>=MAX_WALLETS){toast(`このサイト内で作成できるウォレットは最大${MAX_WALLETS}個です`);return}
   const walletNumber=state.wallets.length+1;
   const seedWords=seedWordsForWallet(walletNumber);
   const seed3Options=[seedWords[3],seedWords[2],seedWords[5]];
@@ -746,6 +772,7 @@ function openSeedModal(){
     <div class="form-grid" style="margin-top:15px"><div class="field"><label>3番目の単語</label><select id="seed3" class="select"><option value="" selected disabled hidden>選択してください</option>${seed3Options.map(word=>`<option>${word}</option>`).join("")}</select></div><div class="field"><label>9番目の単語</label><select id="seed9" class="select"><option value="" selected disabled hidden>選択してください</option>${seed9Options.map(word=>`<option>${word}</option>`).join("")}</select></div></div>
     <button id="finishWallet" class="primary" style="width:100%;margin-top:15px" type="button">ウォレット作成を完了</button>`);
   $("finishWallet").onclick=()=>{
+    if(state.wallets.length>=MAX_WALLETS){closeModal();toast(`このサイト内で作成できるウォレットは最大${MAX_WALLETS}個です`);return}
     if($("seed3").value!==seedWords[2]||$("seed9").value!==seedWords[8]){error("指定された単語を確認してください");return}
     let address=state.wallets.length?generateDemoWalletAddress():WALLET_ADDRESS;
     while(walletByAddress(address))address=generateDemoWalletAddress();
@@ -998,6 +1025,7 @@ function renderAdmissionAuthState(){
   $("admissionVerifyButton").classList.toggle("hidden",live||used);
   $("admissionVerifyButton").innerHTML=expired?'ウォレットで再認証 <span>→</span>':'ウォレットで入館認証 <span>→</span>';
   $("admissionCheckInButton").classList.toggle("hidden",!live);
+  $("admissionPass").classList.toggle("checkin-ready",live);
   if(live)updateAdmissionLiveAuth();
 }
 
@@ -1009,8 +1037,8 @@ function updateAdmissionLiveAuth(){
     clearInterval(admissionAuthTimer);admissionAuthTimer=null;admissionVerifiedTokenId=null;
     log("admission_auth_expired",{ticket_id:owned.ticketId,token_id:owned.tokenId});renderAdmissionAuthState();return;
   }
-  const seconds=Math.ceil(remaining/1000),slot=Math.floor(Date.now()/3000);
-  $("admissionLiveCode").textContent=admissionLiveCode(`${admissionAuthNonce}:${slot}`);
+  const seconds=Math.ceil(remaining/1000),slot=Math.floor((ADMISSION_AUTH_TTL_MS-remaining)/3000);
+  $("admissionLiveCode").textContent=admissionLiveCode(admissionAuthNonce);
   $("admissionLiveCountdown").textContent=`有効期限まで ${seconds}秒`;
   $("admissionLiveProof").style.setProperty("--live-phase",String(slot%6));
 }
@@ -1049,7 +1077,7 @@ function completeAdmissionCheckIn(){
   owned.admissionUsedAt=now();
   log("admission_check_in_completed",{ticket_id:owned.ticketId,token_id:owned.tokenId,used_at:owned.admissionUsedAt});
   clearInterval(admissionAuthTimer);admissionAuthTimer=null;admissionVerifiedTokenId=null;
-  renderAdmissionAuthState();toast("入館処理が完了しました");
+  renderAdmissionAuthState();renderMission();toast("入館処理が完了し、進捗へ反映されました");
 }
 
 function openAdmissionPass(index){
@@ -1373,7 +1401,7 @@ $("admissionSignatureBackdrop").onclick=cancelAdmissionAuthentication;
 $("gameClose").onclick=closeGameExperience;
 $("resetProgressButton").onclick=openResetConfirmation;
 window.addEventListener("pagehide",persistState);
-window.addEventListener("resize",()=>{if(walletSecurityGuideOpen())positionWalletSecurityGuide()});
+window.addEventListener("resize",()=>{if(walletSecurityGuideOpen())requestAnimationFrame(()=>{positionWalletSecurityGuide();keepWalletSecurityGuideTargetInView();positionWalletSecurityGuide()})});
 window.addEventListener("scroll",()=>{if(walletSecurityGuideOpen())requestAnimationFrame(positionWalletSecurityGuide)},{passive:true});
 window.addEventListener("message",event=>{
   const ticketId=state.activeGameTicketId,program=benefitProgram(ticketId);
