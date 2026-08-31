@@ -1265,6 +1265,7 @@ body.progress-guide-open {
   position: fixed;
   z-index: 100;
   inset: 0;
+  touch-action: none;
   background: rgba(6, 9, 18, .76);
   backdrop-filter: blur(2px);
 }
@@ -1432,8 +1433,8 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
 
 @media (max-width: 760px) {
   body.progress-guide-open {
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .progress-guide-backdrop {
@@ -1445,11 +1446,27 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   }
 
   body.progress-guide-open .mission-panel {
+    position: fixed;
+    top: max(10px,env(safe-area-inset-top));
+    right: max(10px,env(safe-area-inset-right));
+    bottom: auto;
+    left: max(10px,env(safe-area-inset-left));
+    width: auto;
+    height: calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    min-height: 0;
+    max-height: calc(100dvh - 20px);
+    margin: 0;
     padding: 16px;
+    overflow: hidden;
     box-shadow:
       0 0 0 3px rgba(255,255,255,.15),
       0 0 38px 13px rgba(221,228,255,.34),
       0 24px 55px rgba(0,0,0,.42);
+  }
+
+  body.progress-guide-open .wallet-mini-status,
+  body.progress-guide-open .progress-reset {
+    display: none;
   }
 
   body.progress-guide-open .mission-panel > .mission-list {
@@ -1466,7 +1483,17 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   .progress-guide-bubble {
     margin-top: 12px;
     padding: 17px;
+    max-height: calc(100dvh - 250px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
     border-radius: 16px;
+  }
+
+  .progress-guide-bubble button {
+    position: sticky;
+    z-index: 1;
+    bottom: 0;
   }
 
   .progress-guide-bubble h2 {
@@ -1670,6 +1697,8 @@ body.wallet-security-guide-open #walletApp {
     max-height: min(245px,calc(100dvh - 24px));
     padding: 17px;
     border-radius: 16px;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .wallet-security-guide h2 {

@@ -231,6 +231,7 @@ let seedPhraseVisible=false;
 let walletSecurityGuideStep=0;
 let walletSecurityGuideTarget=null;
 let walletSecurityGuideInitialScroll={x:0,y:0};
+let mobileGuideTouchY=null;
 let activeAdmissionIndex=null;
 let admissionAuthTimer=null;
 let admissionAuthExpiresAt=0;
@@ -336,7 +337,28 @@ function closeProgressGuide(){
   document.querySelector(`.switcher-item[data-app="${state.currentApp}"]`)?.focus();
 }
 
+function progressGuideOpen(){return !$("progressGuideBubble").classList.contains("hidden")}
 function walletSecurityGuideOpen(){return !$("walletSecurityGuide").classList.contains("hidden")}
+function recordMobileGuideTouchStart(event){
+  if(window.matchMedia("(max-width: 760px)").matches&&(progressGuideOpen()||walletSecurityGuideOpen()))mobileGuideTouchY=event.touches[0]?.clientY??null;
+}
+function preventMobileGuideViewportScroll(event){
+  if(!window.matchMedia("(max-width: 760px)").matches||(!progressGuideOpen()&&!walletSecurityGuideOpen()))return;
+  const element=event.target?.nodeType===Node.ELEMENT_NODE?event.target:event.target?.parentElement;
+  if(progressGuideOpen()&&element?.closest("#missionList"))return;
+  const scrollableBubble=element?.closest(progressGuideOpen()?"#progressGuideBubble":"#walletSecurityGuide");
+  if(scrollableBubble&&scrollableBubble.scrollHeight>scrollableBubble.clientHeight){
+    const maxScrollTop=scrollableBubble.scrollHeight-scrollableBubble.clientHeight;
+    if(event.type==="wheel"){
+      if((event.deltaY<0&&scrollableBubble.scrollTop>0)||(event.deltaY>0&&scrollableBubble.scrollTop<maxScrollTop-1))return;
+    }else{
+      const currentY=event.touches[0]?.clientY??mobileGuideTouchY,deltaY=currentY-mobileGuideTouchY;
+      mobileGuideTouchY=currentY;
+      if((deltaY>0&&scrollableBubble.scrollTop>0)||(deltaY<0&&scrollableBubble.scrollTop<maxScrollTop-1))return;
+    }
+  }
+  event.preventDefault();
+}
 function startWalletSecurityGuide(){
   if(!state.wallets.length||state.walletSecurityGuideCompleted)return;
   if(state.currentApp!=="wallet")switchApp("wallet");
@@ -1403,6 +1425,9 @@ $("resetProgressButton").onclick=openResetConfirmation;
 window.addEventListener("pagehide",persistState);
 window.addEventListener("resize",()=>{if(walletSecurityGuideOpen())requestAnimationFrame(()=>{positionWalletSecurityGuide();keepWalletSecurityGuideTargetInView();positionWalletSecurityGuide()})});
 window.addEventListener("scroll",()=>{if(walletSecurityGuideOpen())requestAnimationFrame(positionWalletSecurityGuide)},{passive:true});
+document.addEventListener("touchmove",preventMobileGuideViewportScroll,{passive:false});
+document.addEventListener("touchstart",recordMobileGuideTouchStart,{passive:true});
+window.addEventListener("wheel",preventMobileGuideViewportScroll,{passive:false});
 window.addEventListener("message",event=>{
   const ticketId=state.activeGameTicketId,program=benefitProgram(ticketId);
   if(event.source!==$("gameFrame").contentWindow||!program||event.data?.type!==program.messageType)return;
