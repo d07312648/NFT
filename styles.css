@@ -276,15 +276,17 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   }
 
   .mission-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
+    display: block;
   }
 
-  .mission-heading .kicker,
   .mission-heading p {
     display: none;
+  }
+
+  .mission-heading .kicker {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 8px;
   }
 
   .mission-heading h2 {
@@ -1500,6 +1502,175 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   }
 }
 
+/* 1つ目のウォレット作成後：公開鍵・シードフレーズ・秘密鍵ガイド */
+body.wallet-security-guide-open {
+  overflow: hidden;
+}
+
+.wallet-security-guide-backdrop {
+  position: fixed;
+  z-index: 260;
+  inset: 0;
+  background: rgba(5,8,17,.82);
+  backdrop-filter: blur(2px);
+}
+
+.wallet-guide-highlight {
+  position: relative !important;
+  z-index: 270 !important;
+  isolation: isolate;
+  pointer-events: none;
+  outline: 3px solid rgba(255,255,255,.96);
+  outline-offset: 7px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 10px rgba(255,255,255,.13),0 0 48px 17px rgba(150,164,255,.42);
+}
+
+.wallet-guide-highlight::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -7px;
+  border-radius: 18px;
+  background: #fbfaff;
+}
+
+.address-box.wallet-guide-highlight::before {
+  background: #f8f9fb;
+}
+
+.seed-phrase-display.wallet-guide-highlight,
+.private-key-display.wallet-guide-highlight {
+  border-color: var(--line);
+  background: #f8f9fb;
+}
+
+.seed-phrase-display.wallet-guide-highlight > span {
+  border-color: #e4e7ed;
+  background: #fff;
+}
+
+.seed-phrase-display.wallet-guide-highlight i {
+  color: #757d8e;
+}
+
+.seed-phrase-display.wallet-guide-highlight b,
+.private-key-display.wallet-guide-highlight code {
+  color: #384055;
+}
+
+.wallet-security-guide {
+  position: fixed;
+  z-index: 280;
+  top: 100px;
+  right: 24px;
+  width: min(380px,calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 21px;
+  overflow: auto;
+  border: 1px solid #dce2ef;
+  border-radius: 19px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 28px 75px rgba(0,0,0,.4);
+  animation: walletSecurityGuideIn .24s ease-out both;
+}
+
+.wallet-security-guide-label {
+  color: #5b42dc;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.45;
+  letter-spacing: .05em;
+}
+
+.wallet-security-guide h2 {
+  margin: 8px 0 10px;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.wallet-security-guide p {
+  margin: 0;
+  color: #535b6c;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.wallet-security-guide button {
+  width: 100%;
+  min-height: 47px;
+  margin-top: 17px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg,#5b3de0,#1769ff);
+  box-shadow: 0 11px 25px rgba(66,63,209,.25);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.wallet-security-guide button span {
+  font-size: 17px;
+}
+
+.wallet-security-guide button:focus-visible {
+  outline: 3px solid rgba(126,101,250,.38);
+  outline-offset: 3px;
+}
+
+@keyframes walletSecurityGuideIn {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 760px) {
+  .wallet-security-guide-backdrop {
+    background: rgba(5,8,17,.84);
+  }
+
+  .wallet-security-guide {
+    top: auto;
+    right: max(12px,env(safe-area-inset-right));
+    bottom: max(12px,env(safe-area-inset-bottom));
+    left: max(12px,env(safe-area-inset-left));
+    width: auto;
+    max-height: min(245px,calc(100dvh - 24px));
+    padding: 17px;
+    border-radius: 16px;
+  }
+
+  .wallet-security-guide h2 {
+    margin: 6px 0 7px;
+    font-size: 15px;
+  }
+
+  .wallet-security-guide p {
+    font-size: 10px;
+    line-height: 1.65;
+  }
+
+  .wallet-security-guide button {
+    min-height: 44px;
+    margin-top: 12px;
+  }
+
+  .wallet-guide-highlight {
+    outline-offset: 4px;
+    box-shadow: 0 0 0 7px rgba(255,255,255,.13),0 0 35px 12px rgba(150,164,255,.4);
+  }
+
+  .wallet-guide-highlight::before {
+    inset: -4px;
+  }
+}
+
 /* ウォレットの研究用疑似秘密鍵 */
 .private-key-vault {
   margin-top: 18px;
@@ -1594,6 +1765,90 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   line-height: 1.65;
 }
 
+.seed-phrase-vault {
+  margin: 0;
+  padding: 0;
+}
+
+.private-key-section {
+  margin-top: 19px;
+  padding-top: 18px;
+  border-top: 1px solid #ded8f5;
+}
+
+.seed-phrase-display {
+  position: relative;
+  margin-top: 13px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px;
+  background: #202238;
+}
+
+.seed-phrase-display > span {
+  min-width: 0;
+  padding: 9px 8px;
+  display: grid;
+  grid-template-columns: 18px minmax(0,1fr);
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,.045);
+}
+
+.seed-phrase-display i {
+  color: #8f96bd;
+  font-size: 8px;
+  font-style: normal;
+}
+
+.seed-phrase-display b {
+  overflow: hidden;
+  color: #f0f1ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+}
+
+.seed-phrase-display.masked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 45deg, rgba(148,140,214,.22) 0 25%, rgba(42,45,74,.26) 0 50%) 0 0 / 10px 10px;
+  mix-blend-mode: screen;
+}
+
+.seed-phrase-display.masked b {
+  color: rgba(221,224,255,.48);
+  filter: blur(2.5px);
+  user-select: none;
+}
+
+.seed-phrase-toggle {
+  margin-top: 11px;
+}
+
+.seed-phrase-vault > p {
+  margin: 11px 0 0;
+  color: #766e91;
+  font-size: 8px;
+  line-height: 1.65;
+}
+
+.private-key-section > p {
+  margin: 11px 0 0;
+  color: #766e91;
+  font-size: 8px;
+  line-height: 1.65;
+}
+
 @media (max-width: 760px) {
   .private-key-vault {
     padding: 15px;
@@ -1613,6 +1868,14 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
     width: 100%;
     min-height: 44px;
     font-size: 10px;
+  }
+
+  .seed-phrase-display {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .seed-phrase-display > span {
+    min-height: 39px;
   }
 }
 

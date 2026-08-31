@@ -1,6 +1,11 @@
 
 const WALLET_ADDRESS = "0x7A4F2C9B6E18D4A1F335B9C8705E1199AB8E93C2";
-const SEED_WORDS = ["orbit","harbor","velvet","maple","crystal","planet","silver","echo","canvas","river","gentle","sunset"];
+const SEED_WORD_BANK = [
+  "orbit","harbor","velvet","maple","crystal","planet","silver","echo","canvas","river","gentle","sunset",
+  "nebula","anchor","lunar","copper","meadow","prism","aurora","drift","summit","flame","willow","comet",
+  "forest","marble","cobalt","breeze","lantern","ocean","amber","feather","valley","coral","thunder","olive",
+  "galaxy","bridge","pearl","canyon","violet","island","meteor","cedar","horizon","frost","clover","dawn"
+];
 const NETWORK_FEE_ETH = 0.0032;
 const PURCHASE_GAS_ETH = 0.0028;
 const STORAGE_KEY = "nft-journey-lab-session-v1";
@@ -10,6 +15,11 @@ const PURCHASE_DELAY_MS = 2400;
 const ADMISSION_AUTH_TTL_MS = 30000;
 const AIRDROP_PURCHASE_THRESHOLD = 3;
 const AIRDROP_TICKET_ID = "nexus-future-pass";
+const WALLET_SECURITY_GUIDE_STEPS = [
+  {target:".address-box",label:"1 / 3 · 公開鍵",title:"公開鍵は、暗号資産の受取先を伝えるアドレスです",description:"取引所から暗号資産を送るとき、この公開鍵を送金先へ貼り付けます。\n公開鍵は、暗号資産を受け取るために相手へ共有できます。",action:"次へ"},
+  {target:".seed-phrase-display",label:"2 / 3 · シードフレーズ",title:"ウォレットを復旧するための12単語です",description:"端末の紛失や故障時に、ウォレットを復旧できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\nこの12単語を知る人はウォレットを復旧できるため、第三者には共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"次へ"},
+  {target:".private-key-display",label:"3 / 3 · 秘密鍵",title:"資産を操作するための最も重要な情報です",description:"秘密鍵を知る人は、ウォレット内の資産を操作できます。\n実際のウォレットでは、表示する際にパスワードの入力を求められます。\n絶対に第三者へ共有しないでください。\nスクリーンショットではなく、紙に手書きして安全な場所に保管することをおすすめします。",action:"閉じる"}
+];
 const NFT_BENEFIT_PROGRAMS = {
   "nova-live":{
     gameName:"星わたり モモ",challengeTitle:"NOVA LIVE 2026 特典チャレンジ",
@@ -77,7 +87,7 @@ const markets = {
 
 const missions = [
   ["account","取引所アカウントを作成","本人確認を完了する"],
-  ["buy","取引所でETHを購入","日本円から暗号資産へ交換"],
+  ["buy","取引所で暗号資産を購入","日本円から暗号資産へ交換"],
   ["wallet","ウォレットを作成","公開鍵を取得する"],
   ["copy","公開鍵をコピー","ウォレットからコピーする"],
   ["send","取引所から送金","公開鍵を貼り付けて送金"],
@@ -107,6 +117,7 @@ function createDefaultState(){
     appEnteredAt:null, appTimes:{exchange:0,wallet:0,market:0},
     accountCreated:false, ethPurchased:false, walletCreated:false, seedConfirmed:false, privateKey:null,
     wallets:[], activeWalletId:null, connectedWalletId:null, copiedWalletId:null,
+    walletSecurityGuideCompleted:false,
     addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, receiptChecked:false, transferPending:false, transferCompletesAt:null, transferDestinationWalletId:null, lastReceivedAmount:0, lastReceivedWalletId:null,
     marketConnected:false, connectionSigned:false, selectedTicketId:null,
     purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null, pendingPurchaseWalletId:null, purchaseCompletesAt:null, admissionPassViewed:false,
@@ -136,6 +147,7 @@ function loadSavedState(){
     if(!["exchange","wallet","market"].includes(restored.currentApp))restored.currentApp="exchange";
     if(!["exchange-home","exchange-buy","exchange-send"].includes(restored.currentExchangeTab))restored.currentExchangeTab="exchange-home";
     if(!["wallet-home","wallet-receive","wallet-nft","wallet-benefits"].includes(restored.currentWalletTab))restored.currentWalletTab="wallet-home";
+    if(typeof saved.state.walletSecurityGuideCompleted!=="boolean")restored.walletSecurityGuideCompleted=!!saved.state.walletCreated;
     const savedWallets=Array.isArray(saved.state.wallets)?saved.state.wallets:[];
     restored.wallets=savedWallets.map((wallet,index)=>({
       id:String(wallet.id||`wallet-${index+1}`),
@@ -143,10 +155,11 @@ function loadSavedState(){
       address:/^0x[0-9a-f]{40}$/i.test(wallet.address||"")?wallet.address:generateDemoWalletAddress(),
       privateKey:/^0x[0-9a-f]{64}$/i.test(wallet.privateKey||"")?wallet.privateKey:generateDemoPrivateKey(),
       ethBalance:Math.max(0,Number(wallet.ethBalance)||0),
-      createdAt:wallet.createdAt||restored.startedAt||now()
+      createdAt:wallet.createdAt||restored.startedAt||now(),
+      seedPhrase:Array.isArray(wallet.seedPhrase)&&wallet.seedPhrase.length===12?wallet.seedPhrase.map(String):seedWordsForWallet(index+1)
     }));
     if(!restored.wallets.length&&restored.walletCreated){
-      restored.wallets.push({id:"wallet-1",name:"ウォレット 1",address:WALLET_ADDRESS,privateKey:/^0x[0-9a-f]{64}$/i.test(restored.privateKey||"")?restored.privateKey:generateDemoPrivateKey(),ethBalance:Math.max(0,Number(restored.walletEth)||0),createdAt:restored.startedAt||now()});
+      restored.wallets.push({id:"wallet-1",name:"ウォレット 1",address:WALLET_ADDRESS,privateKey:/^0x[0-9a-f]{64}$/i.test(restored.privateKey||"")?restored.privateKey:generateDemoPrivateKey(),ethBalance:Math.max(0,Number(restored.walletEth)||0),createdAt:restored.startedAt||now(),seedPhrase:seedWordsForWallet(1)});
     }
     restored.walletCreated=restored.wallets.length>0;
     restored.seedConfirmed=restored.wallets.length>0;
@@ -213,6 +226,9 @@ let tickerTimer=null;
 let transferTimer=null;
 let purchaseTimer=null;
 let privateKeyVisible=false;
+let seedPhraseVisible=false;
+let walletSecurityGuideStep=0;
+let walletSecurityGuideTarget=null;
 let activeAdmissionIndex=null;
 let admissionAuthTimer=null;
 let admissionAuthExpiresAt=0;
@@ -238,6 +254,10 @@ function generateDemoWalletAddress(){
   if(globalThis.crypto?.getRandomValues)globalThis.crypto.getRandomValues(bytes);
   else for(let index=0;index<bytes.length;index++)bytes[index]=Math.floor(Math.random()*256);
   return `0x${Array.from(bytes,byte=>byte.toString(16).padStart(2,"0")).join("").toUpperCase()}`;
+}
+function seedWordsForWallet(walletNumber){
+  const start=((Math.max(1,Number(walletNumber)||1)-1)*12)%SEED_WORD_BANK.length;
+  return Array.from({length:12},(_,index)=>SEED_WORD_BANK[(start+index)%SEED_WORD_BANK.length]);
 }
 function log(type,detail={}){state.eventLog.push({timestamp:now(),app:state.currentApp,type,...detail})}
 function fmtEth(v){return `${Number(v||0).toFixed(4)} ETH`}
@@ -314,6 +334,79 @@ function closeProgressGuide(){
   document.querySelector(`.switcher-item[data-app="${state.currentApp}"]`)?.focus();
 }
 
+function walletSecurityGuideOpen(){return !$("walletSecurityGuide").classList.contains("hidden")}
+function startWalletSecurityGuide(){
+  if(!state.wallets.length||state.walletSecurityGuideCompleted)return;
+  if(state.currentApp!=="wallet")switchApp("wallet");
+  state.currentWalletTab="wallet-receive";renderWallet();
+  walletSecurityGuideStep=0;
+  $("walletSecurityGuideBackdrop").classList.remove("hidden");
+  $("walletSecurityGuideBackdrop").setAttribute("aria-hidden","false");
+  $("walletSecurityGuide").classList.remove("hidden");
+  document.body.classList.add("wallet-security-guide-open");
+  log("wallet_security_guide_started",{wallet_id:activeWallet()?.id||null});
+  renderWalletSecurityGuideStep();
+}
+function renderWalletSecurityGuideStep(){
+  const step=WALLET_SECURITY_GUIDE_STEPS[walletSecurityGuideStep];if(!step)return;
+  setSeedPhraseVisibility(walletSecurityGuideStep===1);
+  setPrivateKeyVisibility(walletSecurityGuideStep===2);
+  walletSecurityGuideTarget?.classList.remove("wallet-guide-highlight");
+  walletSecurityGuideTarget=document.querySelector(`#walletContent ${step.target}`);
+  if(!walletSecurityGuideTarget){closeWalletSecurityGuide();return}
+  walletSecurityGuideTarget.classList.add("wallet-guide-highlight");
+  $("walletSecurityGuideLabel").textContent=step.label;
+  $("walletSecurityGuideTitle").textContent=step.title;
+  $("walletSecurityGuideDescription").textContent=step.description;
+  $("walletSecurityGuideNext").innerHTML=`${step.action}<span aria-hidden="true">${walletSecurityGuideStep===WALLET_SECURITY_GUIDE_STEPS.length-1?"✓":"→"}</span>`;
+  $("walletSecurityGuideNext").setAttribute("aria-label",step.action);
+  log("wallet_security_guide_step_viewed",{step:walletSecurityGuideStep+1,target:step.target});
+  const mobile=window.matchMedia("(max-width: 760px)").matches;
+  walletSecurityGuideTarget.scrollIntoView({behavior:"smooth",block:mobile?"start":"center"});
+  window.setTimeout(()=>{
+    if(!walletSecurityGuideOpen())return;
+    if(mobile)window.scrollBy({top:-84,behavior:"auto"});
+    positionWalletSecurityGuide();
+    $("walletSecurityGuideNext").focus({preventScroll:true});
+  },mobile?340:260);
+}
+function positionWalletSecurityGuide(){
+  if(!walletSecurityGuideOpen()||!walletSecurityGuideTarget)return;
+  const bubble=$("walletSecurityGuide"),targetRect=walletSecurityGuideTarget.getBoundingClientRect();
+  bubble.style.removeProperty("top");bubble.style.removeProperty("right");bubble.style.removeProperty("bottom");bubble.style.removeProperty("left");
+  if(window.matchMedia("(max-width: 760px)").matches){
+    const bottomBubbleTop=window.innerHeight-bubble.offsetHeight-12;
+    if(targetRect.bottom+14>bottomBubbleTop&&targetRect.top>bubble.offsetHeight+32){bubble.style.top="12px";bubble.style.bottom="auto"}
+    return;
+  }
+  const margin=20,bubbleWidth=Math.min(380,window.innerWidth-32),bubbleHeight=bubble.offsetHeight;
+  const canUseRight=targetRect.right+margin+bubbleWidth<=window.innerWidth-16;
+  const canUseLeft=targetRect.left-margin-bubbleWidth>=16;
+  let left,top;
+  if(canUseRight||canUseLeft){
+    left=canUseRight?targetRect.right+margin:targetRect.left-bubbleWidth-margin;
+    top=Math.min(window.innerHeight-bubbleHeight-16,Math.max(16,targetRect.top+(targetRect.height-bubbleHeight)/2));
+  }else{
+    left=Math.min(window.innerWidth-bubbleWidth-16,Math.max(16,targetRect.left+(targetRect.width-bubbleWidth)/2));
+    const canUseBelow=targetRect.bottom+margin+bubbleHeight<=window.innerHeight-16;
+    top=canUseBelow?targetRect.bottom+margin:Math.max(16,targetRect.top-bubbleHeight-margin);
+  }
+  bubble.style.left=`${left}px`;bubble.style.top=`${top}px`;
+}
+function advanceWalletSecurityGuide(){
+  if(!walletSecurityGuideOpen())return;
+  if(walletSecurityGuideStep>=WALLET_SECURITY_GUIDE_STEPS.length-1){closeWalletSecurityGuide();return}
+  walletSecurityGuideStep++;renderWalletSecurityGuideStep();
+}
+function closeWalletSecurityGuide(){
+  setSeedPhraseVisibility(false);setPrivateKeyVisibility(false);
+  walletSecurityGuideTarget?.classList.remove("wallet-guide-highlight");walletSecurityGuideTarget=null;
+  $("walletSecurityGuideBackdrop").classList.add("hidden");$("walletSecurityGuideBackdrop").setAttribute("aria-hidden","true");
+  $("walletSecurityGuide").classList.add("hidden");document.body.classList.remove("wallet-security-guide-open");
+  state.walletSecurityGuideCompleted=true;log("wallet_security_guide_completed",{wallet_id:activeWallet()?.id||null});
+  $("copyAddress")?.focus({preventScroll:true});
+}
+
 function start(){
   state.participantId=participantId();state.startedAt=now();state.appEnteredAt=performance.now();
   landing.classList.add("hidden");workspace.classList.remove("hidden");appSwitcher.classList.remove("hidden");
@@ -332,6 +425,7 @@ function restoreSession(){
   marketApp.classList.toggle("hidden",state.currentApp!=="market");
   document.querySelectorAll(".switcher-item").forEach(button=>button.classList.toggle("active",button.dataset.app===state.currentApp));
   log("session_restored");renderAll();startTicker();resumePendingOperations();
+  if(state.wallets.length&&!state.walletSecurityGuideCompleted)requestAnimationFrame(startWalletSecurityGuide);
   if(restoredAirdrop)requestAnimationFrame(()=>showAirdropReward(restoredAirdrop));
 }
 
@@ -426,7 +520,7 @@ function renderExchangeHome(){
     <span class="task-callout">${state.accountCreated?"本人確認済み":"最初にアカウント作成が必要です"}</span></div>
     <div class="balance-grid">
       <div class="balance-card"><small>TOTAL BALANCE</small><strong>${fmtYen(state.exchangeYen+state.exchangeEth*markets.ETH.price)}</strong><span>日本円 ${fmtYen(state.exchangeYen)} ／ ETH ${fmtEth(state.exchangeEth)}</span></div>
-      <div class="action-card"><h3>${state.accountCreated?"取引を開始できます":"アカウントを開設"}</h3><p>${state.accountCreated?"ETHを購入してウォレットへの送金準備を進めてください。":"メールアドレス登録と疑似本人確認を行います。"}</p>
+      <div class="action-card"><h3>${state.accountCreated?"取引を開始できます":"アカウントを開設"}</h3><p>${state.accountCreated?"イーサリアム(ETH)を購入してウォレットへの送金準備を進めてください。":"メールアドレス登録と疑似本人確認を行います。"}</p>
       <button id="accountButton" class="primary" type="button">${state.accountCreated?"ETHを購入する":"口座開設を開始"}</button></div>
     </div>
     <div class="price-board">
@@ -499,7 +593,7 @@ function renderExchangeBuy(){
     <div class="dashboard-title"><div><span class="kicker">BUY CRYPTO</span><h1>ETHを購入</h1><p>価格は研究用にリアルタイム風に変動します。</p></div><span id="buyBalance" class="task-callout">日本円残高 ${fmtYen(state.exchangeYen)}</span></div>
     <div class="buy-layout">
       <div class="trade-card">
-        <div class="rate-head"><div><small>ETH / JPY</small><br><strong id="liveEthPrice">${fmtYen(markets.ETH.price)}</strong></div><span id="liveEthChange" class="change ${markets.ETH.change>=0?"up":"down"}">${markets.ETH.change>=0?"+":""}${markets.ETH.change.toFixed(2)}%</span></div>
+        <div class="rate-head"><div><small>ETH / JPY（１イーサリアムの価格）</small><br><strong id="liveEthPrice">${fmtYen(markets.ETH.price)}</strong></div><span id="liveEthChange" class="change ${markets.ETH.change>=0?"up":"down"}">${markets.ETH.change>=0?"+":""}${markets.ETH.change.toFixed(2)}%</span></div>
         <div id="liveEthChart" class="sparkline">${chartSvg()}</div>
         <div class="quick-amounts">${[25000,50000,80000,95000].map(v=>`<button data-yen="${v}" type="button">${fmtYen(v)}</button>`).join("")}</div>
         <div class="amount-box"><input id="buyYen" class="input" type="text" inputmode="numeric" autocomplete="off" value="${escapeHtml(state.purchaseYen)}" placeholder="購入金額を入力"><span>JPY</span></div>
@@ -621,7 +715,7 @@ function bindWalletManager(){
   if($("addWalletButton"))$("addWalletButton").onclick=openSeedModal;
 }
 function renderWallet(){
-  privateKeyVisible=false;
+  privateKeyVisible=false;seedPhraseVisible=false;
   document.querySelectorAll("#walletTabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===state.currentWalletTab));
   if(!state.wallets.length){renderWalletCreate();return}
   if(!activeWallet()){state.activeWalletId=state.wallets[0].id;syncLegacyWalletState()}
@@ -641,23 +735,25 @@ function renderWalletCreate(){
 }
 function openSeedModal(){
   const walletNumber=state.wallets.length+1;
+  const seedWords=seedWordsForWallet(walletNumber);
+  const seed3Options=[seedWords[3],seedWords[2],seedWords[5]];
+  const seed9Options=[seedWords[6],seedWords[10],seedWords[8]];
   openModal("SECRET RECOVERY PHRASE",`${walletNumber}個目のウォレットを作成`,`
     <div class="notice warning">実際のウォレットでは、この単語列を失うと資産を復旧できません。第三者に共有してはいけません。</div>
     <div class="seed-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
-      ${SEED_WORDS.map((w,i)=>`<div style="padding:10px;border:1px solid #e3e6ed;border-radius:10px;font:10px monospace"><span style="color:#a0a5b0;margin-right:6px">${i+1}</span>${w}</div>`).join("")}
+      ${seedWords.map((w,i)=>`<div style="padding:10px;border:1px solid #e3e6ed;border-radius:10px;font:10px monospace"><span style="color:#a0a5b0;margin-right:6px">${i+1}</span>${w}</div>`).join("")}
     </div>
-    <div class="form-grid" style="margin-top:15px"><div class="field"><label>3番目の単語</label><select id="seed3" class="select"><option value="">選択</option><option>velvet</option><option>maple</option><option>planet</option></select></div><div class="field"><label>9番目の単語</label><select id="seed9" class="select"><option value="">選択</option><option>canvas</option><option>river</option><option>sunset</option></select></div></div>
-    <label class="check" style="margin-top:14px"><input id="seedAgree" type="checkbox"><span>復旧用フレーズの重要性を理解しました。</span></label>
+    <div class="form-grid" style="margin-top:15px"><div class="field"><label>3番目の単語</label><select id="seed3" class="select"><option value="" selected disabled hidden>選択してください</option>${seed3Options.map(word=>`<option>${word}</option>`).join("")}</select></div><div class="field"><label>9番目の単語</label><select id="seed9" class="select"><option value="" selected disabled hidden>選択してください</option>${seed9Options.map(word=>`<option>${word}</option>`).join("")}</select></div></div>
     <button id="finishWallet" class="primary" style="width:100%;margin-top:15px" type="button">ウォレット作成を完了</button>`);
   $("finishWallet").onclick=()=>{
-    if($("seed3").value!=="velvet"||$("seed9").value!=="canvas"){error("指定された単語を確認してください");return}
-    if(!$("seedAgree").checked){error("復旧用フレーズの確認が必要です");return}
+    if($("seed3").value!==seedWords[2]||$("seed9").value!==seedWords[8]){error("指定された単語を確認してください");return}
     let address=state.wallets.length?generateDemoWalletAddress():WALLET_ADDRESS;
     while(walletByAddress(address))address=generateDemoWalletAddress();
-    const wallet={id:`wallet-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name:`ウォレット ${walletNumber}`,address,privateKey:generateDemoPrivateKey(),ethBalance:0,createdAt:now()};
+    const wallet={id:`wallet-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name:`ウォレット ${walletNumber}`,address,privateKey:generateDemoPrivateKey(),ethBalance:0,createdAt:now(),seedPhrase:seedWords};
     state.wallets.push(wallet);state.activeWalletId=wallet.id;syncLegacyWalletState();
     log("wallet_created",{wallet_id:wallet.id,wallet_number:walletNumber,address:wallet.address});closeModal();toast(`${wallet.name}と秘密鍵を作成しました`);renderAll();
     state.currentWalletTab="wallet-receive";renderWallet();
+    if(walletNumber===1&&!state.walletSecurityGuideCompleted)requestAnimationFrame(startWalletSecurityGuide);
   };
 }
 function renderWalletHome(){
@@ -710,23 +806,53 @@ function privateKeyPanel(){
   const wallet=activeWallet();
   const visible=privateKeyVisible;
   return `<section class="private-key-vault">
-    <div class="private-key-heading"><div><span class="kicker">SECURITY</span><h2>秘密鍵</h2></div><span>研究用疑似データ</span></div>
-    <div id="privateKeyDisplay" class="private-key-display ${visible?"visible":"masked"}"><code id="privateKeyValue" aria-label="${visible?"秘密鍵を表示中":"秘密鍵は非表示"}">${visible?escapeHtml(wallet?.privateKey):maskedPrivateKey()}</code></div>
-    <button id="togglePrivateKey" class="private-key-toggle" type="button" aria-pressed="${visible}">${visible?"秘密鍵を隠す":"秘密鍵を表示する"}</button>
-    <p>実際の秘密鍵は第三者に共有せず、画面の録画やスクリーンショットにも残さないでください。</p>
+    <div class="seed-phrase-vault">
+      <div class="private-key-heading"><div><span class="kicker">RECOVERY</span><h2>シードフレーズ</h2></div><span>12単語・研究用疑似データ</span></div>
+      <div id="seedPhraseDisplay" class="seed-phrase-display ${seedPhraseVisible?"visible":"masked"}" aria-label="${seedPhraseVisible?"シードフレーズを表示中":"シードフレーズは非表示"}">${seedPhraseWords(wallet,seedPhraseVisible)}</div>
+      <button id="toggleSeedPhrase" class="private-key-toggle seed-phrase-toggle" type="button" aria-pressed="${seedPhraseVisible}">${seedPhraseVisible?"シードフレーズを隠す":"シードフレーズを表示する"}</button>
+      <p>シードフレーズはウォレットを復旧できる重要な情報です。秘密鍵と同様に第三者へ共有しないでください。</p>
+    </div>
+    <div class="private-key-section">
+      <div class="private-key-heading"><div><span class="kicker">SECURITY</span><h2>秘密鍵</h2></div><span>研究用疑似データ</span></div>
+      <div id="privateKeyDisplay" class="private-key-display ${visible?"visible":"masked"}"><code id="privateKeyValue" aria-label="${visible?"秘密鍵を表示中":"秘密鍵は非表示"}">${visible?escapeHtml(wallet?.privateKey):maskedPrivateKey()}</code></div>
+      <button id="togglePrivateKey" class="private-key-toggle" type="button" aria-pressed="${visible}">${visible?"秘密鍵を隠す":"秘密鍵を表示する"}</button>
+      <p>実際の秘密鍵は第三者に共有せず、画面の録画やスクリーンショットにも残さないでください。</p>
+    </div>
   </section>`;
+}
+function seedPhraseWords(wallet,visible){
+  const words=Array.isArray(wallet?.seedPhrase)&&wallet.seedPhrase.length===12?wallet.seedPhrase:seedWordsForWallet(Math.max(1,state.wallets.findIndex(item=>item.id===wallet?.id)+1));
+  return words.map((word,index)=>`<span><i>${index+1}</i><b>${visible?escapeHtml(word):"••••••"}</b></span>`).join("");
+}
+function setPrivateKeyVisibility(visible){
+  const wallet=activeWallet();privateKeyVisible=!!visible;
+  const display=$("privateKeyDisplay"),value=$("privateKeyValue"),button=$("togglePrivateKey");
+  if(!wallet||!display||!value||!button)return;
+  display.classList.toggle("visible",privateKeyVisible);display.classList.toggle("masked",!privateKeyVisible);
+  value.textContent=privateKeyVisible?wallet.privateKey:maskedPrivateKey();
+  value.setAttribute("aria-label",privateKeyVisible?"秘密鍵を表示中":"秘密鍵は非表示");
+  button.textContent=privateKeyVisible?"秘密鍵を隠す":"秘密鍵を表示する";button.setAttribute("aria-pressed",String(privateKeyVisible));
+}
+function setSeedPhraseVisibility(visible){
+  const wallet=activeWallet();seedPhraseVisible=!!visible;
+  const display=$("seedPhraseDisplay"),button=$("toggleSeedPhrase");
+  if(!wallet||!display||!button)return;
+  display.classList.toggle("visible",seedPhraseVisible);display.classList.toggle("masked",!seedPhraseVisible);
+  display.innerHTML=seedPhraseWords(wallet,seedPhraseVisible);
+  display.setAttribute("aria-label",seedPhraseVisible?"シードフレーズを表示中":"シードフレーズは非表示");
+  button.textContent=seedPhraseVisible?"シードフレーズを隠す":"シードフレーズを表示する";button.setAttribute("aria-pressed",String(seedPhraseVisible));
 }
 function bindPrivateKeyPanel(){
   const button=$("togglePrivateKey");if(!button)return;
   button.onclick=()=>{
-    const wallet=activeWallet();if(!wallet)return;
-    privateKeyVisible=!privateKeyVisible;
-    const display=$("privateKeyDisplay"),value=$("privateKeyValue");
-    display.classList.toggle("visible",privateKeyVisible);display.classList.toggle("masked",!privateKeyVisible);
-    value.textContent=privateKeyVisible?wallet.privateKey:maskedPrivateKey();
-    value.setAttribute("aria-label",privateKeyVisible?"秘密鍵を表示中":"秘密鍵は非表示");
-    button.textContent=privateKeyVisible?"秘密鍵を隠す":"秘密鍵を表示する";button.setAttribute("aria-pressed",String(privateKeyVisible));
+    setPrivateKeyVisibility(!privateKeyVisible);
     log(privateKeyVisible?"private_key_revealed":"private_key_hidden");
+  };
+  const seedButton=$("toggleSeedPhrase");if(!seedButton)return;
+  seedButton.onclick=()=>{
+    const wallet=activeWallet();if(!wallet)return;
+    setSeedPhraseVisibility(!seedPhraseVisible);
+    log(seedPhraseVisible?"seed_phrase_revealed":"seed_phrase_hidden",{wallet_id:wallet.id});
   };
 }
 async function copyWalletAddress(){
@@ -1225,6 +1351,7 @@ function downloadResult(){
 
 $("startButton").onclick=start;
 $("progressGuideStart").onclick=closeProgressGuide;
+$("walletSecurityGuideNext").onclick=advanceWalletSecurityGuide;
 $("homeButton").onclick=()=>{if(workspace.classList.contains("hidden"))return;window.scrollTo({top:0,behavior:"smooth"})};
 document.querySelectorAll(".switcher-item").forEach(b=>b.onclick=()=>switchApp(b.dataset.app));
 document.querySelectorAll("#exchangeTabs button").forEach(b=>b.onclick=()=>setExchangeTab(b.dataset.tab));
@@ -1246,6 +1373,8 @@ $("admissionSignatureBackdrop").onclick=cancelAdmissionAuthentication;
 $("gameClose").onclick=closeGameExperience;
 $("resetProgressButton").onclick=openResetConfirmation;
 window.addEventListener("pagehide",persistState);
+window.addEventListener("resize",()=>{if(walletSecurityGuideOpen())positionWalletSecurityGuide()});
+window.addEventListener("scroll",()=>{if(walletSecurityGuideOpen())requestAnimationFrame(positionWalletSecurityGuide)},{passive:true});
 window.addEventListener("message",event=>{
   const ticketId=state.activeGameTicketId,program=benefitProgram(ticketId);
   if(event.source!==$("gameFrame").contentWindow||!program||event.data?.type!==program.messageType)return;
