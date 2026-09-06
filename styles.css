@@ -2253,7 +2253,12 @@ body.signature-guide-open #modal {
     padding: 11px 14px;
   }
 
-  body.signature-guide-open .purchase-signature-card .signature-icon {
+  body.signature-guide-open .connection-signature-card .signature-head {
+    padding: 10px 14px;
+  }
+
+  body.signature-guide-open .purchase-signature-card .signature-icon,
+  body.signature-guide-open .connection-signature-card .signature-icon {
     width: 38px;
     height: 38px;
   }
@@ -2268,6 +2273,27 @@ body.signature-guide-open #modal {
     padding-bottom: 4px;
     font-size: 10px;
     line-height: 1.3;
+  }
+
+  body.signature-guide-open .connection-signature-card .signature-details {
+    padding: 9px 14px 11px;
+  }
+
+  body.signature-guide-open .connection-signature-card .hint {
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  body.signature-guide-open .connection-signature-card .signature-message {
+    padding: 9px;
+    font-size: 9px;
+    line-height: 1.4;
+  }
+
+  body.signature-guide-open .connection-signature-card .risk-row {
+    margin-top: 7px;
+    font-size: 9.5px;
+    line-height: 1.35;
   }
 
   .transaction-guide-highlight {

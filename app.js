@@ -143,7 +143,7 @@ function createDefaultState(){
     appEnteredAt:null, appTimes:{exchange:0,wallet:0,market:0},
     accountCreated:false, accountBalanceGuideCompleted:false, ethPurchased:false, walletCreated:false, seedConfirmed:false, privateKey:null,
     wallets:[], activeWalletId:null, connectedWalletId:null, copiedWalletId:null,
-    walletSecurityGuideCompleted:false, nftOwnershipGuideCompleted:false, firstPurchasedNftTokenId:null, airdropGuideCompleted:false,
+    walletSecurityGuideCompleted:false, nftOwnershipGuideCompleted:false, firstPurchasedNftTokenId:null, airdropGuideCompleted:false, admissionResaleGuideShown:false,
     addressCopied:false, addressPasted:false, transferSent:false, transferReceived:false, receiptChecked:false, walletReceiptGuideCompleted:false, transferPending:false, transferCompletesAt:null, transferDestinationWalletId:null, lastReceivedAmount:0, lastReceivedWalletId:null,
     marketConnected:false, connectionSigned:false, selectedTicketId:null,
     purchaseSigned:false, nftOwned:false, ownedNfts:[], pendingPurchaseTicketId:null, pendingPurchaseWalletId:null, purchaseCompletesAt:null, admissionPassViewed:false,
@@ -210,6 +210,7 @@ function loadSavedState(){
     const restoredPurchases=restored.ownedNfts.filter(item=>item.acquisitionType!=="airdrop");
     if(!restoredPurchases.some(item=>item.tokenId===restored.firstPurchasedNftTokenId))restored.firstPurchasedNftTokenId=restoredPurchases[0]?.tokenId||null;
     if(typeof saved.state.nftOwnershipGuideCompleted!=="boolean")restored.nftOwnershipGuideCompleted=false;
+    if(typeof saved.state.admissionResaleGuideShown!=="boolean")restored.admissionResaleGuideShown=restored.ownedNfts.some(item=>!!item.admissionUsedAt);
     if(restored.pendingPurchaseTicketId&&!restored.wallets.some(wallet=>wallet.id===restored.pendingPurchaseWalletId))restored.pendingPurchaseWalletId=restored.connectedWalletId||activeRestoredWallet?.id||null;
     if(!restored.transferReceived)restored.receiptChecked=false;
     restored.appEnteredAt=null;
@@ -259,6 +260,7 @@ let transferTimer=null;
 let purchaseTimer=null;
 let missionCompletionNoticeTimer=null;
 let missionCompletionNoticeActive=false;
+let missionCompletionNoticeCurrent=null;
 const missionCompletionNoticeQueue=[];
 let completionProgressGuideTimer=null;
 let progressGuideMode="intro";
@@ -409,6 +411,7 @@ function scheduleGuidePositionRefresh(passes=3){
   guidePositionRefreshFrame=requestAnimationFrame(refresh);
 }
 function startGuideGeometryMonitor(){
+  suspendMobileMissionCompletionNotice();
   if(guideGeometryMonitorFrame!==null)return;
   guideGeometryKey="";
   const monitor=()=>{
@@ -525,6 +528,7 @@ function closeExchangeBalanceGuide(){
   (exchangeBalanceGuideMode==="wallet-receipt"?$("walletPrimary"):$("accountButton"))?.focus({preventScroll:true});
   $("exchangeBalanceGuide").classList.remove("wallet-receipt-guide");
   if(state.wallets.length&&!state.walletSecurityGuideCompleted)requestAnimationFrame(startWalletSecurityGuide);
+  scheduleMissionCompletionNoticeResume();
 }
 
 function configureProgressGuide(mode){
@@ -548,6 +552,7 @@ function showProgressGuide(mode="intro"){
   $("progressGuideBubble").setAttribute("aria-hidden","false");
   document.body.classList.add("progress-guide-open");
   document.body.classList.toggle("progress-guide-completion-open",mode==="completion");
+  suspendMobileMissionCompletionNotice();
   log(mode==="completion"?"completion_progress_guide_opened":"progress_guide_opened");
   requestAnimationFrame(()=>$("progressGuideStart").focus({preventScroll:true}));
 }
@@ -564,12 +569,13 @@ function closeProgressGuide(){
   if(completion)state.completionProgressGuideCompleted=true;
   log(completion?"completion_progress_guide_closed":"progress_guide_completed");
   document.querySelector(`.switcher-item[data-app="${state.currentApp}"]`)?.focus();
+  scheduleMissionCompletionNoticeResume();
 }
 
 function showCompletionProgressGuide(){
   completionProgressGuideTimer=null;
   if(progress()!==100||state.completionProgressGuideCompleted||progressGuideOpen())return;
-  if(!$("admissionPass").classList.contains("hidden"))closeAdmissionPass();
+  if(!$("admissionPass").classList.contains("hidden"))return;
   document.querySelector(".mission-panel")?.scrollTo({top:0,behavior:"auto"});
   window.scrollTo({top:0,behavior:"auto"});
   showProgressGuide("completion");
@@ -734,6 +740,7 @@ function closeWalletSecurityGuide(){
   document.documentElement.classList.remove("wallet-security-guide-open");
   state.walletSecurityGuideCompleted=true;log("wallet_security_guide_completed",{wallet_id:activeWallet()?.id||null});
   $("copyAddress")?.focus({preventScroll:true});
+  scheduleMissionCompletionNoticeResume();
 }
 
 function firstPurchasedNftEntry(){
@@ -910,6 +917,7 @@ function closeNftOwnershipGuide(focusTarget=true){
   nftOwnershipGuideTarget=null;nftOwnershipGuideMode="purchase";
   if(focusTarget)requestAnimationFrame(()=>target?.focus({preventScroll:true}));
   if(closedMode==="airdrop")requestAnimationFrame(maybeStartNftOwnershipGuide);
+  scheduleMissionCompletionNoticeResume();
 }
 
 function openTransactionExplanationGuide({mode,walletId,targetSelector,label,title,subjectLabel,subjectValue,description,warningPrefix,riskWarning,warningSuffix}){
@@ -970,7 +978,13 @@ function positionSignatureGuide(){
       bubble.style.width=`${stackedWidth}px`;
       bubble.style.left=`${Math.min(window.innerWidth-stackedWidth-viewportMargin,Math.max(viewportMargin,targetRect.left+(targetRect.width-stackedWidth)/2))}px`;
     }
-    const naturalHeight=bubble.offsetHeight,spaceBelow=window.innerHeight-targetRect.bottom-gap-viewportMargin,spaceAbove=targetRect.top-gap-viewportMargin;
+    const naturalHeight=mobile?Math.min(bubble.scrollHeight,window.innerHeight-viewportMargin*2):bubble.offsetHeight;
+    const spaceBelow=window.innerHeight-targetRect.bottom-gap-viewportMargin,spaceAbove=targetRect.top-gap-viewportMargin;
+    if(mobile&&Math.max(spaceBelow,spaceAbove)<naturalHeight){
+      bubble.style.maxHeight=`${naturalHeight}px`;
+      bubble.style.top=`${Math.max(viewportMargin,window.innerHeight-viewportMargin-naturalHeight)}px`;
+      return;
+    }
     if(spaceBelow>=naturalHeight||spaceBelow>=spaceAbove){
       bubble.style.maxHeight=`${Math.max(72,spaceBelow)}px`;bubble.style.top=`${targetRect.bottom+gap}px`;
     }else{
@@ -1001,6 +1015,7 @@ function closeSignatureGuide(focusSignature=true){
   log("transaction_explanation_guide_closed",{guide:signatureGuideMode,wallet_id:signatureGuideWalletId});
   signatureGuideTarget=null;signatureGuideWalletId=null;signatureGuideMode=null;
   if(focusSignature)requestAnimationFrame(()=>$(focusId)?.focus({preventScroll:true}));
+  scheduleMissionCompletionNoticeResume();
 }
 
 function start(){
@@ -1051,16 +1066,32 @@ function progress(){
   const done=missions.filter(([k])=>missionStatus(k)).length;
   return Math.round(done/missions.length*100);
 }
+function mobileInstructionalGuideOpen(){
+  return window.matchMedia("(max-width: 760px)").matches&&(progressGuideOpen()||positionedGuideOpen());
+}
+function suspendMobileMissionCompletionNotice(){
+  if(!window.matchMedia("(max-width: 760px)").matches||!missionCompletionNoticeActive||!missionCompletionNoticeCurrent)return;
+  clearTimeout(missionCompletionNoticeTimer);clearTimeout(toast.t);
+  missionCompletionNoticeQueue.unshift(missionCompletionNoticeCurrent);
+  missionCompletionNoticeCurrent=null;missionCompletionNoticeActive=false;
+  const notice=$("toast");
+  if(notice.classList.contains("mission-completion-success-toast"))notice.classList.add("hidden");
+}
+function scheduleMissionCompletionNoticeResume(){
+  setTimeout(()=>{if(!mobileInstructionalGuideOpen())showNextMissionCompletionNotice()},80);
+}
 function showNextMissionCompletionNotice(){
-  if(missionCompletionNoticeActive||!missionCompletionNoticeQueue.length)return;
-  const [key,title,index]=missionCompletionNoticeQueue.shift();
+  if(missionCompletionNoticeActive||!missionCompletionNoticeQueue.length||mobileInstructionalGuideOpen())return;
+  const notice=missionCompletionNoticeQueue.shift();
+  const [key,title,index]=notice;
+  missionCompletionNoticeCurrent=notice;
   missionCompletionNoticeActive=true;
   const extraClass=`mission-completion-success-toast${key==="wallet"?" wallet-creation-success-toast":""}`;
   showEthSuccess(`進捗${index+1}を達成しました`,`「${title}」が完了しました`,MISSION_COMPLETION_NOTICE_MS,extraClass);
   log("mission_completion_notice_shown",{mission:key,step:index+1});
   clearTimeout(missionCompletionNoticeTimer);
   missionCompletionNoticeTimer=setTimeout(()=>{
-    missionCompletionNoticeActive=false;
+    missionCompletionNoticeActive=false;missionCompletionNoticeCurrent=null;
     showNextMissionCompletionNotice();
   },MISSION_COMPLETION_NOTICE_MS+120);
 }
@@ -1636,9 +1667,11 @@ function resumeAdmissionLiveAuth(){
 }
 
 function startAdmissionResaleGuide(){
-  if(admissionResaleGuideOpen())return false;
+  const mobile=window.matchMedia("(max-width: 760px)").matches;
+  if(admissionResaleGuideOpen()||(mobile&&state.admissionResaleGuideShown))return false;
   admissionResaleGuideTarget=$("admissionLiveScreen");
   if(!admissionResaleGuideTarget)return false;
+  if(mobile)state.admissionResaleGuideShown=true;
   admissionResaleGuideTarget.classList.add("wallet-guide-highlight","admission-resale-guide-highlight");
   document.documentElement.classList.add("admission-resale-guide-open");document.body.classList.add("admission-resale-guide-open");
   $("admissionResaleGuideBackdrop").classList.remove("hidden");$("admissionResaleGuideBackdrop").setAttribute("aria-hidden","false");
@@ -1662,6 +1695,7 @@ function closeAdmissionResaleGuide(){
   hideAdmissionResaleGuide();
   log("admission_resale_guide_closed",{token_id:tokenId});
   resumeAdmissionLiveAuth();
+  scheduleMissionCompletionNoticeResume();
 }
 
 function generateAdmissionNonce(){
@@ -1812,6 +1846,8 @@ function closeAdmissionPass(){
   log("admission_pass_closed");
   const previousIndex=activeAdmissionIndex;activeAdmissionIndex=null;
   document.querySelector(`[data-owned-index="${previousIndex}"]`)?.focus();
+  if(progress()===100&&!state.completionProgressGuideCompleted)scheduleCompletionProgressGuide();
+  scheduleMissionCompletionNoticeResume();
 }
 
 function updateGameOverlay(){
