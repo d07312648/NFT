@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
   <title>NFT Journey Lab｜従来型NFT購入体験</title>
-  <link rel="stylesheet" href="./styles.css?v=4.15.6" />
+  <link rel="stylesheet" href="./styles.css?v=4.15.10" />
 </head>
 <body>
   <div id="toast" class="toast hidden" role="status"></div>
@@ -122,13 +122,13 @@
 
       <ol id="missionList" class="mission-list"></ol>
 
-      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle">
-        <span class="progress-guide-label">GUIDE</span>
+      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle" aria-hidden="true">
+        <span id="progressGuideLabel" class="progress-guide-label">GUIDE</span>
         <h2 id="progressGuideTitle">進捗フローを確認</h2>
-        <p>進捗フローを参考にNFTチケットを獲得してください。</p>
-        <p class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
-        <p class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
-        <p class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
+        <p id="progressGuideDescription">進捗フローを参考にNFTチケットを獲得してください。</p>
+        <p id="progressGuideNote" class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
+        <p id="progressGuideScrollNote" class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
+        <p id="progressGuideHintNote" class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
         <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
       </section>
 
@@ -195,12 +195,39 @@
 
   <div id="progressGuideBackdrop" class="progress-guide-backdrop hidden" aria-hidden="true"></div>
 
+  <div id="exchangeBalanceGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="exchangeBalanceGuide" class="wallet-security-guide exchange-balance-guide hidden" role="dialog" aria-modal="true" aria-labelledby="exchangeBalanceGuideTitle">
+    <span id="exchangeBalanceGuideLabel" class="wallet-security-guide-label">GUIDE · 取引所口座</span>
+    <h2 id="exchangeBalanceGuideTitle">今回は10万円の疑似残高を用意しました</h2>
+    <p id="exchangeBalanceGuideDescription">本来は銀行口座を連携させて、日本円を取引所の口座に入金する必要があります。</p>
+    <button id="exchangeBalanceGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button>
+  </section>
+
   <div id="walletSecurityGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
   <section id="walletSecurityGuide" class="wallet-security-guide hidden" role="dialog" aria-modal="true" aria-labelledby="walletSecurityGuideTitle">
     <span id="walletSecurityGuideLabel" class="wallet-security-guide-label">1 / 4 · ウォレット</span>
     <h2 id="walletSecurityGuideTitle">ウォレットが作成されました</h2>
     <p id="walletSecurityGuideDescription"></p>
     <button id="walletSecurityGuideNext" type="button">次へ <span aria-hidden="true">→</span></button>
+  </section>
+
+  <div id="nftOwnershipGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="nftOwnershipGuide" class="wallet-security-guide nft-ownership-guide hidden" role="dialog" aria-modal="true" aria-labelledby="nftOwnershipGuideTitle">
+    <span id="nftOwnershipGuideLabel" class="wallet-security-guide-label">1 / 2 · 購入完了</span>
+    <h2 id="nftOwnershipGuideTitle">NFTチケットがウォレットに追加されました</h2>
+    <div class="nft-ownership-guide-subject"><strong id="nftOwnershipGuideTicket">購入したNFT</strong><span id="nftOwnershipGuideToken">トークンID</span></div>
+    <div id="nftOwnershipGuideBody" class="nft-ownership-guide-body"></div>
+    <button id="nftOwnershipGuideNext" type="button">NFTの説明へ進む <span aria-hidden="true">→</span></button>
+  </section>
+
+  <div id="signatureGuideOverlay" class="signature-guide-overlay hidden" aria-hidden="true"></div>
+  <section id="signatureGuide" class="wallet-security-guide signature-guide hidden" role="dialog" aria-modal="true" aria-labelledby="signatureGuideTitle">
+    <span id="signatureGuideLabel" class="wallet-security-guide-label">GUIDE · 署名</span>
+    <h2 id="signatureGuideTitle">NFTで使われる「署名」とは？</h2>
+    <div class="signature-guide-wallet"><span id="signatureGuideSubjectLabel">今回署名するウォレット</span><strong id="signatureGuideWalletName">Orbit Wallet</strong></div>
+    <p id="signatureGuideDescription">NFTマーケットプレイスへのウォレットの接続時やNFTの取引を実行する際に、署名を求められます。NFTの文脈で使われる「署名」とは、秘密鍵を使って「この操作を自分が承認した」ことを証明する手続きです。秘密鍵そのものが相手に渡ることはありません。</p>
+    <p><span id="signatureGuideWarningPrefix">署名内容によってはNFTや暗号資産の移動が許可されるため、</span><strong id="signatureGuideRiskWarning" class="signature-risk-warning">悪意のあるサイトに署名すると資産を盗まれる可能性があります。</strong><span id="signatureGuideWarningSuffix">必ず要求元・操作内容・金額・資産移動の有無を確認してください。今回の接続署名では、資産移動もガス代（手数料）も発生しません。</span></p>
+    <div class="signature-guide-actions"><button id="signatureGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button></div>
   </section>
 
   <div id="modalBackdrop" class="modal-backdrop hidden"></div>
@@ -257,32 +284,34 @@
         </div>
 
         <div class="admission-ticket-content">
-          <div id="admissionValidStatus" class="admission-valid-status pending"><i></i><span id="admissionStatusLabel">WALLET AUTH REQUIRED</span><strong id="admissionStatusText">未認証</strong></div>
-          <p id="admissionInstruction" class="admission-instruction">ウォレット署名を行い、NFTチケットの現在の保有者であることを証明してください</p>
+          <div id="admissionLiveScreen" class="admission-live-screen">
+            <div id="admissionValidStatus" class="admission-valid-status pending"><i></i><span id="admissionStatusLabel">WALLET AUTH REQUIRED</span><strong id="admissionStatusText">未認証</strong></div>
+            <p id="admissionInstruction" class="admission-instruction">ウォレット署名を行い、NFTチケットの現在の保有者であることを証明してください</p>
 
-          <div class="admission-verification">
-            <div id="admissionLiveProof" class="admission-live-proof pending" role="status" aria-live="polite">
-              <div class="admission-live-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
-              <span id="admissionLiveLabel">LIVE WALLET PROOF</span>
-              <strong id="admissionLiveCode">—— ——</strong>
-              <small id="admissionLiveCountdown">ウォレット署名が必要です</small>
+            <div class="admission-verification">
+              <div id="admissionLiveProof" class="admission-live-proof pending" role="status" aria-live="polite">
+                <div class="admission-live-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+                <span id="admissionLiveLabel">LIVE WALLET PROOF</span>
+                <strong id="admissionLiveCode">—— ——</strong>
+                <small id="admissionLiveCountdown">ウォレット署名が必要です</small>
+              </div>
+              <div class="admission-event-summary">
+                <span>EVENT</span>
+                <h2 id="admissionEventTitle"></h2>
+                <p id="admissionEventVenue"></p>
+              </div>
             </div>
-            <div class="admission-event-summary">
-              <span>EVENT</span>
-              <h2 id="admissionEventTitle"></h2>
-              <p id="admissionEventVenue"></p>
+
+            <ul class="admission-proof-checks" aria-label="入館認証の確認項目">
+              <li id="admissionOwnershipCheck"><i>✓</i><div><strong>NFTチケット保有</strong><small>譲渡不可</small></div></li>
+              <li id="admissionSignatureCheck"><i>✓</i><div><strong>ウォレット署名</strong><small>秘密鍵の所持を確認</small></div></li>
+              <li id="admissionExpiryCheck"><i>✓</i><div><strong>短時間認証</strong><small>30秒で自動失効</small></div></li>
+            </ul>
+
+            <div class="admission-auth-actions">
+              <button id="admissionVerifyButton" class="admission-verify-button" type="button">ウォレットで入館認証 <span>→</span></button>
+              <button id="admissionCheckInButton" class="admission-checkin-button hidden" type="button">受付で入館処理を完了する <span>✓</span></button>
             </div>
-          </div>
-
-          <ul class="admission-proof-checks" aria-label="入館認証の確認項目">
-            <li id="admissionOwnershipCheck"><i>✓</i><div><strong>NFTチケット保有</strong><small>譲渡不可</small></div></li>
-            <li id="admissionSignatureCheck"><i>✓</i><div><strong>ウォレット署名</strong><small>秘密鍵の所持を確認</small></div></li>
-            <li id="admissionExpiryCheck"><i>✓</i><div><strong>短時間認証</strong><small>30秒で自動失効</small></div></li>
-          </ul>
-
-          <div class="admission-auth-actions">
-            <button id="admissionVerifyButton" class="admission-verify-button" type="button">ウォレットで入館認証 <span>→</span></button>
-            <button id="admissionCheckInButton" class="admission-checkin-button hidden" type="button">受付で入館処理を完了する <span>✓</span></button>
           </div>
 
           <dl class="admission-details">
@@ -313,6 +342,18 @@
       <label class="check admission-signature-agree"><input id="admissionSignatureAgree" type="checkbox"><span>認証先、対象NFTチケット、有効期間を確認しました。</span></label>
       <div class="button-row admission-signature-actions"><button id="admissionSignatureConfirm" class="primary" type="button">メッセージに署名</button><button id="admissionSignatureCancel" class="secondary" type="button">キャンセル</button></div>
     </section>
+
+    <div id="admissionResaleGuideBackdrop" class="wallet-security-guide-backdrop admission-resale-guide-backdrop hidden" aria-hidden="true"></div>
+    <section id="admissionResaleGuide" class="wallet-security-guide admission-resale-guide hidden" role="dialog" aria-modal="true" aria-labelledby="admissionResaleGuideTitle" aria-hidden="true">
+      <div class="admission-resale-guide-content">
+        <span class="wallet-security-guide-label">GUIDE · 転売対策</span>
+        <h2 id="admissionResaleGuideTitle">NFTの譲渡ルールで転売を防止できます</h2>
+        <p>NFTは、スマートコントラクトでチケットの譲渡を制御できます。例えば、SBT（ソウルバウンドトークン）として発行すると、ウォレットから第三者へ譲渡できなくなるため、NFTチケットの転売を防止できます。
+
+今回は擬似体験のため、「受付で入館処理を完了する」を押して終了してください。</p>
+      </div>
+      <button id="admissionResaleGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button>
+    </section>
   </section>
 
   <section id="gameExperience" class="game-experience hidden" role="dialog" aria-modal="true" aria-labelledby="gameExperienceTitle">
@@ -338,6 +379,6 @@
     </div>
   </section>
 
-  <script src="./app.js?v=4.20.0"></script>
+  <script src="./app.js?v=4.20.6"></script>
 </body>
 </html>

@@ -35,8 +35,15 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 }
 .app-stage{min-width:0}.service-app{min-height:760px;overflow:hidden;border:1px solid #e1e4eb;border-radius:24px;background:white;box-shadow:var(--shadow)}.service-header{min-height:76px;padding:0 26px;display:flex;align-items:center;gap:26px;border-bottom:1px solid var(--line)}.service-brand{display:flex;align-items:center;gap:11px;min-width:205px}.service-logo{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;color:white;font-weight:900}.exchange-header .service-logo{background:var(--exchange)}.wallet-header .service-logo{background:var(--wallet)}.market-header .service-logo{background:var(--market)}.service-brand strong,.service-brand small{display:block}.service-brand strong{font-size:13px}.service-brand small{margin-top:2px;color:var(--muted);font-size:9px}.service-tabs{display:flex;align-self:stretch;gap:6px}.service-tabs button{position:relative;padding:0 13px;border:0;background:transparent;color:#777e8e;font-size:11px;font-weight:750}.service-tabs button.active{color:var(--ink)}.service-tabs button.active:after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--exchange)}.wallet-header .service-tabs button.active:after{background:var(--wallet)}.service-user{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:10px}.service-user span{width:29px;height:29px;border-radius:50%;background:linear-gradient(135deg,#dce5ff,#87aaff)}.network-pill{margin-left:auto;padding:8px 11px;display:flex;align-items:center;gap:6px;border-radius:999px;background:#f4f5f8;font-size:10px;font-weight:800}.market-search{flex:1;max-width:460px;padding:11px 15px;border-radius:11px;background:#f3f4f6;color:#9a9faa;font-size:10px}.connect-button{margin-left:auto;padding:10px 15px;border:0;border-radius:11px;color:white;background:var(--market);font-size:10px;font-weight:800}.connect-button.connected{color:#087952;background:#e9f8f2}.service-content{padding:28px}
 .dashboard-title{display:flex;justify-content:space-between;align-items:start;gap:20px}.dashboard-title h1{margin:7px 0 6px;font-size:29px;letter-spacing:-.035em}.dashboard-title p{margin:0;color:var(--muted);font-size:11px}.task-callout{padding:12px 14px;border-radius:13px;background:#eef4ff;color:#214d9c;font-size:10px;font-weight:750}.balance-grid{margin-top:22px;display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.balance-card{padding:23px;border-radius:20px;color:white;background:linear-gradient(140deg,#0753dc,#2c80ff);box-shadow:0 18px 38px rgba(23,105,255,.23)}.balance-card.wallet-balance{background:linear-gradient(140deg,#4027b6,#7a60fa);box-shadow:0 18px 38px rgba(108,77,246,.23)}.balance-card small,.balance-card strong,.balance-card span{display:block}.balance-card small{color:rgba(255,255,255,.66);font-size:9px;letter-spacing:.13em}.balance-card strong{margin-top:8px;font-size:32px}.balance-card span{margin-top:4px;color:rgba(255,255,255,.7);font-size:10px}.action-card{padding:20px;border:1px solid var(--line);border-radius:19px}.action-card h3{margin:0;font-size:14px}.action-card p{margin:7px 0 15px;color:var(--muted);font-size:10px;line-height:1.6}.primary,.secondary,.ghost,.danger-btn{min-height:43px;padding:0 16px;border-radius:11px;font-size:10px;font-weight:850}.primary{border:0;color:white;background:var(--exchange);box-shadow:0 8px 18px rgba(23,105,255,.2)}.wallet-app .primary{background:var(--wallet)}.market-app .primary{background:var(--market)}.secondary{border:1px solid #dfe3ec;background:white;color:var(--ink)}.ghost{border:0;background:#f0f3f8;color:#4b5568}.danger-btn{border:0;color:white;background:var(--red)}button:disabled{cursor:not-allowed;opacity:.45;box-shadow:none}.button-row{display:flex;gap:10px;flex-wrap:wrap}
+.balance-grid.account-pending{grid-template-columns:minmax(0,1fr)}
+.exchange-balance > span{margin-top:8px;color:rgba(255,255,255,.92);font-size:12px;font-weight:800;line-height:1.55;letter-spacing:.01em}
 .price-board{margin-top:18px;border:1px solid var(--line);border-radius:18px;overflow:hidden}.price-row{padding:13px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;border-bottom:1px solid var(--line);font-size:10px}.price-row:last-child{border-bottom:0}.asset-name{display:flex;align-items:center;gap:9px}.coin{width:29px;height:29px;display:grid;place-items:center;border-radius:50%;color:white;background:#5862d6;font-size:9px;font-weight:900}.coin.eth{background:#6870a8}.asset-name strong,.asset-name small{display:block}.asset-name small{margin-top:2px;color:var(--muted);font-size:8px}.price{font-weight:800}.change.up{color:var(--green)}.change.down{color:var(--red)}
 .panel{margin-top:18px;padding:21px;border:1px solid var(--line);border-radius:18px}.panel h2,.panel h3{margin:0}.panel>p{color:var(--muted);font-size:10px;line-height:1.7}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label,.field-title{font-size:10px;font-weight:800}.input,.select,.textarea{width:100%;border:1px solid #dfe3eb;border-radius:11px;background:white;outline:0}.input,.select{height:47px;padding:0 13px}.textarea{min-height:92px;padding:12px;resize:vertical}.input:focus,.select:focus,.textarea:focus{border-color:var(--exchange);box-shadow:0 0 0 3px rgba(23,105,255,.09)}.hint{color:var(--muted);font-size:9px;line-height:1.5}.check{display:flex;align-items:flex-start;gap:9px}.check input{width:17px;height:17px;margin-top:1px;accent-color:var(--exchange)}.check span{color:#4e5565;font-size:10px;line-height:1.55}.summary{border:1px solid var(--line);border-radius:15px;background:#fafbfc}.summary-row{padding:11px 14px;display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);font-size:10px}.summary-row:last-child{border-bottom:0}.summary-row span{color:var(--muted)}.summary-row strong{text-align:right}.notice{padding:13px 14px;border-radius:13px;font-size:10px;line-height:1.6}.notice.info{background:#eef4ff;color:#28549a}.notice.warning{background:#fff7e4;color:#825b0e}.notice.success{background:#eaf8f2;color:#0b7450}.notice.danger{background:#fff0f2;color:#a22d3e}
+.send-amount-label-row{min-height:21px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.send-available-callout{padding:5px 9px;border-radius:8px;background:#eef4ff;color:#214d9c;font-size:9px;font-weight:800;line-height:1.2;white-space:nowrap}
+#transferAmount,#transferNetwork{height:47px;border-radius:11px}
+#transferAmount{-moz-appearance:textfield;appearance:textfield}
+#transferAmount::-webkit-inner-spin-button,#transferAmount::-webkit-outer-spin-button{margin:0;-webkit-appearance:none}
+.send-network-field>label{min-height:21px;display:flex;align-items:center}.send-network-field .select{appearance:none;background-color:#fff}
 .buy-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:17px}.trade-card{padding:21px;border:1px solid var(--line);border-radius:18px}.rate-head{display:flex;justify-content:space-between;gap:15px}.rate-head strong{font-size:26px}.rate-head small{color:var(--muted)}.sparkline{height:115px;margin:19px 0 8px;position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(to bottom,rgba(23,105,255,.09),transparent)}.sparkline svg{width:100%;height:100%}.quick-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.quick-amounts button{height:34px;border:1px solid var(--line);border-radius:9px;background:white;font-size:9px;font-weight:750}.amount-box{margin-top:15px;position:relative}.amount-box input{height:60px;padding:0 54px 0 15px;font-size:23px;font-weight:850}.amount-box span{position:absolute;right:15px;top:20px;color:var(--muted);font-size:11px}.quote-box{margin-top:14px;padding:14px;border-radius:13px;background:#f5f7fb}.quote-box>div{display:flex;justify-content:space-between;padding:5px 0;font-size:10px}.quote-box span{color:var(--muted)}
 .address-box{padding:17px;border:1px solid var(--line);border-radius:15px;background:#f8f9fb}.address-box code{display:block;margin:8px 0 13px;overflow-wrap:anywhere;color:#384055;font-size:11px;line-height:1.6}.copy-button{padding:9px 12px;border:1px solid #dfe3eb;border-radius:9px;background:white;color:var(--wallet);font-size:9px;font-weight:850}.paste-status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:9px}.paste-status i{width:7px;height:7px;border-radius:50%;background:#b8bdc8}.paste-status.ok{color:var(--green)}.paste-status.ok i{background:var(--green)}
 .wallet-assets{margin-top:18px;border:1px solid var(--line);border-radius:17px;overflow:hidden}.asset-row{padding:16px;display:grid;grid-template-columns:1fr auto;align-items:center;border-bottom:1px solid var(--line)}.asset-row:last-child{border-bottom:0}.asset-row-left{display:flex;align-items:center;gap:11px}.asset-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#eef0f6;color:#56607a;font-size:10px;font-weight:900}.asset-row strong,.asset-row small{display:block}.asset-row small{margin-top:3px;color:var(--muted);font-size:9px}.asset-value{text-align:right}.asset-value strong{font-size:11px}
@@ -1273,6 +1280,7 @@ body.progress-guide-open {
 body.progress-guide-open .mission-panel {
   position: relative;
   z-index: 110;
+  top: auto;
   max-height: none;
   overflow: visible;
   scrollbar-gutter: auto;
@@ -1546,17 +1554,114 @@ body.progress-guide-open .mission-panel > :not(.progress-guide-bubble) {
   }
 }
 
+/* 全進捗達成後：進捗画面の完了スポットライト */
+body.progress-guide-completion-open .mission-panel {
+  border-color: rgba(255,255,255,.98);
+  box-shadow:
+    0 0 0 5px rgba(255,255,255,.15),
+    0 0 62px 22px rgba(68,220,166,.42),
+    0 30px 75px rgba(0,0,0,.42);
+}
+
+body.progress-guide-completion-open .track i {
+  background: linear-gradient(90deg,#078158,#12ad7a);
+}
+
+body.progress-guide-completion-open #progressPercent {
+  color: #078158;
+}
+
+body.progress-guide-completion-open .wallet-mini-status,
+body.progress-guide-completion-open .progress-reset {
+  display: none;
+}
+
+.progress-guide-bubble.progress-guide-completion {
+  border-color: #bfe6d7;
+}
+
+.progress-guide-bubble.progress-guide-completion::before {
+  border-color: #bfe6d7;
+}
+
+.progress-guide-completion .progress-guide-label {
+  color: #078158;
+}
+
+.progress-guide-completion .progress-guide-note {
+  color: #316858;
+  background: #edf9f4;
+}
+
+.progress-guide-completion .progress-guide-hint-note {
+  border-color: #f0d99d;
+  color: #73530d;
+  background: #fff8e6;
+}
+
+.progress-guide-completion .progress-guide-hint-note > span {
+  border-color: #bde6d6;
+  color: #fff;
+  background: #0aa66f;
+}
+
+.progress-guide-completion button {
+  background: linear-gradient(135deg,#078158,#12ad7a);
+  box-shadow: 0 10px 24px rgba(7,129,88,.25);
+}
+
+@media (min-width: 761px) and (max-width: 1150px) {
+  .progress-guide-bubble.progress-guide-completion {
+    position: fixed;
+    top: auto;
+    right: auto;
+    bottom: 16px;
+    left: 50%;
+    width: min(720px,calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    transform: translateX(-50%);
+    animation: progressCompletionGuideIn .24s ease-out both;
+  }
+
+  .progress-guide-bubble.progress-guide-completion::before {
+    content: none;
+  }
+}
+
+@keyframes progressCompletionGuideIn {
+  from { opacity: 0; transform: translate(-50%,-8px) scale(.98); }
+  to { opacity: 1; transform: translate(-50%,0) scale(1); }
+}
+
 /* 1つ目のウォレット作成後：公開鍵・シードフレーズ・秘密鍵ガイド */
-body.wallet-security-guide-open {
+body.wallet-security-guide-open,
+body.exchange-balance-guide-open,
+body.nft-ownership-guide-open {
   overscroll-behavior: none;
 }
 
-html.wallet-security-guide-open {
+html.wallet-security-guide-open,
+html.exchange-balance-guide-open,
+html.nft-ownership-guide-open {
   scroll-behavior: auto !important;
 }
 
-body.wallet-security-guide-open #walletApp {
+html.exchange-balance-guide-open {
+  scrollbar-gutter: stable;
+}
+
+body.exchange-balance-guide-open {
+  overflow: hidden;
+}
+
+body.wallet-security-guide-open #walletApp,
+body.nft-ownership-guide-open #walletApp {
   padding-bottom: 64px;
+}
+
+body.nft-ownership-guide-open .toast {
+  visibility: hidden;
 }
 
 .wallet-security-guide-backdrop {
@@ -1602,6 +1707,16 @@ body.wallet-security-guide-open #walletApp {
   content: none;
 }
 
+.exchange-balance.wallet-guide-highlight {
+  outline-width: 2px;
+  outline-offset: 5px;
+  box-shadow: 0 0 0 6px rgba(23,105,255,.2),0 0 28px 8px rgba(23,105,255,.4);
+}
+
+.exchange-balance.wallet-guide-highlight::before {
+  content: none;
+}
+
 .seed-phrase-display.wallet-guide-highlight,
 .private-key-display.wallet-guide-highlight {
   border-color: var(--line);
@@ -1620,6 +1735,17 @@ body.wallet-security-guide-open #walletApp {
 .seed-phrase-display.wallet-guide-highlight b,
 .private-key-display.wallet-guide-highlight code {
   color: #384055;
+}
+
+.owned-ticket-card.nft-purchase-guide-highlight {
+  border-color: rgba(255,255,255,.98);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.owned-ticket-card.nft-purchase-guide-highlight::before {
+  border-radius: 21px;
+  background: #fff;
 }
 
 .wallet-security-guide {
@@ -1688,6 +1814,187 @@ body.wallet-security-guide-open #walletApp {
   outline-offset: 3px;
 }
 
+.exchange-balance-guide .wallet-security-guide-label {
+  color: var(--exchange);
+}
+
+.exchange-balance-guide h2 {
+  margin-bottom: 12px;
+}
+
+.exchange-balance-guide button {
+  margin-top: 19px;
+  background: linear-gradient(135deg,#0753dc,#2c80ff);
+  box-shadow: 0 11px 25px rgba(23,105,255,.25);
+}
+
+.exchange-balance-guide.wallet-receipt-guide .wallet-security-guide-label {
+  color: var(--wallet);
+}
+
+.exchange-balance-guide.wallet-receipt-guide button {
+  background: linear-gradient(135deg,#5b3de0,#765af4);
+  box-shadow: 0 11px 25px rgba(91,61,224,.25);
+}
+
+.nft-ownership-guide {
+  width: min(400px,calc(100vw - 32px));
+  max-height: min(520px,calc(100dvh - 32px));
+}
+
+.nft-ownership-guide-subject {
+  margin-bottom: 13px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #ddd7ff;
+  border-radius: 11px;
+  background: #f6f4ff;
+}
+
+.nft-ownership-guide-subject strong {
+  color: #352878;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.nft-ownership-guide-subject span {
+  overflow-wrap: anywhere;
+  color: #766b9f;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.nft-ownership-guide-body p + p {
+  margin-top: 8px;
+}
+
+.nft-ownership-guide-body ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.nft-ownership-guide-body li {
+  padding: 9px 10px;
+  border: 1px solid #e5e1f8;
+  border-radius: 10px;
+  background: #faf9ff;
+}
+
+.nft-ownership-guide-body li strong,
+.nft-ownership-guide-body li span {
+  display: block;
+}
+
+.nft-ownership-guide-body li strong {
+  color: #403182;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.nft-ownership-guide-body li span {
+  margin-top: 3px;
+  color: #596173;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.nft-ownership-guide > button {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+}
+
+.nft-ownership-guide.nft-ownership-guide-detail {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: min(440px,calc(100vw - 32px));
+  height: calc(100dvh - 32px);
+  max-height: none;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translate(-50%,-50%);
+}
+
+.nft-ownership-guide-detail .nft-ownership-guide-subject {
+  display: none;
+}
+
+.nft-ownership-guide-detail .nft-ownership-guide-body {
+  min-height: 0;
+  padding: 2px 4px 16px 0;
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.nft-ownership-guide-section {
+  padding: 15px;
+  border: 1px solid #e5e1f8;
+  border-radius: 13px;
+  background: #faf9ff;
+}
+
+.nft-ownership-guide-section-label {
+  display: block;
+  color: #6a4de4;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.45;
+  letter-spacing: .035em;
+}
+
+.nft-ownership-guide-section h3 {
+  margin: 5px 0 9px;
+  color: #211947;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.nft-ownership-guide-section p {
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.nft-ownership-guide-section p + p {
+  margin-top: 8px;
+}
+
+.nft-ownership-guide-section ul {
+  gap: 7px;
+}
+
+.nft-ownership-guide-section li {
+  padding: 10px;
+  background: #fff;
+}
+
+.nft-ownership-guide-section li strong {
+  font-size: 10.5px;
+}
+
+.nft-ownership-guide-section li span {
+  font-size: 9.5px;
+  line-height: 1.65;
+}
+
+.nft-ownership-guide-detail > button {
+  position: static;
+  flex: 0 0 auto;
+  margin-top: 14px;
+}
+
 @keyframes walletSecurityGuideIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1736,6 +2043,259 @@ body.wallet-security-guide-open #walletApp {
 
   .wallet-guide-highlight::before {
     inset: -4px;
+  }
+
+  body.nft-ownership-guide-open #walletApp {
+    padding-bottom: 290px;
+  }
+
+  body.nft-ownership-guide-open .nft-purchase-guide-highlight .ticket-art {
+    height: 90px;
+    padding: 10px;
+  }
+
+  body.nft-ownership-guide-open .nft-purchase-guide-highlight .ticket-info {
+    padding: 10px;
+  }
+
+  body.nft-ownership-guide-open .nft-purchase-guide-highlight .ticket-info p {
+    font-size: 8px;
+    line-height: 1.4;
+  }
+
+  body.nft-ownership-guide-open .nft-purchase-guide-highlight .ticket-price {
+    margin-top: 8px;
+  }
+
+  body.nft-ownership-guide-open .nft-purchase-guide-highlight .added-benefit-badge {
+    display: none;
+  }
+
+  .nft-ownership-guide {
+    max-height: min(300px,calc(100dvh - 20px));
+    padding: 14px;
+  }
+
+  .nft-ownership-guide h2 {
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .nft-ownership-guide-subject {
+    margin-bottom: 7px;
+    padding: 7px 9px;
+  }
+
+  .nft-ownership-guide-detail .nft-ownership-guide-subject {
+    display: none;
+  }
+
+  .nft-ownership-guide-body p {
+    font-size: 9.5px;
+    line-height: 1.55;
+  }
+
+  .nft-ownership-guide-body ul {
+    gap: 6px;
+  }
+
+  .nft-ownership-guide-body li {
+    padding: 7px 8px;
+  }
+
+  .nft-ownership-guide-body li strong {
+    font-size: 9px;
+  }
+
+  .nft-ownership-guide-body li span {
+    font-size: 8px;
+    line-height: 1.5;
+  }
+
+  .nft-ownership-guide.nft-ownership-guide-detail {
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    padding: max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+    border: 0;
+    border-radius: 0;
+    transform: none;
+  }
+
+  .nft-ownership-guide-detail h2 {
+    margin: 6px 0 12px;
+    font-size: 20px;
+  }
+
+  .nft-ownership-guide-detail .nft-ownership-guide-body {
+    gap: 10px;
+  }
+
+  .nft-ownership-guide-section {
+    padding: 13px;
+  }
+
+  .nft-ownership-guide-section h3 {
+    font-size: 14px;
+  }
+
+  .nft-ownership-guide-section p {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .nft-ownership-guide-section li strong {
+    font-size: 10.5px;
+  }
+
+  .nft-ownership-guide-section li span {
+    font-size: 9.5px;
+    line-height: 1.6;
+  }
+}
+
+/* ウォレット接続時：署名カードのスポットライトガイド */
+html.signature-guide-open {
+  scroll-behavior: auto !important;
+}
+
+body.signature-guide-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.signature-guide-open #modal {
+  z-index: 310;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.signature-guide-overlay {
+  position: fixed;
+  z-index: 300;
+  inset: 0;
+  touch-action: none;
+  background: transparent;
+}
+
+.transaction-guide-highlight {
+  position: relative;
+  z-index: 4;
+  outline: 3px solid rgba(255,255,255,.98);
+  outline-offset: 7px;
+  box-shadow:
+    0 0 0 9999px rgba(5,8,17,.82),
+    0 0 0 9px rgba(255,255,255,.14),
+    0 0 52px 18px rgba(150,164,255,.44);
+}
+
+.signature-guide {
+  z-index: 320;
+  width: min(390px,calc(100vw - 32px));
+}
+
+.signature-guide p + p {
+  margin-top: 10px;
+}
+
+.signature-risk-warning {
+  font-size: 1.08em;
+}
+
+.signature-guide-wallet {
+  margin: 0 0 13px;
+  padding: 11px 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #ddd7ff;
+  border-radius: 11px;
+  background: #f6f4ff;
+}
+
+.signature-guide-wallet span {
+  color: #766b9f;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .06em;
+}
+
+.signature-guide-wallet strong {
+  overflow-wrap: anywhere;
+  color: #352878;
+  font-size: 10px;
+}
+
+.signature-guide-actions {
+  position: sticky;
+  z-index: 2;
+  right: 0;
+  bottom: -21px;
+  left: 0;
+  margin: 3px -21px -21px;
+  padding: 10px 21px 21px;
+  background: linear-gradient(180deg,rgba(255,255,255,0),#fff 18%);
+}
+
+.signature-guide .signature-guide-actions button {
+  position: static;
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  body.signature-guide-open .modal {
+    top: 18px;
+    height: calc(100dvh - 18px);
+    max-height: calc(100dvh - 18px);
+  }
+
+  body.signature-guide-open .purchase-signature-card .signature-head {
+    padding: 11px 14px;
+  }
+
+  body.signature-guide-open .purchase-signature-card .signature-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  body.signature-guide-open .purchase-signature-card .signature-details {
+    padding: 9px 14px 11px;
+  }
+
+  body.signature-guide-open .purchase-signature-card .risk-row {
+    margin-top: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .transaction-guide-highlight {
+    outline-width: 2px;
+    outline-offset: 5px;
+    box-shadow:
+      0 0 0 9999px rgba(5,8,17,.84),
+      0 0 0 6px rgba(255,255,255,.14),
+      0 0 38px 13px rgba(150,164,255,.4);
+  }
+
+  .signature-guide {
+    width: auto;
+    padding: 15px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .signature-guide-wallet {
+    margin-bottom: 9px;
+    padding: 9px 10px;
+  }
+
+  .signature-guide-actions {
+    bottom: -15px;
+    margin: 3px -15px -15px;
+    padding: 10px 15px 15px;
   }
 }
 
@@ -2365,6 +2925,72 @@ body.admission-pass-open {
 .admission-verify-button:focus-visible,
 .admission-checkin-button:focus-visible { outline: 3px solid rgba(108,77,246,.25); outline-offset: 3px; }
 
+/* 入館認証後：LIVE入館証と転売対策のスポットライトガイド */
+html.admission-resale-guide-open {
+  scroll-behavior: auto !important;
+}
+
+body.admission-resale-guide-open {
+  overscroll-behavior: none;
+}
+
+body.admission-resale-guide-open #admissionPass {
+  overflow: hidden;
+}
+
+body.admission-resale-guide-open .toast {
+  visibility: hidden;
+}
+
+.admission-live-screen.admission-resale-guide-highlight {
+  margin: -12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.admission-live-screen.admission-resale-guide-highlight::before {
+  border-radius: 22px;
+  background: #fff;
+}
+
+.admission-resale-guide {
+  width: min(400px,calc(100vw - 32px));
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admission-resale-guide .wallet-security-guide-label {
+  color: #078158;
+}
+
+.admission-resale-guide-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.admission-resale-guide p {
+  line-height: 1.7;
+}
+
+.admission-resale-guide button {
+  position: static;
+  z-index: 1;
+  flex: 0 0 auto;
+  min-height: 43px;
+  margin-top: 8px;
+  background: linear-gradient(135deg,#078158,#12ad7a);
+  box-shadow: 0 11px 25px rgba(7,129,88,.25);
+}
+
+body.admission-resale-guide-open .admission-checkin-button {
+  pointer-events: none !important;
+}
+
 .admission-signature-backdrop {
   position: fixed;
   z-index: 4;
@@ -2525,6 +3151,32 @@ body.admission-pass-open {
   .admission-signature-sheet { padding: 19px; border-radius: 19px; }
   .admission-signature-actions { display: grid; grid-template-columns: 1fr; }
   .admission-signature-actions button { width: 100%; min-height: 46px; }
+
+  .admission-live-screen.admission-resale-guide-highlight {
+    margin: -8px;
+    padding: 8px;
+    border-radius: 15px;
+  }
+
+  .admission-live-screen.admission-resale-guide-highlight::before {
+    border-radius: 18px;
+  }
+
+  .admission-resale-guide {
+    bottom: auto;
+    max-height: min(245px,calc(100dvh - 20px));
+    padding: 15px;
+    overflow: hidden;
+  }
+
+  .admission-resale-guide p {
+    font-size: 10px;
+    line-height: 1.65;
+  }
+
+  .admission-resale-guide button {
+    min-height: 44px;
+  }
 
   .admission-event-summary h2 { font-size: 14px; }
   .admission-details > div { grid-template-columns: 74px minmax(0, 1fr); gap: 8px; }
@@ -2817,6 +3469,7 @@ body.admission-pass-open {
   font-size:initial;
   animation:ethSuccessToastIn .34s cubic-bezier(.2,.8,.2,1) both;
 }
+.toast.mission-completion-success-toast,
 .toast.wallet-creation-success-toast{z-index:290}
 .wallet-security-guide.wallet-overview-guide{
   max-height:min(208px,calc(100dvh - 32px));
