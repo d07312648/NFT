@@ -575,7 +575,7 @@ function closeProgressGuide(){
 function showCompletionProgressGuide(){
   completionProgressGuideTimer=null;
   if(progress()!==100||state.completionProgressGuideCompleted||progressGuideOpen())return;
-  if(!$("admissionPass").classList.contains("hidden"))return;
+  if(positionedGuideOpen()||!$("admissionPass").classList.contains("hidden"))return;
   document.querySelector(".mission-panel")?.scrollTo({top:0,behavior:"auto"});
   window.scrollTo({top:0,behavior:"auto"});
   showProgressGuide("completion");
@@ -772,7 +772,7 @@ function startAirdropGuide(){
   if(!nftOwnershipGuideTarget)return;
   nftOwnershipGuideMode="airdrop";nftOwnershipGuideStep=0;
   nftOwnershipGuideTarget.classList.add("wallet-guide-highlight","nft-purchase-guide-highlight","nft-airdrop-guide-highlight");
-  document.documentElement.classList.add("nft-ownership-guide-open");document.body.classList.add("nft-ownership-guide-open");
+  document.documentElement.classList.add("nft-ownership-guide-open");document.body.classList.add("nft-ownership-guide-open","nft-airdrop-guide-open");
   $("nftOwnershipGuideBackdrop").classList.remove("hidden");$("nftOwnershipGuideBackdrop").setAttribute("aria-hidden","false");
   $("nftOwnershipGuide").classList.remove("hidden","nft-ownership-guide-detail");$("nftOwnershipGuide").classList.add("nft-airdrop-guide");
   $("nftOwnershipGuideLabel").textContent="GUIDE · AIRDROP";
@@ -881,18 +881,34 @@ function positionNftOwnershipGuide(){
 function keepNftOwnershipGuideTargetInView(){
   if(!nftOwnershipGuideOpen()||nftOwnershipGuideStep>0||!nftOwnershipGuideTarget?.isConnected)return false;
   const targetRect=nftOwnershipGuideTarget.getBoundingClientRect(),bubbleRect=$("nftOwnershipGuide").getBoundingClientRect();
-  const viewportTop=10,viewportBottom=window.innerHeight-10;
+  const mobile=window.matchMedia("(max-width: 760px)").matches;
+  const viewportTop=mobile?18:24,viewportBottom=window.innerHeight-(mobile?22:28);
   let delta=0;
+  if(nftOwnershipGuideMode==="airdrop"){
+    const groupTop=Math.min(targetRect.top,bubbleRect.top),groupBottom=Math.max(targetRect.bottom,bubbleRect.bottom);
+    const groupHeight=groupBottom-groupTop,availableHeight=viewportBottom-viewportTop;
+    if(groupHeight<=availableHeight){
+      delta=(groupTop+groupBottom)/2-(viewportTop+viewportBottom)/2;
+      if(Math.abs(delta)>=1){
+        const previousScrollY=window.scrollY;window.scrollBy({top:delta,behavior:"auto"});
+        if(Math.abs(window.scrollY-previousScrollY)>=1)return true;
+      }
+    }
+  }
   if(targetRect.height>viewportBottom-viewportTop)delta=targetRect.top-viewportTop;
   else if(targetRect.top<viewportTop)delta=targetRect.top-viewportTop;
   else if(targetRect.bottom>viewportBottom)delta=targetRect.bottom-viewportBottom;
-  if(Math.abs(delta)>=1){window.scrollBy({top:delta,behavior:"auto"});return true}
+  if(Math.abs(delta)>=1){
+    const previousScrollY=window.scrollY;window.scrollBy({top:delta,behavior:"auto"});
+    if(Math.abs(window.scrollY-previousScrollY)>=1)return true;
+  }
   const overlaps=targetRect.right>bubbleRect.left&&targetRect.left<bubbleRect.right&&targetRect.bottom>bubbleRect.top&&targetRect.top<bubbleRect.bottom;
   if(!overlaps)return false;
   const gap=12;
   delta=(bubbleRect.top+bubbleRect.bottom)/2<(targetRect.top+targetRect.bottom)/2?targetRect.top-(bubbleRect.bottom+gap):targetRect.bottom-(bubbleRect.top-gap);
   if(Math.abs(delta)<1)return false;
-  window.scrollBy({top:delta,behavior:"auto"});return true;
+  const previousScrollY=window.scrollY;window.scrollBy({top:delta,behavior:"auto"});
+  return Math.abs(window.scrollY-previousScrollY)>=1;
 }
 function advanceNftOwnershipGuide(){
   if(!nftOwnershipGuideOpen())return;
@@ -906,7 +922,7 @@ function closeNftOwnershipGuide(focusTarget=true){
   target?.classList.remove("wallet-guide-highlight","nft-purchase-guide-highlight","nft-airdrop-guide-highlight");
   $("nftOwnershipGuideBackdrop").classList.add("hidden");$("nftOwnershipGuideBackdrop").setAttribute("aria-hidden","true");
   $("nftOwnershipGuide").classList.add("hidden");$("nftOwnershipGuide").classList.remove("nft-ownership-guide-detail","nft-airdrop-guide");
-  document.documentElement.classList.remove("nft-ownership-guide-open");document.body.classList.remove("nft-ownership-guide-open");
+  document.documentElement.classList.remove("nft-ownership-guide-open");document.body.classList.remove("nft-ownership-guide-open","nft-airdrop-guide-open");
   if(closedMode==="airdrop"){
     const entry=airdroppedNftEntry();state.airdropGuideCompleted=true;
     log("airdrop_guide_completed",{token_id:entry?.owned.tokenId||null,wallet_id:entry?nftOwnerWalletId(entry.owned):null});
@@ -1078,7 +1094,10 @@ function suspendMobileMissionCompletionNotice(){
   if(notice.classList.contains("mission-completion-success-toast"))notice.classList.add("hidden");
 }
 function scheduleMissionCompletionNoticeResume(){
-  setTimeout(()=>{if(!mobileInstructionalGuideOpen())showNextMissionCompletionNotice()},80);
+  setTimeout(()=>{
+    if(!mobileInstructionalGuideOpen())showNextMissionCompletionNotice();
+    if(progress()===100&&!state.completionProgressGuideCompleted&&!positionedGuideOpen()&&$("admissionPass").classList.contains("hidden"))scheduleCompletionProgressGuide();
+  },80);
 }
 function showNextMissionCompletionNotice(){
   if(missionCompletionNoticeActive||!missionCompletionNoticeQueue.length||mobileInstructionalGuideOpen())return;
@@ -1096,12 +1115,15 @@ function showNextMissionCompletionNotice(){
   },MISSION_COMPLETION_NOTICE_MS+120);
 }
 function notifyNewlyCompletedMissions(){
+  let completedNow=false;
   missions.forEach(([key,title],index)=>{
     if(!missionStatus(key)||missionCompletionAnnounced.has(key))return;
     missionCompletionAnnounced.add(key);
     missionCompletionNoticeQueue.push([key,title,index]);
+    completedNow=true;
   });
   showNextMissionCompletionNotice();
+  if(completedNow&&progress()===100&&!state.completionProgressGuideCompleted)scheduleCompletionProgressGuide();
 }
 function renderMission(){
   const next=nextMissionKey();

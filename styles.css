@@ -3279,6 +3279,24 @@ body.admission-resale-guide-open .admission-checkin-button {
   border-color: rgba(98,79,229,.42);
   box-shadow: 0 14px 34px rgba(61,46,158,.14);
 }
+.ticket-card.airdrop-ticket-card.nft-airdrop-guide-highlight {
+  z-index: 275 !important;
+  border-color: #fff;
+  background: #fff;
+  outline: 3px solid rgba(255,255,255,.98);
+  outline-offset: 7px;
+  box-shadow:
+    0 0 0 10px rgba(255,255,255,.18),
+    0 0 54px 20px rgba(125,97,255,.66),
+    0 26px 58px rgba(4,7,18,.48) !important;
+}
+.ticket-card.airdrop-ticket-card.nft-airdrop-guide-highlight::before {
+  border-radius: 21px;
+  background: #fff;
+}
+body.nft-airdrop-guide-open #walletApp {
+  padding-bottom: clamp(300px,42vh,420px);
+}
 .ticket-card.airdrop-ticket-card .ticket-art::before {
   content: "LIMITED AIRDROP";
   position: absolute;
@@ -3327,6 +3345,14 @@ body.admission-resale-guide-open .admission-checkin-button {
   .airdrop-market-banner p { font-size: 8px; }
   .airdrop-mini-art { width: 135px; }
   .airdrop-reward-visual { height: 175px; }
+  .ticket-card.airdrop-ticket-card.nft-airdrop-guide-highlight {
+    outline-width: 3px;
+    outline-offset: 5px;
+    box-shadow:
+      0 0 0 8px rgba(255,255,255,.2),
+      0 0 42px 16px rgba(125,97,255,.68),
+      0 20px 44px rgba(4,7,18,.46) !important;
+  }
 }
 
 @media (max-width: 430px) {
