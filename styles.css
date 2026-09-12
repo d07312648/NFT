@@ -3673,3 +3673,12 @@ body.nft-airdrop-guide-open #walletApp {
   .market-wallet-option-head{grid-template-columns:36px minmax(0,1fr)}
   .market-wallet-option-head b{grid-column:2}
 }
+
+/* チェックや前提条件を満たすまで、主要操作が使えないことを明示する */
+.primary:disabled{
+  border:1px solid #d5d9e1;
+  color:#8a919e;
+  background:#e5e8ed;
+  opacity:1;
+  box-shadow:none;
+}

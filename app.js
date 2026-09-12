@@ -755,6 +755,20 @@ function airdroppedNftEntry(){
   const index=state.ownedNfts.findIndex(item=>item.acquisitionType==="airdrop"&&item.ticketId===AIRDROP_TICKET_ID);
   return index<0?null:{owned:state.ownedNfts[index],index};
 }
+function refreshNftOwnershipGuideTarget(){
+  if(nftOwnershipGuideStep>0)return false;
+  const entry=nftOwnershipGuideMode==="airdrop"?airdroppedNftEntry():firstPurchasedNftEntry();
+  if(!entry)return false;
+  const target=document.querySelector(`#walletContent [data-owned-index="${entry.index}"]`);
+  if(!target)return false;
+  if(nftOwnershipGuideTarget!==target){
+    nftOwnershipGuideTarget?.classList.remove("wallet-guide-highlight","nft-purchase-guide-highlight","nft-airdrop-guide-highlight");
+    nftOwnershipGuideTarget=target;
+  }
+  target.classList.add("wallet-guide-highlight","nft-purchase-guide-highlight");
+  target.classList.toggle("nft-airdrop-guide-highlight",nftOwnershipGuideMode==="airdrop");
+  return true;
+}
 function maybeStartAirdropGuide(){
   if(nftOwnershipGuideScheduled||nftOwnershipGuideOpen()||state.airdropGuideCompleted||state.currentApp!=="wallet"||state.currentWalletTab!=="wallet-nft")return false;
   const entry=airdroppedNftEntry(),wallet=activeWallet();
@@ -850,7 +864,7 @@ function positionNftOwnershipGuide(){
   const bubble=$("nftOwnershipGuide");
   bubble.style.removeProperty("top");bubble.style.removeProperty("right");bubble.style.removeProperty("bottom");bubble.style.removeProperty("left");
   if(nftOwnershipGuideStep>0)return;
-  if(!nftOwnershipGuideTarget?.isConnected)return;
+  if(!refreshNftOwnershipGuideTarget())return;
   const targetRect=nftOwnershipGuideTarget.getBoundingClientRect();
   if(window.matchMedia("(max-width: 760px)").matches){
     const viewportMargin=10,gap=12,bubbleHeight=bubble.offsetHeight,maxTop=Math.max(viewportMargin,window.innerHeight-bubbleHeight-viewportMargin);
@@ -1275,7 +1289,7 @@ function renderExchangeBuy(){
         <h3>購入内容</h3><p class="hint">注文時点の価格で受取数量が確定します。</p>
         <div class="quote-box"><div><span>購入金額</span><strong id="quoteAmount">${fmtYen(q.amount)}</strong></div><div><span>販売所手数料</span><strong id="quoteFee">${fmtYen(q.fee)}</strong></div><div><span>受取予定</span><strong id="quoteEth">${q.eth.toFixed(6)} ETH</strong></div><div><span>支払合計</span><strong id="quoteTotal">${fmtYen(q.total)}</strong></div></div>
         <label class="check" style="margin-top:15px"><input id="buyAgree" type="checkbox" ${state.buyAgreementChecked?"checked":""}><span>価格変動と手数料を確認しました。</span></label>
-        <button id="buyEthButton" class="primary" style="width:100%;margin-top:15px" type="button">${state.ethPurchased?"ETHを追加購入する":"ETHを購入する"}</button>
+        <button id="buyEthButton" class="primary" style="width:100%;margin-top:15px" type="button" ${state.buyAgreementChecked?"":"disabled"}>${state.ethPurchased?"ETHを追加購入する":"ETHを購入する"}</button>
         ${state.purchaseHistory.length?`<div class="notice success" style="margin-top:12px">累計購入：${fmtEth(state.purchasedEth)}（${state.purchaseHistory.length}回）<br>日本円残高：${fmtYen(state.exchangeYen)}</div>`:""}
       </div>
     </div>`;
@@ -1287,7 +1301,7 @@ function renderExchangeBuy(){
     state.purchaseYen=digits;
     updateExchangeBuyDynamic(false);
   };
-  $("buyAgree").onchange=e=>{state.buyAgreementChecked=e.target.checked;log("buy_agreement_changed",{checked:e.target.checked})};
+  $("buyAgree").onchange=e=>{state.buyAgreementChecked=e.target.checked;$("buyEthButton").disabled=!e.target.checked;log("buy_agreement_changed",{checked:e.target.checked})};
   $("buyEthButton").onclick=()=>{
     const quote=getBuyQuote();
     if(!state.buyAgreementChecked){error("価格変動と手数料を確認してください");return}
@@ -1321,13 +1335,14 @@ function renderExchangeSend(){
       </div>
       <div class="summary" style="margin-top:16px"><div class="summary-row"><span>送金額</span><strong id="sendAmountSummary">${amount===""?"—":fmtEth(Number(amount))}</strong></div><div class="summary-row"><span>ネットワーク手数料</span><strong>${fmtEth(NETWORK_FEE_ETH)}</strong></div><div class="summary-row"><span>取引所残高</span><strong>${fmtEth(state.exchangeEth)}</strong></div></div>
       <label class="check" style="margin-top:15px"><input id="sendAgree" type="checkbox" ${state.transferPending?"disabled":""}><span>公開鍵を確認しました。暗号資産は誤ったアドレスへ送ると基本的に取り戻せません。</span></label>
-      <div class="button-row" style="margin-top:16px"><button id="reviewSend" class="primary" type="button" ${state.transferPending||max<=0?"disabled":""}>${state.transferPending?"送金処理中":"送金内容を確認"}</button><button id="openWalletReceive" class="secondary" type="button">ウォレットの受取画面を開く</button></div>
+      <div class="button-row" style="margin-top:16px"><button id="reviewSend" class="primary" type="button" disabled>${state.transferPending?"送金処理中":"送金内容を確認"}</button><button id="openWalletReceive" class="secondary" type="button">ウォレットの受取画面を開く</button></div>
       ${state.transferPending?`<div class="notice info" style="margin-top:13px">送金リクエストを処理しています。Orbit Walletで着金を確認してください。</div>`:state.transferSent?`<div class="notice success" style="margin-top:13px">前回の送金は完了しています。残高があれば続けて送金できます。</div>`:""}
     </div>`;
   const dest=$("destinationAddress");
   dest.oninput=e=>{state.destinationAddress=e.target.value};
   dest.onpaste=e=>{state.pasteCount++;state.addressPasted=true;setTimeout(()=>{state.destinationAddress=dest.value;renderExchangeSend()},0);log("wallet_address_pasted")};
   $("transferAmount").oninput=e=>{state.transferAmount=e.target.value;$("sendAmountSummary").textContent=e.target.value===""?"—":fmtEth(Number(e.target.value))};
+  $("sendAgree").onchange=e=>{$("reviewSend").disabled=!e.target.checked||state.transferPending||max<=0};
   $("openWalletReceive").onclick=()=>{switchApp("wallet");state.currentWalletTab="wallet-receive";renderWallet()};
   $("reviewSend").onclick=()=>{
     const rawAmount=$("transferAmount").value.trim(),sendAmount=Number(rawAmount);
@@ -1808,6 +1823,7 @@ function beginAdmissionAuthentication(){
   $("admissionSignatureToken").textContent=owned.tokenId;
   $("admissionSignatureNonce").textContent=admissionAuthNonce;
   $("admissionSignatureAgree").checked=false;
+  $("admissionSignatureConfirm").disabled=true;
   $("admissionSignatureBackdrop").classList.remove("hidden");
   $("admissionSignatureBackdrop").setAttribute("aria-hidden","false");
   $("admissionSignatureSheet").classList.remove("hidden");
@@ -2012,8 +2028,9 @@ function openMarketConnectionSignature(walletId){
       <div class="signature-message">Welcome to MintGate.<br><br>Wallet: ${escapeHtml(wallet.address)}<br>Nonce: MG-${Date.now().toString().slice(-6)}<br>Purpose: Sign in to MintGate</div>
       <div class="risk-row"><span>要求元</span><strong>mintgate.demo</strong></div><div class="risk-row"><span>資産移動</span><strong>なし</strong></div></div></div>
     <label class="check" style="margin-top:14px"><input id="connectUnderstand" type="checkbox"><span>署名内容と要求元を確認しました。</span></label>
-    <div class="button-row" style="margin-top:15px"><button id="signConnect" class="primary" type="button">メッセージに署名</button><button id="rejectConnect" class="secondary" type="button">拒否</button></div>`);
+    <div class="button-row" style="margin-top:15px"><button id="signConnect" class="primary" type="button" disabled>メッセージに署名</button><button id="rejectConnect" class="secondary" type="button">拒否</button></div>`);
   $("modal").scrollTop=0;startSignatureGuide(wallet.id);
+  $("connectUnderstand").onchange=e=>{$("signConnect").disabled=!e.target.checked};
   $("rejectConnect").onclick=()=>{log("signature_rejected",{purpose:"connect"});closeModal()};
   $("signConnect").onclick=()=>{
     if(!$("connectUnderstand").checked){error("署名内容を確認してください");return}
@@ -2040,8 +2057,9 @@ function openTransactionSignature(){
     <div class="signature-details"><div class="risk-row"><span>署名ウォレット</span><strong>${escapeHtml(wallet.name)}</strong></div><div class="risk-row"><span>公開鍵</span><strong style="max-width:270px;overflow-wrap:anywhere">${escapeHtml(wallet.address)}</strong></div><div class="risk-row"><span>接続先</span><strong>MintGate</strong></div><div class="risk-row"><span>操作</span><strong>NFTチケット購入</strong></div><div class="risk-row"><span>コントラクト</span><strong>0x91D2...44AF</strong></div><div class="risk-row"><span>NFT価格</span><strong>${fmtEth(t.price)}</strong></div><div class="risk-row"><span>推定ガス代（手数料）</span><strong>${fmtEth(PURCHASE_GAS_ETH)}</strong></div><div class="risk-row"><span>最大支払額</span><strong>${fmtEth(total)}</strong></div></div></div>
     <div class="notice warning" style="margin-top:13px">署名すると、ブロックチェーンへ購入トランザクションが送信されます。内容を確認してください。</div>
     <label class="check" style="margin-top:14px"><input id="txUnderstand" type="checkbox"><span>送信先、金額、ガス代（手数料）、コントラクトの内容を確認しました。</span></label>
-    <div class="button-row" style="margin-top:15px"><button id="signTransaction" class="primary" type="button">確認して署名</button><button id="rejectTransaction" class="secondary" type="button">拒否</button></div>`);
+    <div class="button-row" style="margin-top:15px"><button id="signTransaction" class="primary" type="button" disabled>確認して署名</button><button id="rejectTransaction" class="secondary" type="button">拒否</button></div>`);
   $("modal").scrollTop=0;startContractGuide(wallet.id);
+  $("txUnderstand").onchange=e=>{$("signTransaction").disabled=!e.target.checked};
   $("rejectTransaction").onclick=()=>{log("signature_rejected",{purpose:"purchase"});closeModal()};
   $("signTransaction").onclick=()=>{
     if(!$("txUnderstand").checked){error("トランザクション内容を確認してください");return}
@@ -2166,6 +2184,7 @@ $("helpClose").onclick=closeHelp;$("helpBackdrop").onclick=closeHelp;
 $("admissionPassClose").onclick=closeAdmissionPass;
 $("admissionVerifyButton").onclick=beginAdmissionAuthentication;
 $("admissionCheckInButton").onclick=completeAdmissionCheckIn;
+$("admissionSignatureAgree").onchange=e=>{$("admissionSignatureConfirm").disabled=!e.target.checked};
 $("admissionSignatureConfirm").onclick=confirmAdmissionSignature;
 $("admissionSignatureCancel").onclick=cancelAdmissionAuthentication;
 $("admissionSignatureBackdrop").onclick=cancelAdmissionAuthentication;
