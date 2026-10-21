@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
   <title>NFT Journey Lab｜従来型NFT購入体験</title>
-  <link rel="stylesheet" href="./styles.css?v=4.15.10" />
+  <link rel="stylesheet" href="./styles.css?v=5.3.4" />
 </head>
 <body>
   <div id="toast" class="toast hidden" role="status"></div>
@@ -34,6 +34,10 @@
       <button class="switcher-item market" data-app="market" type="button">
         <span class="switcher-logo">M</span>
         <span><strong>チケットサイト</strong><small>MintGate</small></span>
+      </button>
+      <button class="switcher-item trade" data-app="trade" type="button">
+        <span class="switcher-logo">P</span>
+        <span><strong>マーケット</strong><small>PassMarket</small></span>
       </button>
     </nav>
 
@@ -81,7 +85,7 @@
           <span>01</span>
         </div>
         <h2>NOVA Exchange</h2>
-        <p>本人確認、ETH購入、外部ウォレットへの送金</p>
+        <p>本人確認、ETHの購入・売却、外部ウォレットへの送金</p>
         <div class="mini-chart">
           <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
         </div>
@@ -120,6 +124,14 @@
         <div class="track"><i id="progressFill"></i></div>
       </div>
 
+      <section id="resultSavePanel" class="result-save-panel hidden" aria-label="体験結果の保存">
+        <strong>すべての進捗を達成しました</strong>
+        <p>JSONを保存し、アンケートと一緒に提出してください。</p>
+        <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+        <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
+        <button id="saveCompletedResult" class="result-save-button" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
+      </section>
+
       <ol id="missionList" class="mission-list"></ol>
 
       <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle" aria-hidden="true">
@@ -129,6 +141,12 @@
         <p id="progressGuideNote" class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
         <p id="progressGuideScrollNote" class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
         <p id="progressGuideHintNote" class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
+        <div id="surveyGuideControls" class="hidden">
+          <p>JSONを保存し、アンケートと一緒に提出してください。</p>
+          <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+          <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
+        </div>
+        <button id="saveCompletedResultGuide" class="result-save-button hidden" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
         <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
       </section>
 
@@ -155,6 +173,7 @@
           <nav id="exchangeTabs" class="service-tabs">
             <button data-tab="exchange-home" class="active" type="button">ホーム</button>
             <button data-tab="exchange-buy" type="button">購入</button>
+            <button data-tab="exchange-sell" type="button">売却</button>
             <button data-tab="exchange-send" type="button">送金</button>
           </nav>
           <div class="service-user"><span></span><b>デモユーザー</b></div>
@@ -177,6 +196,28 @@
           <div class="network-pill"><i></i>Ethereum</div>
         </header>
         <div id="walletContent" class="service-content"></div>
+      </div>
+
+      <div id="tradeApp" class="service-app trade-app hidden">
+        <header class="service-header trade-header">
+          <div class="service-brand">
+            <span class="service-logo">P</span>
+            <div><strong>PassMarket</strong><small>NFTマーケットプレイス</small></div>
+          </div>
+          <label class="trade-search"><span aria-hidden="true">⌕</span><input id="tradeSearch" type="search" placeholder="コレクション・アイテムを検索" autocomplete="off" enterkeyhint="search" aria-label="コレクション・アイテムを検索"></label>
+          <div class="trade-header-tools">
+            <button id="tradeWalletChip" class="trade-wallet-chip" type="button"><strong>ウォレットを接続</strong></button>
+            <button id="tradeNoticeButton" class="trade-notice-button" type="button" aria-label="お知らせ"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b id="tradeNoticeCount" class="hidden">0</b></button>
+          </div>
+          <nav id="tradeTabs" class="service-tabs trade-tabs" aria-label="PassMarketメニュー">
+            <button data-trade-tab="explore" class="active" type="button">探す</button>
+            <button data-trade-tab="rankings" type="button">ランキング</button>
+            <button data-trade-tab="activity" type="button">アクティビティ</button>
+            <button data-trade-tab="account" type="button">マイページ</button>
+            <button data-trade-tab="balance" type="button">売上・送金</button>
+          </nav>
+        </header>
+        <div id="tradeContent" class="service-content trade-content"></div>
       </div>
 
       <div id="marketApp" class="service-app market-app hidden">
@@ -217,7 +258,20 @@
     <h2 id="nftOwnershipGuideTitle">NFTチケットがウォレットに追加されました</h2>
     <div class="nft-ownership-guide-subject"><strong id="nftOwnershipGuideTicket">購入したNFT</strong><span id="nftOwnershipGuideToken">トークンID</span></div>
     <div id="nftOwnershipGuideBody" class="nft-ownership-guide-body"></div>
-    <button id="nftOwnershipGuideNext" type="button">NFTの説明へ進む <span aria-hidden="true">→</span></button>
+    <div class="nft-ownership-guide-actions">
+    <button id="nftOwnershipGuideNext" type="button">詳細なNFTの説明を読む <span aria-hidden="true">→</span></button>
+    <button id="nftOwnershipGuideClose" class="nft-ownership-guide-close hidden" type="button">閉じる</button>
+    </div>
+  </section>
+
+  <div id="tradeGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="tradeGuide" class="wallet-security-guide trade-guide hidden" role="dialog" aria-modal="true" aria-labelledby="tradeGuideTitle">
+    <span id="tradeGuideLabel" class="wallet-security-guide-label">1 / 6 · 二次流通</span>
+    <h2 id="tradeGuideTitle">NFTはマーケットプレイスで売買できます</h2>
+    <p id="tradeGuideDescription"></p>
+    <img id="tradeGuideFigure" class="trade-guide-figure hidden" src="" alt="" decoding="async">
+    <div id="tradeGuideDots" class="trade-guide-dots" aria-hidden="true"></div>
+    <button id="tradeGuideNext" type="button">次へ <span aria-hidden="true">→</span></button>
   </section>
 
   <div id="signatureGuideOverlay" class="signature-guide-overlay hidden" aria-hidden="true"></div>
@@ -257,8 +311,12 @@
       <p>実在するメールアドレス、パスワード、秘密鍵、シードフレーズは入力しないでください。</p>
     </section>
     <section>
+      <h3>PassMarket（NFTの売買）</h3>
+      <p>Orbit Walletを接続すると、保有しているNFTを自分で決めたETHの価格で出品できます。相場の範囲内の価格なら数十秒で他のユーザーが購入し、手数料を差し引いたETHがウォレットに入金されます。購入・出品の取り消し・オファーの承諾にはトランザクションへの署名とガス代が必要です。日本円に換えるには、取引所へ送金して売却します（すべて研究用の疑似取引です）。</p>
+    </section>
+    <section>
       <h3>操作に迷ったら</h3>
-      <p>左側のミッション一覧で、次に完了すべき操作を確認できます。</p>
+      <p>ミッション一覧（パソコンでは画面左側、スマートフォンでは画面上部）で、次に完了すべき操作を確認できます。</p>
     </section>
   </aside>
 
@@ -379,6 +437,10 @@
     </div>
   </section>
 
-  <script src="./app.js?v=4.20.6"></script>
+  <script src="./nft-art.js?v=1.0.0"></script>
+  <script src="./marketplace.js?v=1.3.2"></script>
+  <script src="./app.js?v=5.3.3"></script>
+  <script src="./survey-config.js"></script>
+  <script src="./survey.js?v=1"></script>
 </body>
 </html>

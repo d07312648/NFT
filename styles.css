@@ -3682,3 +3682,812 @@ body.nft-airdrop-guide-open #walletApp {
   opacity:1;
   box-shadow:none;
 }
+
+/* =========================================================
+   v5.0 PassMarket（暗号資産で売買できるNFTマーケットプレイス）
+   ========================================================= */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ヘッダー */
+.trade-header{flex-wrap:wrap;row-gap:0;padding-top:16px}
+.trade-search{flex:1;max-width:520px;height:42px;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid #e3e6ec;border-radius:12px;background:#f5f6f8;color:#8b919d;transition:border-color .18s,box-shadow .18s,background .18s}
+.trade-search:focus-within{border-color:#1769ff;background:#fff;box-shadow:0 0 0 3px rgba(23,105,255,.1)}
+.trade-search span{font-size:18px;line-height:1}
+.trade-search input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:0;color:var(--ink);font-size:12px}
+.trade-header-tools{margin-left:auto;display:flex;align-items:center;gap:8px}
+.trade-notice-button{position:relative;width:42px;height:42px;display:grid;place-items:center;border:1px solid #e3e6ec;border-radius:12px;background:#fff;color:var(--ink)}
+.trade-notice-button b{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;border:2px solid #fff;border-radius:99px;background:var(--red);color:#fff;font-size:9px;line-height:1}
+.trade-header .trade-tabs{order:3;width:calc(100% + 52px);height:48px;margin:14px -26px 0;padding:0 16px;border-top:1px solid #f0f1f4}
+.trade-header .service-tabs button.active:after{background:#1769ff}
+
+/* 共通パーツ */
+.pm-verified{display:inline-grid;place-items:center;width:15px;height:15px;margin-left:5px;border-radius:50%;background:#1769ff;color:#fff;font-size:9px;font-style:normal;font-weight:900;line-height:1;vertical-align:1px}
+.pm-btn{min-height:44px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;border-radius:12px;font-size:11px;font-weight:850;transition:transform .18s,box-shadow .18s,background .18s}
+.pm-btn:hover:not(:disabled){transform:translateY(-1px)}
+.pm-btn.primary{border:1px solid transparent;color:#fff;background:#1769ff;box-shadow:0 10px 22px rgba(23,105,255,.24)}
+.pm-btn.ghost{color:#25324b;background:#f1f4f9}
+.pm-btn.light{color:#0d3fa8;background:#fff}
+.pm-btn.outline-light{color:#fff;background:transparent;border-color:rgba(255,255,255,.45)}
+.pm-btn:disabled{cursor:not-allowed;opacity:.5;box-shadow:none}
+.pm-link{padding:6px 0;border:0;background:transparent;color:#1769ff;font-size:11px;font-weight:850;white-space:nowrap}
+.pm-back{min-height:36px;margin-bottom:14px;padding:0 13px;border:1px solid #e1e4ea;border-radius:10px;background:#fff;color:#4a5263;font-size:11px;font-weight:800}
+.pm-chips{margin-top:16px;padding-bottom:2px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.pm-chips::-webkit-scrollbar{display:none}
+.pm-chip{flex:0 0 auto;min-height:36px;padding:0 15px;border:1px solid #e1e4ea;border-radius:99px;background:#fff;color:#4a5263;font-size:11px;font-weight:800;white-space:nowrap}
+.pm-chip.active{border-color:#16181d;background:#16181d;color:#fff}
+.pm-chip.small{min-height:32px;padding:0 12px;font-size:10px}
+.pm-section{margin-top:30px}
+.pm-section-head{margin-bottom:14px;display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.pm-section-head h2{margin:5px 0 0;font-size:19px;letter-spacing:-.02em}
+.pm-section-head h2 small{margin-left:4px;color:var(--muted);font-size:11px;font-weight:700}
+.pm-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pm-toggle{min-height:38px;padding:0 12px;display:inline-flex;align-items:center;gap:7px;border:1px solid #e1e4ea;border-radius:11px;background:#fff;font-size:11px;font-weight:750;cursor:pointer}
+.pm-toggle input{width:16px;height:16px;margin:0;accent-color:#1769ff}
+.pm-select select{height:38px;padding:0 32px 0 12px;border:1px solid #e1e4ea;border-radius:11px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236e7485' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--ink);font-size:11px;font-weight:750;appearance:none}
+.pm-panel{margin-top:16px;padding:18px;border:1px solid #e5e8ee;border-radius:18px;background:#fff}
+.pm-panel-head{margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pm-panel-head h2{margin:0;font-size:14px}
+.pm-panel-head>span{color:var(--muted);font-size:10px;text-align:right}
+.pm-muted{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.75}
+.pm-muted.center{text-align:center}
+.pm-empty{padding:46px 20px;text-align:center;border:1px dashed #d7dce6;border-radius:18px;background:#fafbfd}
+.pm-empty>span{width:52px;height:52px;margin:0 auto 12px;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(135deg,#1769ff,#7a5cff);font-size:20px;font-weight:900}
+.pm-empty h2{margin:0 0 8px;font-size:18px}
+.pm-empty p{max-width:460px;margin:0 auto;color:var(--muted);font-size:11px;line-height:1.75}
+.pm-empty .pm-btn{margin-top:16px}
+.pm-empty.compact{padding:20px}
+.pm-empty.large{margin-top:10px;padding:64px 20px}
+.pm-more{width:100%;min-height:46px;margin-top:16px;border:1px solid #e1e4ea;border-radius:12px;background:#fff;color:var(--ink);font-size:11px;font-weight:850}
+.pm-change{font-size:10px;font-weight:800;white-space:nowrap}
+.pm-change.up{color:#0a8a5c}
+.pm-change.down{color:#c0304a}
+.pm-change.flat{color:var(--muted)}
+
+/* 探す：ヒーロー */
+.pm-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:18px;align-items:stretch}
+.pm-hero-copy{padding:30px;display:flex;flex-direction:column;justify-content:center;border-radius:22px;color:#fff;background:radial-gradient(circle at 88% 12%,rgba(120,170,255,.45),transparent 40%),radial-gradient(circle at 6% 112%,rgba(0,214,180,.32),transparent 46%),linear-gradient(140deg,#0b1e4d,#123a9c 55%,#1769ff)}
+.pm-eyebrow{color:#a9c8ff;font-size:9px;font-weight:900;letter-spacing:.16em}
+.pm-hero h1{margin:12px 0 10px;font-size:30px;line-height:1.3;letter-spacing:-.03em}
+.pm-hero-copy>p{max-width:540px;margin:0;color:rgba(255,255,255,.8);font-size:11px;line-height:1.85}
+.pm-hero-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+.pm-hero .pm-btn.primary{color:#0d3fa8;background:#fff;box-shadow:0 10px 24px rgba(5,20,60,.25)}
+.pm-hero .pm-btn.ghost{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28)}
+.pm-hero-stats{margin:24px 0 0;display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:30px}
+.pm-hero-stats dt{color:rgba(255,255,255,.66);font-size:9px;font-weight:750}
+.pm-hero-stats dd{margin:4px 0 0;font-size:20px;font-weight:850}
+.pm-spotlight{position:relative;min-height:320px;overflow:hidden;border-radius:22px;background:#0f1424;cursor:pointer;outline:0}
+.pm-spotlight:focus-visible{box-shadow:0 0 0 4px rgba(23,105,255,.35)}
+.pm-spotlight-art{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px}
+.pm-spotlight-art img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}
+.pm-spotlight:hover .pm-spotlight-art img{transform:scale(1.04)}
+.pm-spotlight::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,9,20,0) 35%,rgba(6,9,20,.88))}
+.pm-spotlight-info{position:absolute;z-index:1;right:20px;bottom:18px;left:20px;color:#fff}
+.pm-spotlight-info>span{display:inline-block;padding:5px 10px;border-radius:99px;background:rgba(255,255,255,.18);font-size:9px;font-weight:800;backdrop-filter:blur(8px)}
+.pm-spotlight-info>strong{display:block;margin-top:10px;font-size:22px}
+.pm-spotlight-info>small{display:block;margin-top:3px;color:rgba(255,255,255,.72);font-size:10px}
+.pm-spotlight-info dl{margin:12px 0 0;display:flex;gap:24px}
+.pm-spotlight-info dt{color:rgba(255,255,255,.66);font-size:9px}
+.pm-spotlight-info dd{margin:3px 0 0;font-size:14px;font-weight:850}
+.pm-spotlight-info .pm-change.up{color:#6ff0b8}
+.pm-spotlight-info .pm-change.down{color:#ff9aac}
+.pm-live{margin-top:16px;min-height:44px;padding:9px 14px;display:flex;align-items:center;gap:10px;overflow:hidden;border:1px solid #e6e9ef;border-radius:13px;background:#fafbfd;font-size:11px}
+.pm-live b{color:#0a8a5c;font-size:9px;letter-spacing:.12em}
+.pm-live-dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#0aa66f;animation:pmLivePulse 1.6s infinite}
+.pm-live-text{flex:1;min-width:0;overflow:hidden;color:#4a5263;white-space:nowrap;text-overflow:ellipsis}
+.pm-live-text strong{margin-right:4px;color:var(--ink)}
+.pm-live small{color:var(--muted);white-space:nowrap}
+.pm-live-badge{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:99px;background:#eaf8f2;color:#0a8a5c;font-size:10px;font-weight:900;letter-spacing:.1em}
+.pm-live-badge i{width:8px;height:8px;border-radius:50%;background:#0aa66f;animation:pmLivePulse 1.6s infinite}
+@keyframes pmLivePulse{0%{box-shadow:0 0 0 0 rgba(10,166,111,.5)}70%{box-shadow:0 0 0 7px rgba(10,166,111,0)}100%{box-shadow:0 0 0 0 rgba(10,166,111,0)}}
+
+/* コレクションカード・トレンド */
+.pm-collection-row{padding:2px 2px 12px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin}
+.pm-collection-card{overflow:hidden;border:1px solid #e5e8ee;border-radius:18px;background:#fff;cursor:pointer;outline:0;scroll-snap-align:start;transition:transform .2s,box-shadow .2s}
+.pm-collection-card:hover,.pm-collection-card:focus-visible{transform:translateY(-3px);box-shadow:var(--soft)}
+.pm-collection-card:focus-visible{border-color:#1769ff}
+.pm-collection-banner{height:112px;display:grid;overflow:hidden;background:#10131c}
+.pm-collection-banner.mosaic{grid-template-columns:repeat(3,1fr);gap:2px}
+.pm-collection-banner img{width:100%;height:100%;display:block;object-fit:cover}
+.pm-collection-card-body{position:relative;padding:30px 14px 14px}
+.pm-avatar{width:48px;height:48px;border:3px solid #fff;border-radius:14px;object-fit:cover;background:#eef0f4;box-shadow:0 4px 12px rgba(0,0,0,.14)}
+.pm-collection-card-body .pm-avatar{position:absolute;top:-25px;left:14px}
+.pm-collection-card-body strong{display:block;overflow:hidden;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.pm-collection-card-body dl{margin:10px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm-collection-card-body dt{color:var(--muted);font-size:9px}
+.pm-collection-card-body dd{margin:3px 0 0;font-size:12px;font-weight:850}
+.pm-trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+.pm-trend-row{width:100%;min-height:64px;padding:8px 10px;display:grid;grid-template-columns:22px 44px minmax(0,1fr) auto;align-items:center;gap:12px;border:0;border-radius:12px;background:transparent;color:var(--ink);text-align:left}
+.pm-trend-row:hover{background:#f5f7fa}
+.pm-rank{color:#8a909c;font-size:12px;font-weight:850;text-align:center}
+.pm-trend-row img{width:44px;height:44px;border-radius:11px;object-fit:cover}
+.pm-trend-name{min-width:0}
+.pm-trend-name strong{display:block;overflow:hidden;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.pm-trend-name small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+.pm-trend-value{text-align:right}
+.pm-trend-value strong{display:block;margin-bottom:3px;font-size:12px}
+
+/* アイテムカード */
+.pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:14px}
+.pm-card{position:relative;overflow:hidden;border:1px solid #e5e8ee;border-radius:16px;background:#fff;cursor:pointer;outline:0;transition:transform .2s,box-shadow .2s}
+.pm-card:hover,.pm-card:focus-visible{transform:translateY(-3px);box-shadow:0 14px 30px rgba(28,35,55,.12)}
+.pm-card:focus-visible{border-color:#1769ff}
+.pm-card.mine{border-color:#c9dbff}
+.pm-card-media{position:relative;aspect-ratio:1;overflow:hidden;background:#f1f3f7}
+.pm-card-media img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .45s ease}
+.pm-card:hover .pm-card-media img{transform:scale(1.05)}
+.pm-tier{position:absolute;top:9px;left:9px;padding:4px 8px;border-radius:99px;background:rgba(17,20,30,.72);color:#fff;font-size:8.5px;font-weight:850;backdrop-filter:blur(6px)}
+.pm-tier.t1{background:rgba(10,138,92,.9)}
+.pm-tier.t2{background:rgba(23,105,255,.92)}
+.pm-tier.t3{background:rgba(123,44,191,.92)}
+.pm-tier.t4{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.pm-tier.ticket{letter-spacing:.08em}
+.pm-own-badge{position:absolute;bottom:9px;left:9px;padding:4px 8px;border-radius:99px;background:#fff;color:#1d4fb8;font-size:8.5px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.pm-own-badge.listed{background:#1769ff;color:#fff}
+.pm-fav{position:absolute;top:8px;right:8px;height:28px;padding:0 9px;display:flex;align-items:center;gap:4px;border:0;border-radius:99px;background:rgba(255,255,255,.9);color:#8a909c;font-size:12px;backdrop-filter:blur(6px)}
+.pm-fav b{color:#4a5263;font-size:9px}
+.pm-fav.on{color:#e0245e}
+.pm-card-body{padding:11px 12px 13px}
+.pm-card-body>small{display:block;overflow:hidden;color:var(--muted);font-size:9px;font-weight:750;white-space:nowrap;text-overflow:ellipsis}
+.pm-card-body>small .pm-verified{width:12px;height:12px;margin-left:3px;font-size:7px}
+.pm-card-body>strong{display:block;margin-top:4px;overflow:hidden;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.pm-card-price{margin-top:10px;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.pm-card-price span{color:var(--muted);font-size:9px;font-weight:750}
+.pm-card-price b{font-size:14px}
+.pm-card-last{display:block;margin-top:4px;color:#9399a5;font-size:9px}
+.pm-card-buy{position:absolute;right:0;bottom:0;left:0;height:40px;border:0;background:#1769ff;color:#fff;font-size:11px;font-weight:850;transform:translateY(100%);transition:transform .2s}
+.pm-card:hover .pm-card-buy,.pm-card:focus-within .pm-card-buy{transform:translateY(0)}
+.pm-card-buy.sell{background:#16181d}
+@media (hover:none){.pm-card-buy{display:none}}
+.pm-how{margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pm-how>div{padding:18px;border:1px solid #e3ecff;border-radius:16px;background:#f5f8ff}
+.pm-how span{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#1769ff;color:#fff;font-size:11px;font-weight:900}
+.pm-how h3{margin:12px 0 6px;font-size:13px}
+.pm-how p{margin:0;color:#56607a;font-size:10px;line-height:1.75}
+
+/* コレクションページ */
+.pm-collection-hero{overflow:hidden;padding-bottom:22px;border:1px solid #e5e8ee;border-radius:20px;background:#fff}
+.pm-collection-banner.large{height:190px}
+.pm-collection-banner.large.mosaic{grid-template-columns:repeat(4,1fr)}
+.pm-collection-head{position:relative;margin-top:-38px;padding:0 22px;display:flex;align-items:end;gap:16px}
+.pm-avatar.large{width:96px;height:96px;border-width:4px;border-radius:22px}
+.pm-collection-head h1{margin:6px 0 3px;font-size:24px;letter-spacing:-.03em}
+.pm-collection-head p{margin:0;color:var(--muted);font-size:11px}
+.pm-category-pill{display:inline-block;padding:4px 9px;border-radius:99px;background:#eef3ff;color:#1d4fb8;font-size:9px;font-weight:850}
+.pm-desc{max-width:780px;margin:14px 22px 0;color:#4a5263;font-size:11px;line-height:1.85}
+.pm-stats{margin:18px 22px 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;overflow:hidden;border:1px solid #eceef3;border-radius:14px;background:#eceef3}
+.pm-stats>div{padding:12px 13px;background:#fff}
+.pm-stats dt{color:var(--muted);font-size:9px;font-weight:750}
+.pm-stats dd{margin:5px 0 0;font-size:14px;font-weight:850}
+.pm-note{margin:14px 22px 0;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-radius:12px;font-size:10px;line-height:1.7}
+.pm-note b{flex:0 0 auto;padding:2px 8px;border-radius:7px;font-size:9px}
+.pm-note.ticket{background:#fff7e6;color:#7a4d00}
+.pm-note.ticket b{background:#ffe2a8}
+.pm-note.local{background:#ecf9f2;color:#16613f}
+.pm-note.local b{background:#c9efd9}
+.pm-note.compact{margin:12px 0 0}
+
+/* 価格推移チャート */
+.pm-chart{position:relative;width:100%;height:190px}
+.pm-chart svg{display:block;overflow:visible}
+.pm-grid-line{stroke:#eceef3;stroke-width:1}
+.pm-axis{fill:#8a909c;font-size:10px;font-family:inherit}
+.pm-area{fill:#1769ff;fill-opacity:.1}
+.pm-line{fill:none;stroke:#1769ff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.pm-end-dot,.pm-hover-dot{fill:#1769ff;stroke:#fff;stroke-width:2}
+.pm-end-label{fill:var(--ink);font-size:11px;font-weight:800;font-family:inherit}
+.pm-crosshair{stroke:#a9b0bd;stroke-width:1}
+.pm-hit{cursor:crosshair;touch-action:pan-y}
+.pm-tooltip{position:absolute;z-index:2;padding:7px 10px;border-radius:9px;background:#16181d;color:#fff;white-space:nowrap;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.pm-tooltip strong{display:block;font-size:12px}
+.pm-tooltip span{display:block;margin-top:2px;color:rgba(255,255,255,.72);font-size:9px}
+.pm-chart-table{margin-top:8px}
+.pm-chart-table summary{color:#1769ff;font-size:10px;font-weight:800;cursor:pointer}
+.pm-chart-table table{width:100%;margin-top:8px;border-collapse:collapse;font-size:10px;font-variant-numeric:tabular-nums}
+.pm-chart-table th,.pm-chart-table td{padding:6px 8px;border-bottom:1px solid #eef0f4;text-align:left}
+.pm-chart-table th:last-child,.pm-chart-table td:last-child{text-align:right}
+
+/* アイテムページ */
+.pm-item-layout{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:26px;align-items:start}
+.pm-item-media{position:relative;aspect-ratio:1;overflow:hidden;border:1px solid #e5e8ee;border-radius:20px;background:#f1f3f7}
+.pm-item-media img{width:100%;height:100%;display:block;object-fit:cover}
+.pm-item-media .pm-tier{top:14px;left:14px;padding:6px 11px;font-size:10px}
+.pm-fav.large{top:14px;right:14px;height:34px;padding:0 12px;font-size:14px}
+.pm-fav.large b{font-size:11px}
+.pm-item-collection{padding:0;border:0;background:transparent;color:#1769ff;font-size:12px;font-weight:850}
+.pm-item-main h1{margin:8px 0 10px;font-size:28px;line-height:1.25;letter-spacing:-.03em}
+.pm-item-meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:11px}
+.pm-item-meta b{color:var(--ink)}
+.pm-item-meta b.me{color:#1769ff}
+.pm-price-box{margin-top:18px;padding:20px;border:1px solid #e5e8ee;border-radius:18px;background:linear-gradient(180deg,#fbfcff,#fff)}
+.pm-price-label{display:block;color:var(--muted);font-size:10px;font-weight:800}
+.pm-price{display:block;margin-top:6px;font-size:32px;letter-spacing:-.02em}
+.pm-price.small{font-size:17px}
+.pm-price-sub{margin:8px 0 0;color:#5d6575;font-size:10.5px;line-height:1.7}
+.pm-price-actions{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm-price-actions .pm-btn{width:100%;min-height:48px;font-size:12px}
+.pm-price-actions .pm-btn:only-child{grid-column:1/-1}
+.pm-pay-methods{margin:12px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+.pm-pay-methods span{padding:4px 8px;border:1px solid #e3e6ec;border-radius:7px;color:#5d6575;font-size:9px;font-weight:800}
+.pm-pay-methods .paypay{border-color:#ffd0d6;color:#e8233a}
+.pm-status{margin-top:12px;padding:10px 12px;display:flex;align-items:center;gap:9px;border-radius:11px;background:#eef4ff;color:#1d4fb8;font-size:11px;font-weight:800;line-height:1.5}
+.pm-status.fair{background:#eaf8f2;color:#0b7450}
+.pm-status.low{background:#fff7e4;color:#825b0e}
+.pm-status.high{background:#fff0f2;color:#a22d3e}
+.pm-status.pending{background:#f3f0ff;color:#4a32ba}
+.pm-status.block{margin-top:14px}
+.pm-pulse{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:currentColor;animation:pmBlink 1.4s infinite}
+@keyframes pmBlink{50%{opacity:.25}}
+.pm-offers{display:grid;gap:8px}
+.pm-offer-row{padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #eceef3;border-radius:12px;font-size:11px}
+.pm-offer-row strong{display:block;font-size:13px}
+.pm-offer-row small{display:block;margin-top:2px;color:var(--muted);font-size:9px}
+.pm-offer-row>span:last-child{display:flex;justify-content:flex-end;gap:6px}
+.pm-offer-row em{color:var(--muted);font-size:10px;font-style:normal;font-weight:800}
+.pm-offer-row.open{border-color:#cfe0ff;background:#f7faff}
+.pm-offer-row.accepted em{color:#0a8a5c}
+.pm-offer-row.declined em{color:#a22d3e}
+.pm-mini{min-height:32px;padding:0 11px;border:1px solid #dfe3ea;border-radius:9px;background:#fff;color:var(--ink);font-size:10px;font-weight:850}
+.pm-mini.solid{border-color:#1769ff;background:#1769ff;color:#fff}
+.pm-item-lower{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.pm-traits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pm-traits>div{padding:11px 10px;border:1px solid #dfe9ff;border-radius:12px;background:#f6f9ff;text-align:center}
+.pm-traits span{display:block;color:#5f6b85;font-size:9px;font-weight:800}
+.pm-traits strong{display:block;margin-top:4px;font-size:12px}
+.pm-traits small{display:block;margin-top:4px;color:var(--muted);font-size:9px}
+.pm-traits.compact{margin-top:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.pm-details{margin:0}
+.pm-details>div{padding:10px 0;display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eef0f4;font-size:11px}
+.pm-details dt{color:var(--muted)}
+.pm-details dd{margin:0;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+
+/* アクティビティ表 */
+.pm-activity{overflow:hidden;border:1px solid #e5e8ee;border-radius:16px;background:#fff}
+.pm-activity-row{padding:10px 14px;display:grid;grid-template-columns:104px minmax(0,2fr) 96px minmax(0,1fr) minmax(0,1fr) 72px;align-items:center;gap:12px;border-bottom:1px solid #eef0f4;font-size:11px}
+.pm-activity.no-item .pm-activity-row{grid-template-columns:104px 96px minmax(0,1fr) minmax(0,1fr) 72px}
+.pm-activity-row:last-child{border-bottom:0}
+.pm-activity-row.head{background:#f8f9fb;color:var(--muted);font-size:9.5px;font-weight:800}
+.pm-activity-row.mine{background:#f7faff}
+.pm-activity-row>.pm-activity-user small{display:none}
+.pm-event{display:flex;align-items:center;gap:8px;font-weight:850}
+.pm-event i{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#f0f2f6;font-size:12px;font-style:normal}
+.pm-event.sale i{background:#e6f6ef;color:#0a8a5c}
+.pm-event.list i{background:#eaf1ff;color:#1769ff}
+.pm-event.offer i{background:#f1edff;color:#5b3fd6}
+.pm-event.cancel i{background:#fdeef0;color:#c0304a}
+.pm-event.price i{background:#fff5e0;color:#a26a00}
+.pm-event.mint i{background:#fff0f8;color:#c03d8f}
+.pm-activity-item{min-width:0}
+.pm-activity-item button{max-width:100%;padding:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--ink);text-align:left}
+.pm-activity-item img{flex:0 0 auto;width:36px;height:36px;border-radius:9px;object-fit:cover}
+.pm-activity-item button>span{min-width:0;overflow:hidden;font-weight:800;white-space:nowrap;text-overflow:ellipsis}
+.pm-activity-item button>span small{display:block;overflow:hidden;color:var(--muted);font-size:9px;font-weight:650;text-overflow:ellipsis}
+.pm-activity-price{font-weight:850;font-variant-numeric:tabular-nums}
+.pm-activity-user{overflow:hidden;color:#4a5263;white-space:nowrap;text-overflow:ellipsis}
+.pm-activity-user.me{color:#1769ff;font-weight:850}
+.pm-activity-time{color:var(--muted);text-align:right;white-space:nowrap}
+
+/* ランキング */
+.pm-rank-controls{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:10px;font-weight:800}
+.pm-rank-table{margin-top:16px;overflow:hidden;border:1px solid #e5e8ee;border-radius:16px;background:#fff}
+.pm-rank-row{width:100%;padding:10px 16px;display:grid;grid-template-columns:36px minmax(0,2.4fr) repeat(5,minmax(0,1fr));align-items:center;gap:10px;border:0;border-bottom:1px solid #eef0f4;background:#fff;color:var(--ink);font-size:11.5px;font-weight:800;text-align:left;font-variant-numeric:tabular-nums}
+.pm-rank-row:last-child{border-bottom:0}
+.pm-rank-row:not(.head):hover{background:#f7f9fc}
+.pm-rank-row.head{background:#f8f9fb;color:var(--muted);font-size:9.5px}
+.pm-rank-row>span>small{display:none}
+.pm-rank-name{min-width:0;display:flex;align-items:center;gap:12px}
+.pm-rank-name img{flex:0 0 auto;width:44px;height:44px;border-radius:11px;object-fit:cover}
+.pm-rank-name>span{min-width:0}
+.pm-rank-name strong{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pm-rank-name small{display:block;margin-top:3px;color:var(--muted);font-size:9px;font-weight:700}
+
+/* マイページ */
+.pm-profile{padding:22px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px;border:1px solid #e3e9fb;border-radius:20px;background:linear-gradient(135deg,#f3f7ff,#f7f3ff)}
+.pm-profile-avatar{width:68px;height:68px;display:grid;place-items:center;border-radius:20px;color:#fff;background:linear-gradient(135deg,#1769ff,#7a5cff);font-size:20px;font-weight:900;text-transform:uppercase}
+.pm-profile-copy h1{margin:5px 0 4px;font-size:22px}
+.pm-profile-copy p{margin:0;color:var(--muted);font-size:11px}
+.pm-profile-stats{margin:0;display:grid;grid-template-columns:repeat(4,auto);gap:24px}
+.pm-profile-stats dt{color:var(--muted);font-size:9px;font-weight:800}
+.pm-profile-stats dd{margin:4px 0 0;font-size:17px;font-weight:850}
+.pm-subtabs{margin:18px 0 16px;display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid #e8eaf0;scrollbar-width:none}
+.pm-subtabs::-webkit-scrollbar{display:none}
+.pm-subtabs button{position:relative;flex:0 0 auto;min-height:44px;padding:0 14px;display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#6b7383;font-size:12px;font-weight:800}
+.pm-subtabs button b{min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;border-radius:99px;background:#eef0f4;color:#4a5263;font-size:9.5px}
+.pm-subtabs button.active{color:var(--ink)}
+.pm-subtabs button.active::after{content:"";position:absolute;right:10px;bottom:-1px;left:10px;height:3px;border-radius:3px 3px 0 0;background:#1769ff}
+.pm-subtabs button.active b{background:#1769ff;color:#fff}
+.pm-inline-note{margin-bottom:14px}
+.pm-listing-list{display:grid;gap:10px}
+.pm-listing-row{padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:14px;border:1px solid #e5e8ee;border-radius:14px;background:#fff}
+.pm-listing-item{min-width:0;padding:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--ink);text-align:left}
+.pm-listing-item img{flex:0 0 auto;width:52px;height:52px;border-radius:11px;object-fit:cover}
+.pm-listing-item>span{min-width:0}
+.pm-listing-item strong{display:block;overflow:hidden;font-size:12px;white-space:nowrap;text-overflow:ellipsis}
+.pm-listing-item small{display:block;margin-top:3px;color:var(--muted);font-size:9.5px}
+.pm-listing-price{font-size:15px;font-weight:850}
+.pm-listing-actions{display:flex;gap:6px}
+
+/* 売上・出金 */
+.pm-balance-grid{margin-top:20px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:16px}
+.pm-balance-card{padding:24px;border-radius:20px;color:#fff;background:radial-gradient(circle at 92% 0,rgba(255,255,255,.22),transparent 40%),linear-gradient(140deg,#0b3db8,#1769ff 60%,#3f8cff);box-shadow:0 18px 38px rgba(23,105,255,.24)}
+.pm-balance-card>span{color:rgba(255,255,255,.82);font-size:11px;font-weight:800}
+.pm-balance-card>strong{display:block;margin-top:8px;font-size:40px;letter-spacing:-.02em}
+.pm-balance-card dl{margin:16px 0 0;display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:26px}
+.pm-balance-card dt{color:rgba(255,255,255,.72);font-size:9px}
+.pm-balance-card dd{margin:4px 0 0;font-size:14px;font-weight:850}
+.pm-balance-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+.pm-bank-card{padding:20px;border:1px solid #e5e8ee;border-radius:20px;background:#fff}
+.pm-bank-card>.pm-btn{width:100%;margin-top:12px}
+.pm-bank{padding:12px;display:flex;align-items:center;gap:12px;border-radius:13px;background:#f6f8fb}
+.pm-bank.compact{margin-bottom:12px}
+.pm-bank>div{flex:1;min-width:0}
+.pm-bank-icon{flex:0 0 auto;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#16181d;color:#fff;font-size:13px;font-weight:900}
+.pm-bank strong{display:block;font-size:12px}
+.pm-bank small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+.pm-fee-list{margin:16px 0 0;padding:0;display:grid;gap:8px;list-style:none}
+.pm-fee-list li{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10.5px}
+.pm-fee-list b{color:var(--ink)}
+.summary-row.total{background:#f2f6ff}
+.summary-row.total span{color:#22314f;font-weight:800}
+.summary-row.total strong{color:#0d3fa8;font-size:13px}
+.pm-ledger-row{padding:12px 4px;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;border-bottom:1px solid #eef0f4}
+.pm-ledger-row:last-child{border-bottom:0}
+.pm-ledger-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#f0f2f6;color:#4a5263;font-weight:900}
+.pm-ledger-row.plus .pm-ledger-icon{background:#e6f6ef;color:#0a8a5c}
+.pm-ledger-title{min-width:0}
+.pm-ledger-title strong{display:block;overflow:hidden;font-size:11.5px;white-space:nowrap;text-overflow:ellipsis}
+.pm-ledger-title small{display:block;margin-top:3px;color:var(--muted);font-size:9.5px}
+.pm-ledger-amount{font-size:13px;font-weight:850;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pm-ledger-row.plus .pm-ledger-amount{color:#0a8a5c}
+.pm-ledger-amount small{display:block;margin-top:3px;color:var(--muted);font-size:9px;font-weight:750}
+.trade-content>.prototype-strip{margin-top:16px}
+
+/* モーダル内のパーツ */
+.pm-modal-item{padding:12px;display:flex;align-items:center;gap:13px;border:1px solid #e5e8ee;border-radius:15px;background:#fafbfc}
+.pm-modal-item img{flex:0 0 auto;width:64px;height:64px;border-radius:12px;object-fit:cover}
+.pm-modal-item>div{min-width:0}
+.pm-modal-item small{display:block;color:var(--muted);font-size:9.5px;font-weight:750}
+.pm-modal-item strong{display:block;margin-top:3px;font-size:14px}
+.pm-modal-item span{display:block;margin-top:4px;color:#6b7383;font-size:9.5px}
+.pm-market-ref{margin-top:12px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1px;overflow:hidden;border:1px solid #e5e8ee;border-radius:13px;background:#e5e8ee}
+.pm-market-ref>div{padding:10px 12px;background:#fff}
+.pm-market-ref>div.main{background:#f2f9f5}
+.pm-market-ref>div:only-child{grid-column:1/-1}
+.pm-market-ref span{display:block;color:var(--muted);font-size:9px;font-weight:800}
+.pm-market-ref strong{display:block;margin-top:4px;font-size:13px}
+.pm-market-ref .main strong{color:#0b7450}
+.pm-field-label{display:block;margin:16px 0 8px;font-size:11px;font-weight:850}
+.amount-box.pm-price-input{margin-top:0}
+.pm-price-input input{font-variant-numeric:tabular-nums}
+.pm-quick-prices{margin-top:9px;display:flex;flex-wrap:wrap;gap:7px}
+.pm-quick-prices button{min-height:34px;padding:0 11px;border:1px solid #dfe3ea;border-radius:9px;background:#fff;color:#2b3242;font-size:10px;font-weight:800}
+.pm-quick-prices button:hover{border-color:#1769ff;color:#1769ff}
+.pm-gauge{position:relative;margin-top:16px;padding-top:5px}
+.pm-gauge-track{height:8px;display:flex;gap:2px;overflow:hidden;border-radius:99px}
+.pm-gauge-track i{display:block;height:100%}
+.pm-gauge-track .low{background:#f5c46b}
+.pm-gauge-track .fair{background:#34c48b}
+.pm-gauge-track .high{background:#f08a9b}
+#listingGaugeMarker{position:absolute;top:0;width:18px;height:18px;margin-left:-9px;border:3px solid #fff;border-radius:50%;background:#16181d;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:left .15s ease}
+.pm-gauge-labels{margin-top:7px;display:flex;justify-content:space-between;color:var(--muted);font-size:9px;font-weight:750}
+.pm-estimate{margin:12px 0 0;padding:10px 12px;border-radius:11px;font-size:10.5px;font-weight:800;line-height:1.6}
+.pm-estimate.fair{background:#eaf8f2;color:#0b7450}
+.pm-estimate.low{background:#fff7e4;color:#825b0e}
+.pm-estimate.high,.pm-estimate.error{background:#fff0f2;color:#a22d3e}
+.pm-duration{padding:4px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-radius:12px;background:#f1f3f6}
+.pm-duration button{min-height:36px;border:0;border-radius:9px;background:transparent;color:#5d6575;font-size:11px;font-weight:850}
+.pm-duration button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(20,25,40,.1)}
+.pm-fee-summary{margin-top:14px}
+.pm-low-confirm{margin-top:12px;padding:11px 12px;border:1px solid #f3dca5;border-radius:11px;background:#fffaf0}
+.pm-modal-primary{width:100%;min-height:50px;margin-top:14px;font-size:12px}
+.pm-done{padding:24px}
+.pm-done h2{font-size:26px}
+.pm-purchased{padding:14px;display:flex;align-items:center;gap:14px;border:1px solid #cbe7dc;border-radius:16px;background:#f1faf6}
+.pm-purchased img{flex:0 0 auto;width:84px;height:84px;border-radius:14px;object-fit:cover}
+.pm-purchased span{color:#0a8a5c;font-size:10px;font-weight:900}
+.pm-purchased h3{margin:5px 0 3px;font-size:15px}
+.pm-purchased small{color:var(--muted);font-size:10px}
+.pm-notices{display:grid;gap:8px}
+.pm-notice{width:100%;padding:12px;display:grid;grid-template-columns:38px minmax(0,1fr);align-items:start;gap:12px;border:1px solid #e5e8ee;border-radius:13px;background:#fff;color:var(--ink);text-align:left}
+.pm-notice>span:first-child{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#eef4ff;color:#1769ff;font-weight:900}
+.pm-notice.sold>span:first-child,.pm-notice.offer_accepted>span:first-child,.pm-notice.withdraw>span:first-child{background:#e6f6ef;color:#0a8a5c}
+.pm-notice strong{display:block;font-size:12px}
+.pm-notice small{display:block;margin-top:3px;color:#5d6575;font-size:10.5px;line-height:1.6}
+.pm-notice em{display:block;margin-top:4px;color:var(--muted);font-size:9px;font-style:normal}
+
+/* 決済画面（売上残高・購入アイテム表示） */
+.checkout-order>div{flex:1;min-width:0}
+.checkout-order-image{flex:0 0 auto;width:56px;height:56px;border-radius:11px;object-fit:cover}
+.checkout-note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.7}
+.balance-icon{color:#fff;background:linear-gradient(145deg,#0b3db8,#1769ff);font-size:16px}
+.payment-method-card:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* PassWallet・Ticket Store との連携 */
+.wallet-listing-badge{margin-top:10px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:10px;background:#eaf1ff;color:#1d4fb8;font-size:9.5px;font-weight:850}
+.wallet-listing-badge b{font-size:12px}
+.collectible-art{height:210px}
+.added-benefit-badge.collectible-badge{color:#1d4fb8;background:#eef4ff}
+.pm-owned-visual{max-width:320px;margin:0 auto;aspect-ratio:1;overflow:hidden;border-radius:17px;background:#f1f3f7}
+.pm-owned-visual img{width:100%;height:100%;display:block;object-fit:cover}
+.pm-wallet-callout{margin-top:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #d6e4ff;border-radius:17px;background:linear-gradient(145deg,#f7faff,#eef4ff)}
+.pm-wallet-callout>div>span{color:#1d4fb8;font-size:8.5px;font-weight:900;letter-spacing:.12em}
+.pm-wallet-callout h3{margin:6px 0 5px;font-size:14px}
+.pm-wallet-callout p{margin:0;color:#4a5677;font-size:10px;line-height:1.65}
+.pm-wallet-callout p span{font-weight:800}
+.pm-wallet-callout button{flex:0 0 auto;min-height:44px;padding:0 15px;border:0;border-radius:12px;background:#1769ff;color:#fff;font-size:11px;font-weight:850;white-space:nowrap}
+.admission-entry-callout.disabled{filter:grayscale(.6);opacity:.75}
+.admission-entry-callout button:disabled{cursor:not-allowed}
+.pm-store-banner{margin-top:18px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:18px;color:#fff;background:radial-gradient(circle at 92% 20%,rgba(255,255,255,.2),transparent 35%),linear-gradient(135deg,#0b3db8,#1769ff)}
+.pm-store-banner span{color:#bcd3ff;font-size:8.5px;font-weight:900;letter-spacing:.14em}
+.pm-store-banner h2{margin:6px 0 5px;font-size:17px}
+.pm-store-banner p{max-width:560px;margin:0;color:rgba(255,255,255,.8);font-size:10px;line-height:1.7}
+.pm-store-banner button{flex:0 0 auto;min-height:44px;padding:0 16px;border:0;border-radius:12px;background:#fff;color:#0d3fa8;font-size:11px;font-weight:850}
+
+@media (max-width:1150px){
+  .pm-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .pm-trend-grid{grid-template-columns:1fr}
+  .pm-profile{grid-template-columns:auto minmax(0,1fr)}
+  .pm-profile-stats{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .pm-listing-row{grid-template-columns:minmax(0,1fr) auto;row-gap:10px}
+  .pm-listing-actions{grid-column:1/-1}
+}
+
+@media (max-width:760px){
+  .trade-header{position:static}
+  .trade-search{order:2;flex:1 1 100%;max-width:none;height:46px}
+  .trade-search input{font-size:16px}
+  .trade-header-tools{margin-left:0}
+  .trade-notice-button{width:40px;height:40px}
+  .trade-header .trade-tabs{width:calc(100% + 26px);margin:8px -13px 0}
+  .trade-content{padding:16px 12px 26px}
+  .pm-btn{min-height:48px;font-size:13px}
+  .pm-link,.pm-back{font-size:12px}
+  .pm-chip{min-height:40px;font-size:12px}
+  .pm-chip.small{min-height:38px;font-size:12px}
+  .pm-section{margin-top:26px}
+  .pm-section-head h2{font-size:18px}
+  .pm-toggle,.pm-select select{min-height:42px;font-size:13px}
+  .pm-panel{padding:15px}
+  .pm-panel-head h2{font-size:15px}
+  .pm-panel-head>span{font-size:11px}
+  .pm-muted,.pm-empty p{font-size:12px}
+  .pm-hero{grid-template-columns:1fr;gap:12px}
+  .pm-hero-copy{padding:22px 18px}
+  .pm-hero h1{font-size:25px}
+  .pm-hero-copy>p{font-size:13px;line-height:1.8}
+  .pm-hero-actions .pm-btn{flex:1 1 140px}
+  .pm-hero-stats{gap:18px}
+  .pm-hero-stats dt{font-size:10px}
+  .pm-hero-stats dd{font-size:18px}
+  .pm-spotlight{min-height:250px}
+  .pm-spotlight-info>span{font-size:10px}
+  .pm-spotlight-info>small,.pm-spotlight-info dt{font-size:11px}
+  .pm-live{font-size:12px}
+  .pm-collection-row{grid-auto-columns:78%}
+  .pm-collection-card-body dt{font-size:10px}
+  .pm-collection-card-body strong,.pm-collection-card-body dd{font-size:13px}
+  .pm-trend-name strong,.pm-trend-value strong{font-size:13px}
+  .pm-trend-name small,.pm-change{font-size:11px}
+  .pm-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .pm-card{border-radius:14px}
+  .pm-card:hover{transform:none;box-shadow:none}
+  .pm-card-body{padding:10px}
+  .pm-card-body>small,.pm-card-last,.pm-card-price span{font-size:10px}
+  .pm-card-body>strong{font-size:12.5px}
+  .pm-tier,.pm-own-badge{font-size:9px}
+  .pm-fav{height:30px;font-size:13px}
+  .pm-how{grid-template-columns:1fr}
+  .pm-how h3{font-size:15px}
+  .pm-how p{font-size:12px}
+  .pm-collection-banner.large{height:130px}
+  .pm-collection-head{margin-top:-30px;padding:0 16px;gap:12px}
+  .pm-avatar.large{width:72px;height:72px;border-radius:18px}
+  .pm-collection-head h1{font-size:20px}
+  .pm-collection-head p{font-size:12px}
+  .pm-desc{margin:12px 16px 0;font-size:12.5px}
+  .pm-stats{margin:16px 16px 0;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pm-stats>div:last-child:nth-child(odd){grid-column:1/-1}
+  .pm-stats dt{font-size:10.5px}
+  .pm-stats dd{font-size:15px}
+  .pm-note{margin:12px 16px 0;flex-direction:column;gap:6px;font-size:12px}
+  .pm-note.compact{margin:12px 0 0}
+  .pm-chart-table summary,.pm-chart-table table{font-size:12px}
+  .pm-item-layout{grid-template-columns:1fr;gap:16px}
+  .pm-item-main h1{font-size:23px}
+  .pm-item-collection,.pm-item-meta{font-size:12px}
+  .pm-price-box{padding:16px}
+  .pm-price-label{font-size:11px}
+  .pm-price{font-size:28px}
+  .pm-price-sub{font-size:12px}
+  .pm-pay-methods span{font-size:10px}
+  .pm-status{font-size:12px}
+  .pm-item-lower{grid-template-columns:1fr;gap:0}
+  .pm-traits{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pm-traits span,.pm-traits small{font-size:10.5px}
+  .pm-traits strong{font-size:13px}
+  .pm-details>div{font-size:12px}
+  .pm-offer-row{grid-template-columns:1fr 1fr;font-size:12px}
+  .pm-offer-row small{font-size:10.5px}
+  .pm-offer-row>span:last-child{grid-column:1/-1;justify-content:flex-start}
+  .pm-mini{min-height:40px;padding:0 15px;font-size:12px}
+  .pm-activity-row.head{display:none}
+  .pm-activity-row,.pm-activity.no-item .pm-activity-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"event time" "item item" "price price" "from to";gap:6px 12px;padding:12px;font-size:12px}
+  .pm-activity.no-item .pm-activity-row{grid-template-areas:"event time" "price price" "from to"}
+  .pm-event{grid-area:event}
+  .pm-activity-time{grid-area:time;font-size:11px}
+  .pm-activity-item{grid-area:item}
+  .pm-activity-item button>span small{font-size:10.5px}
+  .pm-activity-price{grid-area:price;font-size:14px}
+  .pm-activity-user.from{grid-area:from}
+  .pm-activity-user.to{grid-area:to}
+  .pm-activity-row>.pm-activity-user small{display:block;color:var(--muted);font-size:10px;font-weight:700}
+  .pm-rank-table{overflow-x:auto}
+  .pm-rank-row{min-width:680px;font-size:12.5px}
+  .pm-profile{padding:16px;gap:14px}
+  .pm-profile-avatar{width:56px;height:56px;border-radius:16px;font-size:17px}
+  .pm-profile-copy h1{font-size:19px}
+  .pm-profile-copy p{font-size:12px}
+  .pm-profile-stats{gap:8px}
+  .pm-profile-stats dt{font-size:10px}
+  .pm-profile-stats dd{font-size:15px}
+  .pm-subtabs button{font-size:13px}
+  .pm-listing-item strong{font-size:13px}
+  .pm-listing-item small{font-size:11px}
+  .pm-balance-grid{grid-template-columns:1fr}
+  .pm-balance-card{padding:20px}
+  .pm-balance-card>span{font-size:12px}
+  .pm-balance-card>strong{font-size:34px}
+  .pm-balance-card dl{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .pm-balance-card dt{font-size:10px}
+  .pm-balance-actions .pm-btn{flex:1 1 150px}
+  .pm-bank strong{font-size:13px}
+  .pm-bank small,.pm-fee-list li{font-size:12px}
+  .pm-ledger-title strong{font-size:12.5px}
+  .pm-ledger-title small,.pm-ledger-amount small{font-size:10.5px}
+  .pm-ledger-amount{font-size:14px}
+  .pm-modal-item strong{font-size:15px}
+  .pm-modal-item small,.pm-modal-item span{font-size:11px}
+  .pm-market-ref{grid-template-columns:1fr 1fr}
+  .pm-market-ref>div.main{grid-column:1/-1}
+  .pm-market-ref span{font-size:10.5px}
+  .pm-market-ref strong{font-size:14px}
+  .pm-field-label{font-size:13px}
+  .pm-quick-prices button{min-height:40px;padding:0 13px;font-size:12px}
+  .pm-gauge-labels{font-size:10.5px}
+  .pm-estimate{font-size:12px}
+  .pm-duration button{min-height:42px;font-size:12px}
+  .pm-modal-primary{font-size:14px}
+  .pm-notice strong{font-size:13px}
+  .pm-notice small{font-size:12px}
+  .checkout-note{font-size:12px}
+  .wallet-listing-badge{font-size:11px}
+  .wallet-listing-badge b{font-size:13px}
+  .collectible-art{height:180px}
+  .pm-wallet-callout{flex-direction:column;align-items:stretch}
+  .pm-wallet-callout h3{font-size:16px}
+  .pm-wallet-callout p{font-size:12px}
+  .pm-wallet-callout button{width:100%;font-size:13px}
+  .pm-store-banner{flex-direction:column;align-items:stretch}
+  .pm-store-banner h2{font-size:18px}
+  .pm-store-banner p{font-size:12px}
+  .pm-store-banner button{width:100%;font-size:13px}
+}
+@media (max-width:420px){
+  .pm-hero-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .pm-hero-stats dd{font-size:16px}
+  .pm-grid{gap:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pm-live-dot,.pm-live-badge i,.pm-pulse{animation:none}
+  .pm-card,.pm-card-media img,.pm-spotlight-art img,.pm-collection-card,.pm-btn{transition:none}
+}
+
+/* 暗号資産版の追加パーツ */
+.prototype-strip{padding:10px 12px;border-radius:10px;color:#5b6471;background:#f1f3f6;font-size:8.5px;line-height:1.55;text-align:center}
+.payment-prototype-strip{margin-top:14px}
+.switcher-item{min-width:168px}
+.switcher-item.trade .switcher-logo,.trade-header .service-logo{background:linear-gradient(135deg,#0f5ef0,#4a8bff)}
+.trade-wallet-chip{height:42px;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid #16181d;border-radius:12px;background:#16181d;color:#fff;white-space:nowrap}
+.trade-wallet-chip strong{font-size:11px}
+.trade-wallet-chip.connected{border-color:#d9e5ff;background:#f2f7ff;color:#174ea6}
+.trade-wallet-chip.connected span{font-size:9px;font-weight:800}
+.trade-wallet-chip.connected strong{font-size:12px}
+.pm-price-yen{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:750}
+.pm-input-yen{min-height:14px;margin:6px 0 0;color:var(--muted);font-size:10px;font-weight:750}
+.pm-balance-card>.pm-balance-yen{display:block;margin-top:4px;color:rgba(255,255,255,.78);font-size:12px;font-weight:750}
+.pm-approval-note{margin-top:12px}
+.pm-bank-card>.pm-sell-link{width:100%;margin-top:12px}
+.pm-approval-note strong{font-size:10.5px}
+@media (max-width:1150px){.switcher-item{min-width:150px}}
+@media (max-width:760px){
+  .app-switcher{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding-right:6px;padding-left:6px}
+  .switcher-item{min-width:0}
+  .switcher-item strong{font-size:9.5px}
+  .prototype-strip{font-size:11px}
+  .trade-wallet-chip{height:40px;padding:0 11px}
+  .trade-wallet-chip strong{font-size:12px}
+  .pm-price-yen,.pm-input-yen{font-size:12px}
+  .pm-approval-note strong{font-size:12.5px}
+  .exchange-header .service-tabs{grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .exchange-header .service-tabs button{min-width:0;padding-right:6px;padding-left:6px}
+}
+@media (max-width:420px){.trade-wallet-chip.connected span{display:none}}
+
+/* PassMarket はじめてガイド（ハイライト付き） */
+.trade-guide .wallet-security-guide-label{color:#1769ff}
+.trade-guide #tradeGuideNext{background:linear-gradient(135deg,#0753dc,#2c80ff);box-shadow:0 11px 25px rgba(23,105,255,.28)}
+.trade-guide-dots{margin-top:15px;display:flex;gap:5px}
+.trade-guide-dots i{flex:1;height:4px;border-radius:99px;background:#e3e8f2}
+.trade-guide-dots i.done{background:#a9c6ff}
+.trade-guide-dots i.active{background:#1769ff}
+.pm-guide-highlight{box-shadow:0 0 0 10px rgba(255,255,255,.13),0 0 48px 17px rgba(80,140,255,.45)}
+.pm-guide-highlight::before{background:#fff}
+.pm-section .pm-how{margin-top:0}
+.trade-guide h2{word-break:auto-phrase;text-wrap:balance}
+.trade-guide.trade-guide-wide{width:min(640px,calc(100vw - 32px))}
+.trade-guide-figure{display:block;width:100%;height:auto;margin-top:12px;border:1px solid #dfe7f5;border-radius:10px;background:#fff}
+.pm-hero-actions.pm-guide-highlight::before,.pm-hero-copy.pm-guide-highlight::before{background:linear-gradient(140deg,#0b1e4d,#1550d8)}
+@media (max-width:760px){
+  .trade-guide-dots{margin-top:11px}
+  .trade-guide.trade-guide-wide{width:auto;max-height:calc(100dvh - 96px)}
+  .trade-guide-figure{margin-top:10px;border-radius:8px}
+  .pm-guide-highlight{box-shadow:0 0 0 7px rgba(255,255,255,.13),0 0 35px 12px rgba(80,140,255,.42)}
+  .pm-hero-actions .pm-btn{padding:0 12px;white-space:nowrap}
+}
+
+/* 購入完了ガイド：「詳細を読む」と「閉じる」をまとめて下部に固定 */
+.nft-ownership-guide-actions{position:sticky;z-index:2;bottom:0;display:grid;gap:8px;background:#fff}
+.nft-ownership-guide-actions>button{position:static}
+.nft-ownership-guide-actions .nft-ownership-guide-close{min-height:42px;margin-top:0;justify-content:center;border:1px solid #d9d3f5;background:#fff;color:#4a32ba;box-shadow:none}
+.nft-ownership-guide-detail .nft-ownership-guide-actions{position:static;flex:0 0 auto}
+.nft-ownership-guide-detail .nft-ownership-guide-actions #nftOwnershipGuideNext{margin-top:14px}
+/* 保有NFTページ：NFTの詳しい説明をいつでも開けるボタン */
+.nft-explanation-button{width:100%;margin-top:12px;padding:13px 15px;display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #dcd4ff;border-radius:14px;color:var(--ink);background:linear-gradient(145deg,#fbfaff,#f3efff);text-align:left;transition:border-color .18s,box-shadow .18s}
+.nft-explanation-button:hover,.nft-explanation-button:focus-visible{border-color:#8f7bf4;box-shadow:0 8px 22px rgba(108,77,246,.14)}
+.nft-explanation-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(135deg,#6c4df6,#8b62ff);font:italic 900 16px Georgia,serif}
+.nft-explanation-button strong,.nft-explanation-button small{display:block}
+.nft-explanation-button strong{font-size:12px}
+.nft-explanation-button small{margin-top:3px;color:var(--muted);font-size:9.5px;line-height:1.5}
+.nft-explanation-button>b{color:#5b42dc;font-size:16px}
+@media (max-width:760px){
+  .nft-ownership-guide-actions .nft-ownership-guide-close{min-height:44px;font-size:12px}
+  .nft-ownership-guide:not(.nft-ownership-guide-detail){max-height:min(352px,calc(100dvh - 20px))}
+  .nft-explanation-button{padding:13px}
+  .nft-explanation-button strong{font-size:14px}
+  .nft-explanation-button small{font-size:11px}
+}
+
+/* 通知は表示のみ。重なったボタンやチェックボックスをそのまま押せるようにする */
+.toast{pointer-events:none}
+
+/* スマホの切り替えバーは画面上部（ヘッダーの位置）に表示する。
+   背景ぼかし（backdrop-filter）に対応していない古いiOSでは画面下部に移ってしまうため、ヘッダー内に配置して位置をそろえ、右端はヘルプボタンのために空ける */
+@media (max-width:760px){
+  .app-switcher{position:absolute;right:64px;width:auto}
+  /* 4つの切り替えボタンのラベルが狭い画面でも1行に収まるよう、画面幅に合わせて文字を縮める */
+  .switcher-item strong{white-space:nowrap;font-size:min(10px,2.6vw)}
+}
+
+/* ヘルプは画面の高さに収め、内容が長い場合はスクロールして最後まで読めるようにする（スマホのブラウザのツールバーに隠れないよう dvh を使う） */
+.help-drawer{height:100dvh;overflow-y:auto;overscroll-behavior:contain}
+@media (max-width:760px){.help-drawer{padding-bottom:calc(96px + env(safe-area-inset-bottom))}}
+
+/* 全進捗達成後の結果保存 */
+.result-save-panel{margin:16px 0;padding:16px;border:2px solid #087c58;border-radius:14px;background:#effbf5;color:#14563e}
+.result-save-panel>strong{display:block;font-size:14px;line-height:1.5}
+.result-save-panel>p{margin:6px 0 12px;font-size:12px;line-height:1.6}
+.result-save-button,#saveCompletedResultGuide{display:block;width:100%;min-height:48px;padding:13px 16px;border:0;border-radius:10px;background:#087c58;color:#fff;font-size:15px;font-weight:700;line-height:1.5;cursor:pointer;box-shadow:0 4px 12px rgba(8,124,88,.2)}
+.result-save-button:hover,#saveCompletedResultGuide:hover{background:#066344}
+.result-save-button:focus-visible{outline:3px solid #1769ff;outline-offset:3px}
+#saveCompletedResultGuide{margin-top:18px}
+.result-save-panel.hidden,.result-save-button.hidden{display:none}
+
+/* JSON保存とアンケートへの移動 */
+.result-survey-button,#surveyGuideControls .result-survey-button{display:block;width:100%;min-height:52px;margin:12px 0;padding:14px;border:0;border-radius:10px;background:#087c58;color:white;font-size:15px;font-weight:700;line-height:1.6;cursor:pointer;box-shadow:0 4px 12px rgba(8,124,88,.2)}
+.result-survey-button:disabled{opacity:.65;cursor:wait}
+.result-survey-button:focus-visible{outline:3px solid #1769ff;outline-offset:3px}
+.survey-status{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.survey-status:empty{display:none}
+.survey-status.survey-error{color:#a42828}
+#saveCompletedResult,#saveCompletedResultGuide{background:#fff;color:#14563e;border:1px solid #087c58;box-shadow:none;font-size:13px;margin-top:10px}
+
+/* Desktop spotlight explanations only; mobile and regular screens retain their styles. */
+@media (min-width: 761px) {
+  .wallet-security-guide:not(.nft-ownership-guide-detail) {
+    width: min(520px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 24px;
+  }
+  .wallet-security-guide.trade-guide-wide {
+    width: min(720px, calc(100vw - 32px));
+  }
+  .progress-guide-bubble {
+    max-height: calc(100dvh - 64px);
+    padding: 24px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .wallet-security-guide:not(.nft-ownership-guide-detail) h2,
+  .progress-guide-bubble h2 {
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.5;
+  }
+  .wallet-security-guide:not(.nft-ownership-guide-detail) p,
+  .progress-guide-bubble p {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.8;
+  }
+  .wallet-security-guide:not(.nft-ownership-guide-detail) .wallet-security-guide-label,
+  .progress-guide-bubble .progress-guide-label {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.5;
+    letter-spacing: .04em;
+  }
+  .progress-guide-bubble .progress-guide-note,
+  .progress-guide-bubble .progress-guide-hint-note {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.75;
+    padding: 12px 14px;
+  }
+  .wallet-security-guide:not(.nft-ownership-guide-detail) button,
+  .progress-guide-bubble button {
+    min-height: 50px;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.5;
+    padding: 12px 16px;
+  }
+  #nftOwnershipGuide:not(.nft-ownership-guide-detail) .nft-ownership-guide-subject strong,
+  .signature-guide-wallet strong,
+  .passkey-guide-subject strong {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  #nftOwnershipGuide:not(.nft-ownership-guide-detail) .nft-ownership-guide-subject span,
+  .signature-guide-wallet span,
+  .passkey-guide-subject small {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  #nftOwnershipGuide:not(.nft-ownership-guide-detail) .nft-ownership-guide-body li {
+    padding: 13px 15px;
+  }
+  #nftOwnershipGuide:not(.nft-ownership-guide-detail) .nft-ownership-guide-body li strong {
+    font-size: 17px;
+    font-weight: 750;
+    line-height: 1.6;
+  }
+  #nftOwnershipGuide:not(.nft-ownership-guide-detail) .nft-ownership-guide-body li span {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.8;
+  }
+}
+@media (min-width: 1151px) {
+  .progress-guide-bubble { width: min(560px, calc(100vw - 400px)); }
+}
+@media (min-width: 1280px) {
+  .wallet-security-guide:not(.nft-ownership-guide-detail) { width: 560px; }
+  .wallet-security-guide.trade-guide-wide { width: 720px; }
+}
+@media (min-width: 761px) and (max-width: 1150px) {
+  .progress-guide-bubble {
+    position: fixed;
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    width: min(720px, calc(100vw - 32px));
+    margin: 0;
+    max-height: calc(100dvh - 32px);
+  }
+  .progress-guide-bubble::before { display: none; }
+}
+@media (min-width: 1151px) {
+  .progress-guide-bubble { max-height: calc(100dvh - 160px); }
+}
