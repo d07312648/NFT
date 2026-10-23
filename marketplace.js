@@ -1119,7 +1119,7 @@ function tradeSearchPage(){
 /* ---------- はじめてガイド（マーケットを初めて開いたとき） ---------- */
 const TRADE_GUIDE_STEPS=[
   {target:".pm-hero",mobileTarget:".pm-hero-copy",label:"二次流通",title:"NFTはマーケットプレイスで売買できます",description:"運営元が二次流通（転売）を認めている場合、購入したNFTをマーケットプレイスで売買できます。"},
-  {target:null,wide:true,label:"運営への還元",title:"公認の二次流通では、運営にも手数料が入ります",description:"転売が公式に認められた形で行えます。売買が成立すると、その手数料の一部が運営側に入ります。このマーケットでも、販売額の一部が「クリエイター収益」として運営元・制作元に還元されます。",
+  {target:null,wide:true,label:"運営への還元",title:"公認の二次流通では、運営にも手数料が入ります",description:"転売が公式に認められた形で行えます。メルカリなどの従来のCtoCサービスとは違い、売買が成立すると、その手数料の一部が運営側に入ります。このマーケットでも、販売額の一部が「クリエイター収益」として運営元・制作元に還元され、継続的な財源の確保に繋がります。",
     image:{src:"./assets/guide/resale-fee-diagram.png",alt:"従来のサービスでは売買の手数料がマーケットプレイスのみに入るのに対し、NFTの二次流通ではマーケットプレイスと製作元・運営の両方に手数料が入ることを示す図"}},
   {target:".pm-collection-row",label:"使用後も残る価値",title:"使用後のNFTチケットも取引されることがあります",description:"NFTチケットの場合、アートとしての価値がある、長期的な特典が付いている、サインが入っているといった付加価値があれば、イベントで使用した後も売買される可能性があります。"},
   {target:"#tradeLiveTicker",label:"NFTだからできること",title:"所有者と取引履歴を記録できるNFTだからこそ",description:"使用後も価値が残り、取引が続くことは、通常の電子チケットでは難しいことです。所有者や取引履歴を記録し、本物であること（真正性）を証明できるNFTだからこそ実現できる仕組みです。"},
@@ -1163,6 +1163,10 @@ function setTradeGuideTarget(target){
   tradeGuideTarget=target||null;
   tradeGuideTarget?.classList.add("wallet-guide-highlight","pm-guide-highlight");
 }
+function formatTradeGuideDescription(description){
+  const highlights=["売買が成立すると、その手数料の一部が運営側に入ります。", "継続的な財源の確保に繋がります。", "所有者や取引履歴を記録し、本物であること（真正性）を証明できるNFTだからこそ実現できる仕組みです。", "例えば、NFTゲームでは、獲得したキャラクターやアイテムがNFTとなり、外部ウォレットに移してマーケットで他のユーザーと売買できます。", "レア度が高く高個体なものほど価格が高くなるといったように、資産性を持つようになります。"];
+  return highlights.reduce((html,text)=>html.replace(escapeHtml(text),`<strong class="trade-guide-emphasis">${escapeHtml(text)}</strong>`),escapeHtml(description));
+}
 function renderTradeGuideStep(){
   const step=TRADE_GUIDE_STEPS[tradeGuideStep],last=tradeGuideStep===TRADE_GUIDE_STEPS.length-1;
   setTradeGuideTarget(tradeGuideStepTarget(step));
@@ -1173,7 +1177,7 @@ function renderTradeGuideStep(){
   figure.alt=step.image?.alt||"";
   $("tradeGuideLabel").textContent=`${tradeGuideStep+1} / ${TRADE_GUIDE_STEPS.length} · ${step.label}`;
   $("tradeGuideTitle").textContent=step.title;
-  $("tradeGuideDescription").textContent=step.description;
+  $("tradeGuideDescription").innerHTML=formatTradeGuideDescription(step.description);
   $("tradeGuideDots").innerHTML=TRADE_GUIDE_STEPS.map((_,index)=>`<i class="${index<tradeGuideStep?"done":index===tradeGuideStep?"active":""}"></i>`).join("");
   $("tradeGuideNext").innerHTML=last?'はじめる <span aria-hidden="true">✓</span>':'次へ <span aria-hidden="true">→</span>';
   $("tradeGuide").scrollTop=0;

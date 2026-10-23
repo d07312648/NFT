@@ -2200,6 +2200,7 @@ body.signature-guide-open #modal {
 }
 
 .signature-risk-warning {
+  color: #c62828;
   font-size: 1.08em;
 }
 
@@ -4490,4 +4491,42 @@ body.nft-airdrop-guide-open #walletApp {
 }
 @media (min-width: 1151px) {
   .progress-guide-bubble { max-height: calc(100dvh - 160px); }
+}
+
+/* Emphasize key statements in the market guide. */
+#tradeGuideDescription .trade-guide-emphasis{color:#000;font-weight:700}
+
+/* Keep the completed-flow dialog and all of its actions reachable on phones. */
+@media (max-width: 760px), (max-width: 1150px) and (max-height: 500px) {
+  body.progress-guide-completion-open { overflow: hidden; }
+  body.progress-guide-completion-open .mission-panel {
+    position: fixed;
+    inset: max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    overflow: hidden;
+  }
+  body.progress-guide-completion-open .mission-panel > :not(.progress-guide-bubble) {
+    display: none;
+  }
+  body.progress-guide-completion-open .progress-guide-bubble {
+    position: absolute;
+    inset: 10px;
+    width: auto;
+    transform: none;
+    animation: none;
+    margin: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  .progress-guide-bubble.progress-guide-completion::before { display: none; }
+  .progress-guide-bubble.progress-guide-completion button {
+    position: static;
+  }
 }

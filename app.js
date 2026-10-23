@@ -565,6 +565,7 @@ function configureProgressGuide(mode){
 function showProgressGuide(mode="intro"){
   if(progressGuideOpen())return;
   progressGuideMode=mode;configureProgressGuide(mode);
+  $("progressGuideBubble").scrollTop=0;
   $("progressGuideBackdrop").classList.remove("hidden");
   $("progressGuideBackdrop").setAttribute("aria-hidden","false");
   $("progressGuideBubble").classList.remove("hidden");
@@ -1028,8 +1029,8 @@ function startSignatureGuide(walletId){
     mode:"signature",walletId:wallet.id,targetSelector:"#modalBody .connection-signature-card",label:"GUIDE · 署名",title:"NFTで使われる「署名」とは？",
     subjectLabel:"今回署名するウォレット",subjectValue:`${wallet.name}（${shortWalletAddress(wallet.address)}）`,
     description:"NFTマーケットプレイスへのウォレットの接続時やNFTの取引を実行する際に、署名を求められます。NFTの文脈で使われる「署名」とは、秘密鍵を使って「この操作を自分が承認した」ことを証明する手続きです。秘密鍵そのものが相手に渡ることはありません。",
-    warningPrefix:"署名内容によってはNFTや暗号資産の移動が許可されるため、",riskWarning:"悪意のあるサイトに署名すると資産を盗まれる可能性があります。",
-    warningSuffix:"必ず要求元・操作内容・金額・資産移動の有無を確認してください。今回の接続署名では、資産移動もガス代（手数料）も発生しません。"
+    warningPrefix:"署名内容によってはNFTや暗号資産の移動が許可されるため、",riskWarning:"悪意のあるサイトに署名すると資産を盗まれる可能性があります。必ず要求元・操作内容・金額・資産移動の有無を確認してください。",
+    warningSuffix:"今回の接続署名では、資産移動もガス代（手数料）も発生しません。"
   });
 }
 function startContractGuide(walletId){
@@ -1039,8 +1040,8 @@ function startContractGuide(walletId){
     mode:"contract",walletId:wallet.id,targetSelector:"#modalBody .purchase-signature-card",label:"GUIDE · コントラクト",title:"NFT取引で使われる「コントラクト」とは？",
     subjectLabel:"今回実行するコントラクト",subjectValue:"MintGate NFT販売（0x91D2...44AF）",
     description:"NFTの文脈で使われる「コントラクト（スマートコントラクト）」とは、ブロックチェーン上で動くプログラムです。あらかじめ定められた条件に従って、代金の支払いやNFTの発行・移動などを自動で実行します。",
-    warningPrefix:"一度実行された取引は原則として取り消せません。",riskWarning:"悪意のあるコントラクトを承認すると、NFTや暗号資産を盗まれる可能性があります。",
-    warningSuffix:"必ず要求元・操作内容・コントラクトアドレス・最大支払額を確認してください。今回の疑似取引では、表示中のNFTチケット購入のみを実行します。"
+    warningPrefix:"一度実行された取引は原則として取り消せません。",riskWarning:"悪意のあるコントラクトを承認すると、NFTや暗号資産を盗まれる可能性があります。必ず要求元・操作内容・コントラクトアドレス・最大支払額を確認してください。",
+    warningSuffix:"今回の疑似取引では、表示中のNFTチケット購入のみを実行します。"
   });
 }
 function positionSignatureGuide(){
@@ -2318,7 +2319,9 @@ function resultData(){
 }
 function downloadResult(){
   const blob=new Blob([JSON.stringify(resultData(),null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`${state.participantId}_multi_service_flow.json`;a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`${state.participantId}_multi_service_flow.json`;a.hidden=true;document.body.appendChild(a);
+  try{a.click()}finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+  document.querySelectorAll("[data-survey-status]").forEach(el=>{el.textContent="JSONの保存を開始しました。ブラウザのダウンロード一覧をご確認ください。"});
 }
 
 $("startButton").onclick=start;
