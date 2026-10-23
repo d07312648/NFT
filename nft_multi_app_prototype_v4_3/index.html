@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="取引所・ウォレット・NFTマーケットを行き来する従来型NFT購入の研究用疑似体験" />
+  <title>NFT Journey Lab｜従来型NFT購入体験</title>
+  <link rel="stylesheet" href="./styles.css?v=5.3.4" />
+</head>
+<body>
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <header class="global-header">
+    <button class="lab-brand" id="homeButton" type="button" aria-label="ホームへ">
+      <span class="lab-logo">J</span>
+      <span>
+        <strong>NFT Journey Lab</strong>
+        <small>Research Prototype</small>
+      </span>
+    </button>
+
+    <nav id="appSwitcher" class="app-switcher hidden" aria-label="サービスを切り替える">
+      <button class="switcher-item exchange" data-app="exchange" type="button">
+        <span class="switcher-logo">E</span>
+        <span><strong>取引所</strong><small>NOVA Exchange</small></span>
+      </button>
+      <button class="switcher-item wallet" data-app="wallet" type="button">
+        <span class="switcher-logo">W</span>
+        <span><strong>ウォレット</strong><small>Orbit Wallet</small></span>
+      </button>
+      <button class="switcher-item market" data-app="market" type="button">
+        <span class="switcher-logo">M</span>
+        <span><strong>チケットサイト</strong><small>MintGate</small></span>
+      </button>
+      <button class="switcher-item trade" data-app="trade" type="button">
+        <span class="switcher-logo">P</span>
+        <span><strong>マーケット</strong><small>PassMarket</small></span>
+      </button>
+    </nav>
+
+    <div class="header-tools">
+      <span class="demo-pill">研究用デモ</span>
+      <button id="helpButton" class="round-button" type="button" aria-label="ヘルプを開く">?</button>
+    </div>
+  </header>
+
+  <main id="landing" class="landing">
+    <div class="landing-confetti" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="digital-ticket-decoration" aria-hidden="true">
+      <span class="decoration-label">NFT TICKET</span>
+      <strong>LIVE<br>EXPERIENCE</strong>
+      <span class="decoration-code">#2026-1042</span>
+      <span class="decoration-qr"></span>
+    </div>
+    <section class="landing-copy">
+      <span class="kicker">TRADITIONAL NFT ACQUISITION</span>
+      <h1><em>NFTチケットを購入する</em></h1>
+      <p>
+        暗号資産取引所、ウォレット、NFTチケット購入サイトを別々のサービスとして再現し、
+        従来型のNFT獲得に必要な操作を疑似体験します。
+      </p>
+
+      <div class="safety-note">
+        <span>!</span>
+        <div>
+          <strong>実際の資産・個人情報は使用しません</strong>
+          <p>表示される価格、公開鍵、署名、暗号資産、NFTはすべて研究用の架空データです。</p>
+        </div>
+      </div>
+
+      <button id="startButton" class="hero-button" type="button">
+        体験を開始する <span>→</span>
+      </button>
+    </section>
+
+    <section class="journey-preview" aria-label="体験するサービス">
+      <article class="preview-card preview-exchange">
+        <div class="preview-top">
+          <span class="preview-logo">E</span>
+          <span>01</span>
+        </div>
+        <h2>NOVA Exchange</h2>
+        <p>本人確認、ETHの購入・売却、外部ウォレットへの送金</p>
+        <div class="mini-chart">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </article>
+      <article class="preview-card preview-wallet">
+        <div class="preview-top">
+          <span class="preview-logo">W</span>
+          <span>02</span>
+        </div>
+        <h2>Orbit Wallet</h2>
+        <p>ウォレット作成、公開鍵コピー、署名、NFT保管</p>
+        <div class="address-preview">0x7A4F...93C2</div>
+      </article>
+      <article class="preview-card preview-market">
+        <div class="preview-top">
+          <span class="preview-logo">M</span>
+          <span>03</span>
+        </div>
+        <h2>MintGate</h2>
+        <p>ウォレット接続、チケット選択、購入トランザクション</p>
+        <div class="nft-preview-grid"><i></i><i></i><i></i></div>
+      </article>
+    </section>
+  </main>
+
+  <main id="workspace" class="workspace hidden">
+    <aside class="mission-panel">
+      <div class="mission-heading">
+        <span class="kicker">MISSION</span>
+        <h2>NFTチケット獲得</h2>
+        <p id="participantText">参加者ID：—</p>
+      </div>
+
+      <div class="overall-progress">
+        <div><span>全体の進捗</span><strong id="progressPercent">0%</strong></div>
+        <div class="track"><i id="progressFill"></i></div>
+      </div>
+
+      <section id="resultSavePanel" class="result-save-panel hidden" aria-label="体験結果の保存">
+        <strong>すべての進捗を達成しました</strong>
+        <p>JSONを保存し、アンケートと一緒に提出してください。</p>
+        <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+        <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
+        <button id="saveCompletedResult" class="result-save-button" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
+      </section>
+
+      <ol id="missionList" class="mission-list"></ol>
+
+      <section id="progressGuideBubble" class="progress-guide-bubble hidden" role="dialog" aria-modal="true" aria-labelledby="progressGuideTitle" aria-hidden="true">
+        <span id="progressGuideLabel" class="progress-guide-label">GUIDE</span>
+        <h2 id="progressGuideTitle">進捗フローを確認</h2>
+        <p id="progressGuideDescription">進捗フローを参考にNFTチケットを獲得してください。</p>
+        <p id="progressGuideNote" class="progress-guide-note">※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。</p>
+        <p id="progressGuideScrollNote" class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
+        <p id="progressGuideHintNote" class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
+        <div id="surveyGuideControls" class="hidden">
+          <p>JSONを保存し、アンケートと一緒に提出してください。</p>
+          <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+          <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
+        </div>
+        <button id="saveCompletedResultGuide" class="result-save-button hidden" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
+        <button id="progressGuideStart" type="button">閉じる <span aria-hidden="true">→</span></button>
+      </section>
+
+      <div class="wallet-mini-status">
+        <div>
+          <span>ウォレット残高</span>
+          <strong id="sideWalletBalance">0.0000 ETH</strong>
+        </div>
+        <span id="sideNetworkStatus" class="dot-label"><i></i>未接続</span>
+      </div>
+
+      <button id="resetProgressButton" class="progress-reset" type="button">
+        <span aria-hidden="true">↺</span>進捗をリセットする
+      </button>
+    </aside>
+
+    <section class="app-stage">
+      <div id="exchangeApp" class="service-app exchange-app">
+        <header class="service-header exchange-header">
+          <div class="service-brand">
+            <span class="service-logo">E</span>
+            <div><strong>NOVA Exchange</strong><small>暗号資産取引所</small></div>
+          </div>
+          <nav id="exchangeTabs" class="service-tabs">
+            <button data-tab="exchange-home" class="active" type="button">ホーム</button>
+            <button data-tab="exchange-buy" type="button">購入</button>
+            <button data-tab="exchange-sell" type="button">売却</button>
+            <button data-tab="exchange-send" type="button">送金</button>
+          </nav>
+          <div class="service-user"><span></span><b>デモユーザー</b></div>
+        </header>
+        <div id="exchangeContent" class="service-content"></div>
+      </div>
+
+      <div id="walletApp" class="service-app wallet-app hidden">
+        <header class="service-header wallet-header">
+          <div class="service-brand">
+            <span class="service-logo">O</span>
+            <div><strong>Orbit Wallet</strong><small>Self-custody wallet</small></div>
+          </div>
+          <nav id="walletTabs" class="service-tabs">
+            <button data-tab="wallet-home" class="active" type="button">資産</button>
+            <button data-tab="wallet-receive" type="button">受け取る</button>
+            <button data-tab="wallet-nft" type="button">NFT</button>
+            <button data-tab="wallet-benefits" type="button">特典</button>
+          </nav>
+          <div class="network-pill"><i></i>Ethereum</div>
+        </header>
+        <div id="walletContent" class="service-content"></div>
+      </div>
+
+      <div id="tradeApp" class="service-app trade-app hidden">
+        <header class="service-header trade-header">
+          <div class="service-brand">
+            <span class="service-logo">P</span>
+            <div><strong>PassMarket</strong><small>NFTマーケットプレイス</small></div>
+          </div>
+          <label class="trade-search"><span aria-hidden="true">⌕</span><input id="tradeSearch" type="search" placeholder="コレクション・アイテムを検索" autocomplete="off" enterkeyhint="search" aria-label="コレクション・アイテムを検索"></label>
+          <div class="trade-header-tools">
+            <button id="tradeWalletChip" class="trade-wallet-chip" type="button"><strong>ウォレットを接続</strong></button>
+            <button id="tradeNoticeButton" class="trade-notice-button" type="button" aria-label="お知らせ"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b id="tradeNoticeCount" class="hidden">0</b></button>
+          </div>
+          <nav id="tradeTabs" class="service-tabs trade-tabs" aria-label="PassMarketメニュー">
+            <button data-trade-tab="explore" class="active" type="button">探す</button>
+            <button data-trade-tab="rankings" type="button">ランキング</button>
+            <button data-trade-tab="activity" type="button">アクティビティ</button>
+            <button data-trade-tab="account" type="button">マイページ</button>
+            <button data-trade-tab="balance" type="button">売上・送金</button>
+          </nav>
+        </header>
+        <div id="tradeContent" class="service-content trade-content"></div>
+      </div>
+
+      <div id="marketApp" class="service-app market-app hidden">
+        <header class="service-header market-header">
+          <div class="service-brand">
+            <span class="service-logo">M</span>
+            <div><strong>MintGate</strong><small>NFT Ticket Marketplace</small></div>
+          </div>
+          <div class="market-search">イベント・コレクションを検索</div>
+          <button id="marketWalletButton" class="connect-button" type="button">ウォレットを接続</button>
+        </header>
+        <div id="marketContent" class="service-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="progressGuideBackdrop" class="progress-guide-backdrop hidden" aria-hidden="true"></div>
+
+  <div id="exchangeBalanceGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="exchangeBalanceGuide" class="wallet-security-guide exchange-balance-guide hidden" role="dialog" aria-modal="true" aria-labelledby="exchangeBalanceGuideTitle">
+    <span id="exchangeBalanceGuideLabel" class="wallet-security-guide-label">GUIDE · 取引所口座</span>
+    <h2 id="exchangeBalanceGuideTitle">今回は10万円の疑似残高を用意しました</h2>
+    <p id="exchangeBalanceGuideDescription">本来は銀行口座を連携させて、日本円を取引所の口座に入金する必要があります。</p>
+    <button id="exchangeBalanceGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button>
+  </section>
+
+  <div id="walletSecurityGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="walletSecurityGuide" class="wallet-security-guide hidden" role="dialog" aria-modal="true" aria-labelledby="walletSecurityGuideTitle">
+    <span id="walletSecurityGuideLabel" class="wallet-security-guide-label">1 / 4 · ウォレット</span>
+    <h2 id="walletSecurityGuideTitle">ウォレットが作成されました</h2>
+    <p id="walletSecurityGuideDescription"></p>
+    <button id="walletSecurityGuideNext" type="button">次へ <span aria-hidden="true">→</span></button>
+  </section>
+
+  <div id="nftOwnershipGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="nftOwnershipGuide" class="wallet-security-guide nft-ownership-guide hidden" role="dialog" aria-modal="true" aria-labelledby="nftOwnershipGuideTitle">
+    <span id="nftOwnershipGuideLabel" class="wallet-security-guide-label">1 / 2 · 購入完了</span>
+    <h2 id="nftOwnershipGuideTitle">NFTチケットがウォレットに追加されました</h2>
+    <div class="nft-ownership-guide-subject"><strong id="nftOwnershipGuideTicket">購入したNFT</strong><span id="nftOwnershipGuideToken">トークンID</span></div>
+    <div id="nftOwnershipGuideBody" class="nft-ownership-guide-body"></div>
+    <div class="nft-ownership-guide-actions">
+    <button id="nftOwnershipGuideNext" type="button">詳細なNFTの説明を読む <span aria-hidden="true">→</span></button>
+    <button id="nftOwnershipGuideClose" class="nft-ownership-guide-close hidden" type="button">閉じる</button>
+    </div>
+  </section>
+
+  <div id="tradeGuideBackdrop" class="wallet-security-guide-backdrop hidden" aria-hidden="true"></div>
+  <section id="tradeGuide" class="wallet-security-guide trade-guide hidden" role="dialog" aria-modal="true" aria-labelledby="tradeGuideTitle">
+    <span id="tradeGuideLabel" class="wallet-security-guide-label">1 / 6 · 二次流通</span>
+    <h2 id="tradeGuideTitle">NFTはマーケットプレイスで売買できます</h2>
+    <p id="tradeGuideDescription"></p>
+    <img id="tradeGuideFigure" class="trade-guide-figure hidden" src="" alt="" decoding="async">
+    <div id="tradeGuideDots" class="trade-guide-dots" aria-hidden="true"></div>
+    <button id="tradeGuideNext" type="button">次へ <span aria-hidden="true">→</span></button>
+  </section>
+
+  <div id="signatureGuideOverlay" class="signature-guide-overlay hidden" aria-hidden="true"></div>
+  <section id="signatureGuide" class="wallet-security-guide signature-guide hidden" role="dialog" aria-modal="true" aria-labelledby="signatureGuideTitle">
+    <span id="signatureGuideLabel" class="wallet-security-guide-label">GUIDE · 署名</span>
+    <h2 id="signatureGuideTitle">NFTで使われる「署名」とは？</h2>
+    <div class="signature-guide-wallet"><span id="signatureGuideSubjectLabel">今回署名するウォレット</span><strong id="signatureGuideWalletName">Orbit Wallet</strong></div>
+    <p id="signatureGuideDescription">NFTマーケットプレイスへのウォレットの接続時やNFTの取引を実行する際に、署名を求められます。NFTの文脈で使われる「署名」とは、秘密鍵を使って「この操作を自分が承認した」ことを証明する手続きです。秘密鍵そのものが相手に渡ることはありません。</p>
+    <p><span id="signatureGuideWarningPrefix">署名内容によってはNFTや暗号資産の移動が許可されるため、</span><strong id="signatureGuideRiskWarning" class="signature-risk-warning">悪意のあるサイトに署名すると資産を盗まれる可能性があります。</strong><span id="signatureGuideWarningSuffix">必ず要求元・操作内容・金額・資産移動の有無を確認してください。今回の接続署名では、資産移動もガス代（手数料）も発生しません。</span></p>
+    <div class="signature-guide-actions"><button id="signatureGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button></div>
+  </section>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden"></div>
+  <section id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <div>
+        <span id="modalKicker" class="kicker">確認</span>
+        <h2 id="modalTitle">タイトル</h2>
+      </div>
+      <button id="modalClose" class="round-button" type="button" aria-label="閉じる">×</button>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+  </section>
+
+  <div id="helpBackdrop" class="modal-backdrop hidden"></div>
+  <aside id="helpDrawer" class="help-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div><span class="kicker">HELP</span><h2>この体験について</h2></div>
+      <button id="helpClose" class="round-button" type="button">×</button>
+    </div>
+    <section>
+      <h3>体験の目的</h3>
+      <p>複数サービス間の移動、公開鍵のコピー・貼り付け、送金、ウォレット署名など、NFT獲得までの一連の負担を評価します。</p>
+    </section>
+    <section>
+      <h3>安全上の注意</h3>
+      <p>実在するメールアドレス、パスワード、秘密鍵、シードフレーズは入力しないでください。</p>
+    </section>
+    <section>
+      <h3>PassMarket（NFTの売買）</h3>
+      <p>Orbit Walletを接続すると、保有しているNFTを自分で決めたETHの価格で出品できます。相場の範囲内の価格なら数十秒で他のユーザーが購入し、手数料を差し引いたETHがウォレットに入金されます。購入・出品の取り消し・オファーの承諾にはトランザクションへの署名とガス代が必要です。日本円に換えるには、取引所へ送金して売却します（すべて研究用の疑似取引です）。</p>
+    </section>
+    <section>
+      <h3>操作に迷ったら</h3>
+      <p>ミッション一覧（パソコンでは画面左側、スマートフォンでは画面上部）で、次に完了すべき操作を確認できます。</p>
+    </section>
+  </aside>
+
+  <section id="admissionPass" class="admission-pass hidden" role="dialog" aria-modal="true" aria-labelledby="admissionPassTitle">
+    <header class="admission-pass-header">
+      <div class="admission-pass-brand">
+        <span class="admission-pass-logo">M</span>
+        <div><strong>MintGate ENTRY PASS</strong><small>NFT Ticket Verification</small></div>
+      </div>
+      <button id="admissionPassClose" class="admission-pass-close" type="button" aria-label="入館証を閉じる">×</button>
+    </header>
+
+    <div class="admission-pass-body">
+      <article class="admission-ticket">
+        <div class="admission-ticket-visual">
+          <img id="admissionEventImage" src="" alt="">
+          <div class="admission-ticket-shade"></div>
+          <div class="admission-ticket-copy">
+            <span id="admissionEventCategory"></span>
+            <h1 id="admissionPassTitle">NFT入館証</h1>
+            <strong id="admissionEventDate"></strong>
+          </div>
+        </div>
+
+        <div class="admission-ticket-content">
+          <div id="admissionLiveScreen" class="admission-live-screen">
+            <div id="admissionValidStatus" class="admission-valid-status pending"><i></i><span id="admissionStatusLabel">WALLET AUTH REQUIRED</span><strong id="admissionStatusText">未認証</strong></div>
+            <p id="admissionInstruction" class="admission-instruction">ウォレット署名を行い、NFTチケットの現在の保有者であることを証明してください</p>
+
+            <div class="admission-verification">
+              <div id="admissionLiveProof" class="admission-live-proof pending" role="status" aria-live="polite">
+                <div class="admission-live-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+                <span id="admissionLiveLabel">LIVE WALLET PROOF</span>
+                <strong id="admissionLiveCode">—— ——</strong>
+                <small id="admissionLiveCountdown">ウォレット署名が必要です</small>
+              </div>
+              <div class="admission-event-summary">
+                <span>EVENT</span>
+                <h2 id="admissionEventTitle"></h2>
+                <p id="admissionEventVenue"></p>
+              </div>
+            </div>
+
+            <ul class="admission-proof-checks" aria-label="入館認証の確認項目">
+              <li id="admissionOwnershipCheck"><i>✓</i><div><strong>NFTチケット保有</strong><small>譲渡不可</small></div></li>
+              <li id="admissionSignatureCheck"><i>✓</i><div><strong>ウォレット署名</strong><small>秘密鍵の所持を確認</small></div></li>
+              <li id="admissionExpiryCheck"><i>✓</i><div><strong>短時間認証</strong><small>30秒で自動失効</small></div></li>
+            </ul>
+
+            <div class="admission-auth-actions">
+              <button id="admissionVerifyButton" class="admission-verify-button" type="button">ウォレットで入館認証 <span>→</span></button>
+              <button id="admissionCheckInButton" class="admission-checkin-button hidden" type="button">受付で入館処理を完了する <span>✓</span></button>
+            </div>
+          </div>
+
+          <dl class="admission-details">
+            <div><dt>TOKEN ID</dt><dd id="admissionTokenId"></dd></div>
+            <div><dt>TOKEN TYPE</dt><dd>NFTチケット</dd></div>
+            <div><dt>OWNER</dt><dd id="admissionOwner"></dd></div>
+            <div><dt>ISSUED AT</dt><dd id="admissionIssuedAt"></dd></div>
+          </dl>
+
+          <div class="admission-demo-notice">これは研究用の疑似署名デモです。実際のブロックチェーン通信や施設への入場には使用できません。</div>
+        </div>
+      </article>
+    </div>
+
+    <div id="admissionSignatureBackdrop" class="admission-signature-backdrop hidden" aria-hidden="true"></div>
+    <section id="admissionSignatureSheet" class="admission-signature-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="admissionSignatureTitle" aria-hidden="true">
+      <div class="admission-signature-head">
+        <span>O</span>
+        <div><small>ORBIT WALLET</small><h2 id="admissionSignatureTitle">入館認証メッセージへ署名</h2></div>
+      </div>
+      <p>この署名は送金ではありません。現在のウォレット所有者であることだけを証明します。</p>
+      <dl class="admission-signature-details">
+        <div><dt>要求元</dt><dd>MintGate Entry</dd></div>
+        <div><dt>対象NFTチケット</dt><dd id="admissionSignatureToken"></dd></div>
+        <div><dt>ワンタイムNonce</dt><dd id="admissionSignatureNonce"></dd></div>
+        <div><dt>有効期間</dt><dd>署名後30秒</dd></div>
+      </dl>
+      <label class="check admission-signature-agree"><input id="admissionSignatureAgree" type="checkbox"><span>認証先、対象NFTチケット、有効期間を確認しました。</span></label>
+      <div class="button-row admission-signature-actions"><button id="admissionSignatureConfirm" class="primary" type="button" disabled>メッセージに署名</button><button id="admissionSignatureCancel" class="secondary" type="button">キャンセル</button></div>
+    </section>
+
+    <div id="admissionResaleGuideBackdrop" class="wallet-security-guide-backdrop admission-resale-guide-backdrop hidden" aria-hidden="true"></div>
+    <section id="admissionResaleGuide" class="wallet-security-guide admission-resale-guide hidden" role="dialog" aria-modal="true" aria-labelledby="admissionResaleGuideTitle" aria-hidden="true">
+      <div class="admission-resale-guide-content">
+        <span class="wallet-security-guide-label">GUIDE · 転売対策</span>
+        <h2 id="admissionResaleGuideTitle">NFTの譲渡ルールで転売を防止できます</h2>
+        <p>NFTは、スマートコントラクトでチケットの譲渡を制御できます。例えば、SBT（ソウルバウンドトークン）として発行すると、ウォレットから第三者へ譲渡できなくなるため、NFTチケットの転売を防止できます。
+
+今回は擬似体験のため、「受付で入館処理を完了する」を押して終了してください。</p>
+      </div>
+      <button id="admissionResaleGuideClose" type="button">閉じる <span aria-hidden="true">✓</span></button>
+    </section>
+  </section>
+
+  <section id="gameExperience" class="game-experience hidden" role="dialog" aria-modal="true" aria-labelledby="gameExperienceTitle">
+    <header class="game-experience-header">
+      <div>
+        <span class="kicker">NFT HOLDER CHALLENGE</span>
+        <h2 id="gameExperienceTitle">NFT特典チャレンジ</h2>
+      </div>
+      <div class="game-score-chip"><span>BEST SCORE</span><strong id="gameBestScore">0</strong></div>
+      <button id="gameClose" class="game-close" type="button" aria-label="ゲームを閉じる">×</button>
+    </header>
+    <div class="game-experience-body">
+      <aside class="game-benefit-panel" aria-label="スコア特典一覧">
+        <span class="kicker">SCORE REWARDS</span>
+        <h3>ゲームで特典を獲得</h3>
+        <p>スコアが各目標に到達すると、NFTに新しい特典が追加されます。</p>
+        <ol id="gameBenefitList" class="game-benefit-list"></ol>
+        <p id="gameNextReward" class="game-next-reward"></p>
+      </aside>
+      <div class="game-frame-wrap">
+        <iframe id="gameFrame" title="NFT特典ゲーム" src="about:blank" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <script src="./nft-art.js?v=1.0.0"></script>
+  <script src="./marketplace.js?v=1.3.2"></script>
+  <script src="./app.js?v=5.3.3"></script>
+  <script src="./survey-config.js"></script>
+  <script src="./survey.js?v=1"></script>
+</body>
+</html>
