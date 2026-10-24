@@ -126,8 +126,8 @@
 
       <section id="resultSavePanel" class="result-save-panel hidden" aria-label="体験結果の保存">
         <strong>すべての進捗を達成しました</strong>
-        <p>JSONを保存し、アンケートと一緒に提出してください。</p>
-        <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+        <p>先にJSONを保存し、保存後にアンケートへ進んでください。</p>
+        <button class="result-survey-button" data-save-survey type="button">① 結果のJSONをダウンロード</button>
         <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
         <button id="saveCompletedResult" class="result-save-button" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
       </section>
@@ -143,8 +143,8 @@
         <p id="progressGuideScrollNote" class="progress-guide-scroll-note"><span aria-hidden="true">↔</span>スマホでは進捗フローを横にスワイプすると、すべての手順を確認できます。</p>
         <p id="progressGuideHintNote" class="progress-guide-hint-note"><span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。</p>
         <div id="surveyGuideControls" class="hidden">
-          <p>JSONを保存し、アンケートと一緒に提出してください。</p>
-          <button class="result-survey-button" data-save-survey type="button">JSONを保存してアンケートの回答に進む</button>
+          <p>先にJSONを保存し、保存後にアンケートへ進んでください。</p>
+          <button class="result-survey-button" data-save-survey type="button">① 結果のJSONをダウンロード</button>
           <p class="survey-status" data-survey-status role="status" aria-live="polite"></p>
         </div>
         <button id="saveCompletedResultGuide" class="result-save-button hidden" type="button"><span aria-hidden="true">↓</span> 結果をJSONで保存</button>
@@ -443,6 +443,6 @@
   <script src="./marketplace.js?v=1.3.2"></script>
   <script src="./app.js?v=20261024-mobile-completion"></script>
   <script src="./survey-config.js"></script>
-  <script src="./survey.js?v=1"></script>
+  <script src="./survey.js?v=20261024-save-first"></script>
 </body>
 </html>
