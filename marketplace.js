@@ -258,17 +258,49 @@ function marketFees(price,collection){
   const platform=roundEth(price*MARKET_FEE_RATE),royalty=roundEth(price*(collection?.royalty||0));
   return {platform,royalty,net:roundEth(price-platform-royalty)};
 }
+// Cache only during a synchronous render; never reuse prices after a market update.
+let tradeRenderCache=null;
+function withTradeRenderCache(render){
+  const previous=tradeRenderCache;
+  tradeRenderCache={ids:null,collectionIds:new Map(),floors:new Map(),volumes:new Map()};
+  try{return render()}finally{tradeRenderCache=previous}
+}
 function allMarketItemIds(){
+  if(tradeRenderCache?.ids)return tradeRenderCache.ids;
   const ids=new Set(MARKET_CATALOG.map(item=>item.id));
   Object.keys(marketState().items).forEach(id=>{if(id.startsWith("tok-")&&marketItemInfo(id))ids.add(id)});
   state.ownedNfts.forEach(entry=>{const id=marketItemIdForEntry(entry);if(!entry.soldAt&&marketItemInfo(id))ids.add(id)});
-  return [...ids];
+  const result=[...ids];
+  if(tradeRenderCache)tradeRenderCache.ids=result;
+  return result;
 }
-function collectionItemIds(collectionId){return allMarketItemIds().filter(id=>marketItemCollectionId(id)===collectionId)}
+function collectionItemIds(collectionId){
+  if(tradeRenderCache?.collectionIds.has(collectionId))return tradeRenderCache.collectionIds.get(collectionId);
+  const ids=allMarketItemIds().filter(id=>marketItemCollectionId(id)===collectionId);
+  if(tradeRenderCache)tradeRenderCache.collectionIds.set(collectionId,ids);
+  return ids;
+}
 function collectionListings(collectionId){return collectionItemIds(collectionId).map(id=>marketRecord(id).listing).filter(Boolean)}
-function collectionFloor(collectionId){const prices=collectionListings(collectionId).map(l=>l.price);return prices.length?Math.min(...prices):null}
+function collectionFloor(collectionId){
+  if(tradeRenderCache?.floors.has(collectionId))return tradeRenderCache.floors.get(collectionId);
+  const prices=collectionListings(collectionId).map(l=>l.price),floor=prices.length?Math.min(...prices):null;
+  if(tradeRenderCache)tradeRenderCache.floors.set(collectionId,floor);
+  return floor;
+}
 function collectionVolume(collectionId,windowMs=7*MARKET_DAY_MS){
   const since=Date.now()-windowMs;
+  if(tradeRenderCache){
+    if(!tradeRenderCache.volumes.has(windowMs)){
+      const totals=new Map();
+      for(const event of marketState().activity){
+        if(event.type!=="sale"||event.at<since)continue;
+        const id=marketItemCollectionId(event.itemId);
+        totals.set(id,(totals.get(id)||0)+event.price);
+      }
+      tradeRenderCache.volumes.set(windowMs,totals);
+    }
+    return tradeRenderCache.volumes.get(windowMs).get(collectionId)||0;
+  }
   return marketState().activity.filter(a=>a.type==="sale"&&a.at>=since&&marketItemCollectionId(a.itemId)===collectionId).reduce((sum,a)=>sum+a.price,0);
 }
 function collectionBasePrice(c){return c.kind==="ticket"&&!c.noCap?marketTicketFaceEth(c)*c.demand:c.floorBase}
@@ -1246,11 +1278,12 @@ function renderTrade(){
   if(!content||!state.participantId||state.currentApp!=="trade")return;
   const view=tradeView();
   document.querySelectorAll("#tradeTabs button").forEach(button=>button.classList.toggle("active",!view.query.trim()&&button.dataset.tradeTab===view.tab));
-  let html;
-  if(view.query.trim())html=tradeSearchPage();
-  else if(view.page==="item")html=tradeItemPage(view.id);
-  else if(view.page==="collection")html=tradeCollectionPage(view.id);
-  else html=({explore:tradeExplorePage,rankings:tradeRankingsPage,activity:tradeActivityPage,account:tradeAccountPage,balance:tradeBalancePage}[view.tab]||tradeExplorePage)();
+  const html=withTradeRenderCache(()=>{
+    if(view.query.trim())return tradeSearchPage();
+    else if(view.page==="item")return tradeItemPage(view.id);
+    else if(view.page==="collection")return tradeCollectionPage(view.id);
+    else return ({explore:tradeExplorePage,rankings:tradeRankingsPage,activity:tradeActivityPage,account:tradeAccountPage,balance:tradeBalancePage}[view.tab]||tradeExplorePage)();
+  });
   content.innerHTML=html;
   hydrateTradeCharts();
   if(tradeGuideOpen())refreshTradeGuideTarget();else maybeStartTradeGuide();

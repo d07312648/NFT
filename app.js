@@ -1214,33 +1214,16 @@ function renderMission(){
   notifyNewlyCompletedMissions();
 }
 
-function resolveMissionHintTarget(key){
-  const hint=missionHints[key];if(!hint)return null;
-  if(key==="buy"&&!state.accountCreated)return {app:"exchange",tab:"exchange-home",action:"先に口座開設画面を開く"};
-  if(key==="send"&&!state.walletCreated)return {app:"wallet",tab:"wallet-home",action:"先にウォレットを作成する"};
-  if(key==="admission"&&!state.ownedNfts.length)return {app:"market",tab:null,action:"先にNFTチケットを購入する"};
-  return {app:hint.app,tab:hint.tab,action:hint.action};
-}
-
 function openMissionHint(key){
   const hint=missionHints[key],mission=missions.find(([missionKey])=>missionKey===key);if(!hint||!mission)return;
-  const done=missionStatus(key),target=resolveMissionHintTarget(key);
+  const done=missionStatus(key);
   log("mission_hint_opened",{mission:key,completed:done});
   openModal("操作ヒント",mission[1],`
     <div class="mission-hint-summary"><span class="mission-hint-service">${escapeHtml(hint.service)}</span><span class="mission-hint-state ${done?"done":""}">${done?"✓ 完了済み":"操作を確認"}</span><p>${escapeHtml(hint.summary)}</p></div>
     <ol class="mission-hint-steps">${hint.steps.map((step,index)=>`<li><span>${index+1}</span><p>${escapeHtml(step)}</p></li>`).join("")}</ol>
     <div class="mission-hint-tip"><span>TIP</span><p>${escapeHtml(hint.tip)}</p></div>
-    <button id="missionHintGo" class="mission-hint-go ${target.app}" type="button">${escapeHtml(target.action)} <span>→</span></button>`);
-  $("missionHintGo").onclick=()=>goToMissionHintTarget(key);
-}
-
-function goToMissionHintTarget(key){
-  const target=resolveMissionHintTarget(key);if(!target)return;
-  closeModal();
-  if(target.app==="exchange"&&target.tab)state.currentExchangeTab=target.tab;
-  if(target.app==="wallet"&&target.tab)state.currentWalletTab=target.tab;
-  log("mission_hint_navigation",{mission:key,to_app:target.app,to_tab:target.tab});
-  switchApp(target.app);
+    <button id="missionHintClose" class="mission-hint-go ${hint.app}" type="button">閉じる</button>`);
+  $("missionHintClose").onclick=closeModal;
 }
 
 function switchApp(app){
