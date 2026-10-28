@@ -1612,11 +1612,11 @@ function renderWalletHome(){
     ${walletManagerPanel()}
     <div class="dashboard-title wallet-overview-title"><div><span class="kicker">PORTFOLIO</span><h1>${escapeHtml(wallet.name)}</h1><p>${escapeHtml(shortWalletAddress(wallet.address))}</p></div><span class="task-callout">${pendingHere?"入金確認中":"Ethereum Mainnet"}</span></div>
     <div class="balance-grid"><div class="balance-card wallet-balance"><small>TOTAL BALANCE</small><strong>${fmtEth(wallet.ethBalance)}</strong><span>${fmtYen(wallet.ethBalance*markets.ETH.price)}</span></div>
-      <div class="action-card"><h3>${wallet.ethBalance>0?"チケット購入の準備完了":"ETHを受け取る"}</h3><p>${wallet.ethBalance>0?"MintGateでこのウォレットを接続できます。":"公開鍵をコピーし、取引所の送金先へ貼り付けます。"}</p><button id="walletPrimary" class="primary" type="button">${wallet.ethBalance>0?"MintGateを開く":"受取用アドレスを表示"}</button></div></div>
+      <div class="action-card"><h3>${wallet.ethBalance>0?"チケット購入の準備完了":"ETHを受け取る"}</h3><p>${wallet.ethBalance>0?"画面上部の「チケットサイト」を開き、このウォレットを接続してください。":"公開鍵をコピーし、取引所の送金先へ貼り付けます。"}</p>${wallet.ethBalance>0?"":`<button id="walletPrimary" class="primary" type="button">受取用アドレスを表示</button>`}</div></div>
     ${pendingHere?`<div class="notice info" style="margin-top:16px">ネットワーク確認中です。通常は複数の承認を待って残高へ反映されます。</div>`:""}
     <div class="wallet-assets"><div class="asset-row"><div class="asset-row-left"><span class="asset-icon">Ξ</span><div><strong>Ethereum</strong><small>ETH</small></div></div><div class="asset-value"><strong>${fmtEth(wallet.ethBalance)}</strong><small>${fmtYen(wallet.ethBalance*markets.ETH.price)}</small></div></div></div>
     ${privateKeyPanel()}`;
-  $("walletPrimary").onclick=()=>wallet.ethBalance>0?switchApp("market"):(state.currentWalletTab="wallet-receive",renderWallet());
+  if($("walletPrimary"))$("walletPrimary").onclick=()=>{state.currentWalletTab="wallet-receive";renderWallet()};
   bindWalletManager();bindPrivateKeyPanel();
   if(receiptCompletedNow&&!state.walletReceiptGuideCompleted)requestAnimationFrame(()=>startExchangeBalanceGuide("wallet-receipt"));
 }
@@ -1627,17 +1627,16 @@ function renderWalletReceive(){
   const pendingHere=state.transferPending&&state.transferDestinationWalletId===wallet.id;
   walletContent.innerHTML=`
     ${walletManagerPanel()}
-    <div class="dashboard-title"><div><span class="kicker">RECEIVE</span><h1>${escapeHtml(wallet.name)}でETHを受け取る</h1><p>以下の公開鍵を取引所の送金先に貼り付けてください。</p></div><span class="task-callout">ネットワーク：Ethereum</span></div>
+    <div class="dashboard-title"><div><span class="kicker">RECEIVE</span><h1>${escapeHtml(wallet.name)}でETHを受け取る</h1><p>公開鍵をコピーした後、画面上部の「取引所」を開き、「送金」タブの送金先へ貼り付けてください。</p></div><span class="task-callout">ネットワーク：Ethereum</span></div>
     <div class="panel">
       <div class="address-box"><span class="field-title">あなたの公開鍵（ウォレットアドレス）</span><code id="publicAddress">${escapeHtml(wallet.address)}</code><button id="copyAddress" class="copy-button" type="button">${copiedHere?"コピー済み":"公開鍵をコピー"}</button></div>
       <div class="notice warning" style="margin-top:13px">送金元と送金先で、必ず同じネットワークを選択してください。</div>
-      <div class="button-row" style="margin-top:15px"><button id="goExchangeSend" class="primary" type="button" ${!copiedHere?"disabled":""}>取引所の送金画面へ</button><button id="checkWallet" class="secondary" type="button">${receivingHere&&state.receiptChecked?"入金確認済み":"残高を再確認"}</button></div>
+      <div class="button-row" style="margin-top:15px"><button id="checkWallet" class="secondary" type="button">${receivingHere&&state.receiptChecked?"入金確認済み":"残高を再確認"}</button></div>
       ${pendingHere?`<div class="notice info" style="margin-top:13px">取引所からの送金を確認中です…</div>`:""}
       ${receivingHere&&!state.transferPending?`<div class="notice success" style="margin-top:13px">${fmtEth(state.lastReceivedAmount)} の入金が確認されました。</div>`:""}
     </div>
     ${privateKeyPanel()}`;
   $("copyAddress").onclick=copyWalletAddress;
-  $("goExchangeSend").onclick=()=>{switchApp("exchange");state.currentExchangeTab="exchange-send";renderExchange()};
   $("checkWallet").onclick=()=>{
     if(pendingHere){toast("まだネットワーク確認中です");return}
     if(!receivingHere){toast("このウォレットへの入金はまだありません");return}
