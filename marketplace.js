@@ -402,6 +402,7 @@ function scheduleMyListing(itemId,price,previous=null){
   };
 }
 function createMyListing(itemId,price,days){
+  if(marketListingBlockedReason())return false;
   const entry=myEntryForItem(itemId),rec=marketRecord(itemId),info=marketItemInfo(itemId);
   if(!entry||!info)return false;
   const nowMs=Date.now();
@@ -561,6 +562,9 @@ function refreshMarketViews({exchange=false}={}){
   if(exchange)renderAllKeepingExchangeInput();else renderAll({skipExchange:true});
 }
 function updateTradeChrome(){
+  const marketAppElement=document.getElementById("tradeApp");
+  if(marketAppElement)marketAppElement.inert=!state.tradeGuideCompleted;
+  updateMarketAccessUi();
   const chip=document.getElementById("tradeWalletChip");
   if(chip){
     const wallet=state.participantId?tradeWallet():null;
@@ -786,7 +790,7 @@ function tradeItemCard(itemId){
     <div class="pm-card-body"><small>${escapeHtml(info.collection.name)}${info.collection.verified?MARKET_VERIFIED:""}</small><strong>${escapeHtml(info.name)}</strong>
       <div class="pm-card-price">${listing?`<span>価格</span><b>${fmtMarketEth(listing.price)}</b>`:`<span>未出品</span>`}</div>
       <small class="pm-card-last">${rec.lastSalePrice?`最終取引 ${fmtMarketEth(rec.lastSalePrice)}`:"取引履歴なし"}</small></div>
-    ${!mine&&listing?`<button class="pm-card-buy" data-trade-action="buy" data-id="${itemId}" type="button">今すぐ購入</button>`:mine&&!listing?`<button class="pm-card-buy sell" data-trade-action="list" data-id="${itemId}" type="button">出品する</button>`:""}
+    ${!mine&&listing?`<button class="pm-card-buy" data-trade-action="buy" data-id="${itemId}" type="button">今すぐ購入</button>`:mine&&!listing?`<button class="pm-card-buy sell" data-trade-action="list" data-id="${itemId}" type="button" ${marketListingButtonAttributes()}>${marketListingBlockedReason()?"出品は入館・マーケット確認後":"出品する"}</button>`:""}
   </article>`;
 }
 function tradeItemGrid(ids,emptyText="条件に合うアイテムがありません"){
@@ -1000,7 +1004,7 @@ function tradeItemPage(itemId){
     priceBox=`<span class="pm-price-label">あなたが保有しています</span><strong class="pm-price small">売れやすい価格帯 ${fmtMarketEth(range.low)}〜${fmtMarketEth(range.high)}</strong>
       <p class="pm-price-sub">${floor?`フロア価格 ${fmtMarketEth(floor)}・`:""}${rec.lastSalePrice?`最終取引 ${fmtMarketEth(rec.lastSalePrice)}`:"取引履歴はまだありません"}</p>
       ${range.face?`<p class="pm-price-sub">公式リセールの上限価格：${fmtMarketEth(range.cap)}（定価）</p>`:""}
-      <div class="pm-price-actions"><button class="pm-btn primary" data-trade-action="list" data-id="${itemId}" type="button">出品する</button>${info.isTicket?`<button class="pm-btn ghost" data-trade-action="open-wallet" data-id="${itemId}" type="button">Orbit Walletで開く</button>`:""}</div>`;
+      <div class="pm-price-actions"><button class="pm-btn primary" data-trade-action="list" data-id="${itemId}" type="button" ${marketListingButtonAttributes()}>${marketListingBlockedReason()?"出品は入館・マーケット確認後":"出品する"}</button>${info.isTicket?`<button class="pm-btn ghost" data-trade-action="open-wallet" data-id="${itemId}" type="button">Orbit Walletで開く</button>`:""}</div>`;
   }else if(listing){
     priceBox=`<span class="pm-price-label">現在の価格</span><strong class="pm-price">${fmtMarketEth(listing.price)}</strong><span class="pm-price-yen">${fmtYenApprox(listing.price)}</span>
       <p class="pm-price-sub">出品者 ${escapeHtml(listing.seller)}・出品期限 ${new Date(listing.expiresAt).toLocaleDateString("ja-JP")}</p>
@@ -1163,15 +1167,14 @@ let tradeGuideTarget=null;
 let tradeGuideScheduled=false;
 function tradeGuideOpen(){const guide=document.getElementById("tradeGuide");return !!guide&&!guide.classList.contains("hidden")}
 function maybeStartTradeGuide(){
-  const view=tradeView();
-  if(state.tradeGuideCompleted||tradeGuideScheduled||tradeGuideOpen()||state.currentApp!=="trade"||view.page||view.query.trim()||view.tab!=="explore")return;
+  if(state.tradeGuideCompleted||tradeGuideScheduled||tradeGuideOpen()||state.currentApp!=="trade")return;
   tradeGuideScheduled=true;
   // 先に達成した手順の通知を表示し終えてから、マーケットのガイドを開く。
-  if(missionCompletionNoticeActive||missionCompletionNoticeQueue.length||progressGuideOpen()){
+  if(missionCompletionNoticeActive||missionCompletionNoticeQueue.length||progressGuideOpen()||positionedGuideOpen()||!$("modal").classList.contains("hidden")){
     setTimeout(()=>{tradeGuideScheduled=false;maybeStartTradeGuide()},250);
     return;
   }
-  requestAnimationFrame(()=>{tradeGuideScheduled=false;if(!state.tradeGuideCompleted&&state.currentApp==="trade")startTradeGuide()});
+  requestAnimationFrame(()=>{if(!state.tradeGuideCompleted&&state.currentApp==="trade")startTradeGuide();tradeGuideScheduled=false;if(!state.tradeGuideCompleted&&!tradeGuideOpen()&&state.currentApp==="trade")maybeStartTradeGuide()});
 }
 function startTradeGuide(replay=false){
   if(tradeGuideOpen()||!$("modal").classList.contains("hidden")||progressGuideOpen()||positionedGuideOpen())return;
@@ -1260,6 +1263,7 @@ function advanceTradeGuide(){
 }
 function closeTradeGuide(){
   if(!tradeGuideOpen())return;
+  if(tradeGuideStep<TRADE_GUIDE_STEPS.length-1)return;
   setTradeGuideTarget(null);
   $("tradeGuideBackdrop").classList.add("hidden");$("tradeGuideBackdrop").setAttribute("aria-hidden","true");
   $("tradeGuide").classList.add("hidden");
@@ -1362,7 +1366,18 @@ function marketModalItemHeader(info){
 
 /* ---------- 出品 ---------- */
 function marketNeedsApproval(walletId,collectionId){return !marketState().approvals?.[walletId]?.[collectionId]}
+function marketListingBlockedReason(){
+  if(!state.ownedNfts.some(entry=>!!entry.admissionUsedAt))return "入館を完了すると出品できます。入館後にマーケットを開いてください。";
+  if(!state.tradeOpened)return "マーケットを開くと出品できるようになります。画面上部の「マーケット」を開いてください。";
+  return "";
+}
+function marketListingButtonAttributes(){
+  const reason=marketListingBlockedReason();
+  return reason?`disabled title="${reason}" aria-label="${reason}"`:"";
+}
 function openListingModal(itemId,mode="create"){
+  const blockedReason=marketListingBlockedReason();
+  if(mode==="create"&&blockedReason){error(blockedReason);return}
   const entry=myEntryForItem(itemId),info=marketItemInfo(itemId);
   if(!entry||!info){error("このNFTは保有していません");return}
   requireTradeWallet(wallet=>renderListingForm(itemId,mode,wallet),entry.ownerWalletId);
@@ -1701,6 +1716,8 @@ function resumeMarketOperations(){
 
 /* ---------- Orbit Wallet 連携 ---------- */
 function walletMarketCallout(entry){
+  const blockedReason=marketListingBlockedReason();
+  if(blockedReason&&!marketListingForEntry(entry))return `<section class="pm-wallet-callout"><div><span>PASSMARKET</span><h3>このNFTをマーケットで売る</h3><p>${blockedReason}</p></div><button type="button" disabled>${state.ownedNfts.some(item=>!!item.admissionUsedAt)?"マーケットを開くと出品できます":"入館後に出品できます"}</button></section>`;
   const itemId=marketItemIdForEntry(entry),listing=marketListingForEntry(entry),range=marketPriceRange(itemId);
   return `<section class="pm-wallet-callout${listing?" listed":""}"><div><span>PASSMARKET</span><h3>${listing?`${fmtMarketEth(listing.price)} で出品中`:"このNFTをマーケットで売る"}</h3>${listing?"":`<p>売れやすい価格帯：${fmtMarketEth(range.low)}〜${fmtMarketEth(range.high)}。売上はETHでこのウォレットに入金されます。</p>`}</div><button id="walletMarketAction" type="button">${listing?"出品を管理する":"出品する"} <b>→</b></button></section>`;
 }

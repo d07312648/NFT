@@ -120,7 +120,7 @@ const missions = [
   ["receive","ウォレットで受取確認","入金の反映を確認する"],
   ["connect","チケットサイトに接続","接続メッセージへ署名"],
   ["purchase","NFTチケットを購入","取引内容を確認・署名"],
-  ["admission","入館証を表示する","受付で入館処理を完了する"],
+  ["admission","入館処理を完了する","受付で入館処理を完了する"],
   ["trade","マーケットを開く","マーケットの説明を最後まで確認する"]
 ];
 
@@ -556,7 +556,7 @@ function configureProgressGuide(mode){
   $("progressGuideLabel").textContent=completion?"COMPLETE":"GUIDE";
   $("progressGuideTitle").textContent=completion?"すべての進捗を達成しました":"進捗フローを確認";
   $("progressGuideDescription").textContent=completion?"ここまで体験していただき、ありがとうございました。":"進捗フローを参考にNFTチケットを獲得してください。";
-  $("progressGuideNote").textContent=completion?"「条件に応じて特典を付与する仕組み」を再現するため、各NFTチケットにゲームを用意しています。よろしければ、ゲームを楽しみながらNFTチケットを集めてみてください。また、マーケットではチケットを含む様々なNFTを売買できるようになっているので、興味があればぜひ体験してみてください。":"※進捗フローの1から順番に進めなくてもチケットを獲得できるので、自由に体験してみてください。";
+  $("progressGuideNote").textContent=completion?"「条件に応じて特典を付与する仕組み」を再現するため、各NFTチケットにゲームを用意しています。よろしければ、ゲームを楽しみながらNFTチケットを集めてみてください。また、マーケットではチケットを含む様々なNFTを売買できるようになっているので、興味があればぜひ体験してみてください。":"順番通りに操作しなくても達成できるところもありますが、数字の小さい順に進捗を進めていくことをおすすめします";
   $("progressGuideScrollNote").classList.toggle("hidden",completion);
   $("progressGuideHintNote").innerHTML=completion?'<span aria-hidden="true">✓</span>最後に、アンケートへのご回答をお願いいたします。':'<span aria-hidden="true">?</span>操作に困ったら、各進捗の「？」をタップすると操作のヒントを見ることができます。';
   $("progressGuideStart").innerHTML=completion?'続けてマーケットを体験する <span aria-hidden="true">→</span>':'閉じる <span aria-hidden="true">→</span>';
@@ -819,7 +819,6 @@ function startAirdropGuide(){
   $("nftOwnershipGuideToken").textContent=`トークンID ${entry.owned.tokenId}`;
   $("nftOwnershipGuideBody").innerHTML="<p>NFTでは、特定の条件を満たしたユーザーに対して、運営者がNFTを無料で配布することがあります。この配布方法を「エアドロップ」と呼びます。</p><p>今回は、NFTチケットを合計3枚購入した特典として、限定NFTがこのウォレットに自動で配布されました。</p>";
   $("nftOwnershipGuideNext").innerHTML='閉じる <span aria-hidden="true">✓</span>';$("nftOwnershipGuideNext").setAttribute("aria-label","閉じる");
-  $("nftOwnershipGuideClose").classList.add("hidden");
   startGuideGeometryMonitor();scheduleGuidePositionRefresh(4);
   log("airdrop_guide_started",{wallet_id:wallet.id,token_id:entry.owned.tokenId,ticket_id:entry.owned.ticketId});
   const placeGuide=()=>{
@@ -875,7 +874,6 @@ function renderNftOwnershipGuideStep(){
   const action=isOverview?"閉じる":step.action;
   $("nftOwnershipGuideNext").innerHTML=`${action}<span aria-hidden="true">${isOverview?"✓":"→"}</span>`;
   $("nftOwnershipGuideNext").setAttribute("aria-label",action);
-  $("nftOwnershipGuideClose").classList.toggle("hidden",isOverview);
   if(!explanation)log("nft_ownership_guide_step_viewed",{step:isOverview?2:1,sections:isOverview?NFT_OWNERSHIP_GUIDE_STEPS.length-1:1,token_id:entry.owned.tokenId});
   const placeGuide=()=>{
     if(!nftOwnershipGuideOpen())return;
@@ -968,6 +966,7 @@ function advanceNftOwnershipGuide(){
 }
 function closeNftOwnershipGuide(focusTarget=true){
   if(!nftOwnershipGuideOpen())return;
+  if(focusTarget&&nftOwnershipGuideMode==="purchase"&&nftOwnershipGuideStep===0)return;
   const target=nftOwnershipGuideTarget,closedMode=nftOwnershipGuideMode;
   target?.classList.remove("wallet-guide-highlight","nft-purchase-guide-highlight","nft-airdrop-guide-highlight");
   $("nftOwnershipGuideBackdrop").classList.add("hidden");$("nftOwnershipGuideBackdrop").setAttribute("aria-hidden","true");
@@ -979,7 +978,7 @@ function closeNftOwnershipGuide(focusTarget=true){
     const entry=airdroppedNftEntry();state.airdropGuideCompleted=true;
     log("airdrop_guide_completed",{token_id:entry?.owned.tokenId||null,wallet_id:entry?nftOwnerWalletId(entry.owned):null});
   }else{
-    state.nftOwnershipGuideCompleted=true;
+    state.nftOwnershipGuideCompleted=nftOwnershipGuideStep>0;
     log("nft_ownership_guide_completed",{step:nftOwnershipGuideStep+1,token_id:state.firstPurchasedNftTokenId});
     requestAnimationFrame(()=>{if(state.currentApp==="wallet"&&state.currentWalletTab==="wallet-nft"&&!nftOwnershipGuideOpen())renderWallet()});
   }
@@ -1110,6 +1109,7 @@ function start(){
 
 function restoreSession(){
   if(!state.participantId)return;
+  if(state.currentApp==="trade"&&!marketAccessAllowed())state.currentApp="wallet";
   const restoredAirdrop=maybeGrantAirdrop("session_restore");
   state.appEnteredAt=performance.now();
   landing.classList.add("hidden");workspace.classList.remove("hidden");appSwitcher.classList.remove("hidden");
@@ -1226,7 +1226,23 @@ function openMissionHint(key){
   $("missionHintClose").onclick=closeModal;
 }
 
+function marketAccessAllowed(){return state.ownedNfts.some(item=>!!item.admissionUsedAt)}
+function updateMarketAccessUi(){
+  const allowed=marketAccessAllowed();
+  document.querySelectorAll('[data-app="trade"]').forEach(button=>{
+    button.disabled=!allowed;
+    button.title=allowed?"マーケットを開く":"入館処理を完了すると利用できます";
+    const label=button.querySelector("small");
+    if(label)label.textContent=allowed?"PassMarket":"入館完了後に利用可能";
+  });
+  const banner=$("openPassMarket");
+  if(banner){
+    banner.disabled=!allowed;
+    banner.innerHTML=allowed?'PassMarketを開く <b>→</b>':"入館完了後に利用できます";
+  }
+}
 function switchApp(app){
+  if(app==="trade"&&!marketAccessAllowed()){error("マーケットは入館処理を完了してから利用できます");return}
   if(app==="trade"&&!state.tradeOpened){state.tradeOpened=true;log("trade_opened");persistState()}
   if(state.currentApp!==app){
     if(state.appEnteredAt!==null)state.appTimes[state.currentApp]+=Math.round((performance.now()-state.appEnteredAt)/1000);
@@ -2116,6 +2132,7 @@ function renderMarket(){
     <div class="ticket-grid">${tickets.filter(t=>!t.airdropOnly).map(t=>ticketCard(t,true,false)).join("")}</div>`;
   if($("openOwnedNft"))$("openOwnedNft").onclick=()=>{state.activeWalletId=connected.id;syncLegacyWalletState();switchApp("wallet");state.currentWalletTab="wallet-nft";renderWallet()};
   $("openPassMarket").onclick=()=>{log("passmarket_banner_opened");switchApp("trade")};
+  updateMarketAccessUi();
   document.querySelectorAll("[data-select-ticket]").forEach(b=>b.onclick=()=>{
     if(!walletReady){error("先にOrbit Walletを作成してください");return}
     if(!connectedWallet()){error("先にウォレットを接続してください");return}
@@ -2315,7 +2332,6 @@ $("saveCompletedResultGuide").onclick=downloadResult;
 $("exchangeBalanceGuideClose").onclick=closeExchangeBalanceGuide;
 $("walletSecurityGuideNext").onclick=advanceWalletSecurityGuide;
 $("nftOwnershipGuideNext").onclick=advanceNftOwnershipGuide;
-$("nftOwnershipGuideClose").onclick=()=>closeNftOwnershipGuide();
 $("signatureGuideClose").onclick=closeSignatureGuide;
 $("homeButton").onclick=()=>{if(workspace.classList.contains("hidden"))return;window.scrollTo({top:0,behavior:"smooth"})};
 document.querySelectorAll(".switcher-item").forEach(b=>b.onclick=()=>switchApp(b.dataset.app));
