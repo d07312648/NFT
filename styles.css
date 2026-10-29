@@ -4550,3 +4550,14 @@ body.nft-airdrop-guide-open #walletApp {
     flex-shrink: 0;
   }
 }
+
+/* 初回のゲーム特典獲得ガイド（全画面表示にも対応） */
+.first-benefit-guide{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(7,12,30,.82);overflow:auto;overscroll-behavior:contain}
+.first-benefit-guide-content{width:100%;max-width:620px;max-height:100%;overflow:auto;padding:28px;border-radius:22px;background:#fff;color:#19243b;box-shadow:0 20px 70px #0005;line-height:1.8}
+.first-benefit-guide-content h2{font-size:22px;line-height:1.5;margin:8px 0 22px}
+.first-benefit-guide-content p{font-size:14px;margin:16px 0}
+.first-benefit-highlight{padding:18px;border:3px solid #6482ff;border-radius:14px;background:#eff4ff;box-shadow:0 0 0 5px #6482ff24}
+.first-benefit-highlight span,.first-benefit-highlight strong,.first-benefit-highlight small{display:block}
+.first-benefit-highlight span{color:#2451ac;font-weight:800;font-size:13px}.first-benefit-highlight strong{font-size:19px;margin:5px 0}
+.first-benefit-guide-content .first-benefit-note{font-size:12px;color:#596579}.first-benefit-guide-content button{width:100%;margin-top:8px}
+@media(max-width:760px){.first-benefit-guide{padding:12px}.first-benefit-guide-content{padding:20px}.first-benefit-guide-content h2{font-size:19px}}
