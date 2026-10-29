@@ -2046,12 +2046,15 @@ function closeAdmissionPass(){
 function showFirstBenefitGuide(){
   const pending=state.firstBenefitGuidePending;
   if(state.firstBenefitGuideCompleted||!pending||$("firstBenefitGuide")||$("gameExperience").classList.contains("hidden"))return;
-  const benefit=benefitProgram(pending.ticketId)?.benefits.find(item=>item.score===pending.score);
-  if(!benefit)return;
+  const rewards=(pending.rewards||[pending]).map(reward=>({
+    ticketId:reward.ticketId,
+    benefit:benefitProgram(reward.ticketId)?.benefits.find(item=>item.score===reward.score)
+  })).filter(reward=>reward.benefit);
+  if(!rewards.length)return;
   const guide=document.createElement("section");
   guide.id="firstBenefitGuide";guide.className="first-benefit-guide";
   guide.setAttribute("role","dialog");guide.setAttribute("aria-modal","true");guide.setAttribute("aria-labelledby","firstBenefitGuideTitle");
-  guide.innerHTML=`<div class="first-benefit-guide-content"><span class="kicker">初めての特典獲得</span><h2 id="firstBenefitGuideTitle">NFTを識別して、条件に応じた特典を届ける</h2><div class="first-benefit-highlight"><span>✓ 獲得した特典</span><strong>${escapeHtml(benefit.title)}</strong><small>${fmtScore(benefit.score)}点の条件を達成</small></div><p>NFTは、コントラクトアドレスとトークンIDの組み合わせによって、1点ずつ識別できます。運営者は、そのNFTの保有者と、ゲームのスコアなどの条件達成状況を確認し、対象となる保有者に特典を提供できます。</p><p>今回のゲームでは、目標スコアを達成すると、保有するNFTチケットに対応した特典が使えるようになる仕組みを体験しています。購入した後も、条件に応じて新しい楽しみやサービスを追加できることが、NFTの活用方法のひとつです。</p><p class="first-benefit-note">特典の内容や付与条件は運営者が設計します。NFTを持つだけで、すべての特典が自動的に付くわけではありません。</p><button id="firstBenefitGuideClose" class="primary" type="button">説明を閉じる</button></div>`;
+  guide.innerHTML=`<div class="first-benefit-guide-content"><span class="kicker">初めての特典獲得</span><h2 id="firstBenefitGuideTitle">NFTを識別して、条件に応じた特典を届ける</h2><div class="first-benefit-highlight"><span>✓ 獲得した特典（${rewards.length}件）</span><ul class="first-benefit-rewards">${rewards.map(({benefit})=>`<li><strong>${escapeHtml(benefit.title)}</strong><small>${fmtScore(benefit.score)}点の条件を達成</small></li>`).join("")}</ul></div><p>NFTは、コントラクトアドレスとトークンIDの組み合わせによって、1点ずつ識別できます。運営者は、そのNFTの保有者と、ゲームのスコアなどの条件達成状況を確認し、対象となる保有者に特典を提供できます。</p><p>今回のゲームでは、目標スコアを達成すると、保有するNFTチケットに対応した特典が使えるようになる仕組みを体験しています。購入した後も、条件に応じて新しい楽しみやサービスを追加できることが、NFTの活用方法のひとつです。</p><p class="first-benefit-note">特典の内容や付与条件は運営者が設計します。NFTを持つだけで、すべての特典が自動的に付くわけではありません。</p><button id="firstBenefitGuideClose" class="primary" type="button">説明を閉じる</button></div>`;
   $("gameExperience").appendChild(guide);
   $("gameExperience").querySelector(".game-experience-header").inert=true;
   $("gameExperience").querySelector(".game-experience-body").inert=true;
@@ -2414,7 +2417,12 @@ window.addEventListener("message",event=>{
   program.benefits.forEach(benefit=>{
     if(previousBest<benefit.score&&progress.bestScore>=benefit.score){
       progress.benefitsUnlockedAt[benefit.score]=now();
-      if(!state.firstBenefitGuideCompleted&&!state.firstBenefitGuidePending)state.firstBenefitGuidePending={ticketId,score:benefit.score};
+      if(!state.firstBenefitGuideCompleted){
+        const pending=state.firstBenefitGuidePending;
+        const rewards=pending?(pending.rewards||[{ticketId:pending.ticketId,score:pending.score}]):[];
+        if(!rewards.some(reward=>reward.ticketId===ticketId&&reward.score===benefit.score))rewards.push({ticketId,score:benefit.score});
+        state.firstBenefitGuidePending={rewards};
+      }
       log("nft_benefit_unlocked",{ticket_id:ticketId,score:benefit.score,benefit:benefit.title,code:benefit.code});
     }
   });

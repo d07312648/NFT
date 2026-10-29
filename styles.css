@@ -4561,3 +4561,5 @@ body.nft-airdrop-guide-open #walletApp {
 .first-benefit-highlight span{color:#2451ac;font-weight:800;font-size:13px}.first-benefit-highlight strong{font-size:19px;margin:5px 0}
 .first-benefit-guide-content .first-benefit-note{font-size:12px;color:#596579}.first-benefit-guide-content button{width:100%;margin-top:8px}
 @media(max-width:760px){.first-benefit-guide{padding:12px}.first-benefit-guide-content{padding:20px}.first-benefit-guide-content h2{font-size:19px}}
+
+.first-benefit-rewards{list-style:none;margin:10px 0 0;padding:0}.first-benefit-rewards li+li{margin-top:14px;padding-top:14px;border-top:1px solid #c8d5f5}
